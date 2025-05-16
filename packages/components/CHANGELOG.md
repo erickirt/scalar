@@ -1,5 +1,26 @@
 # @scalar/components
 
+## 0.13.59
+
+### Patch Changes
+
+- 1843cfe: fix(components): set search result item to use an anchor tag
+  - @scalar/themes@0.11.3
+  - @scalar/code-highlight@0.0.29
+  - @scalar/use-hooks@0.1.50
+  - @scalar/icons@0.3.7
+
+## 0.13.58
+
+### Patch Changes
+
+- af38fa6: feat: updates scalar loading component style
+- Updated dependencies [90b773e]
+  - @scalar/themes@0.11.2
+  - @scalar/code-highlight@0.0.29
+  - @scalar/use-hooks@0.1.49
+  - @scalar/icons@0.3.6
+
 ## 0.13.57
 
 ### Patch Changes

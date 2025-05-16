@@ -1,5 +1,48 @@
 # @scalar/nuxt
 
+## 0.3.34
+
+### Patch Changes
+
+- 4e4d329: don't inherit the default layout
+- 57ee3af: perf: replace $fetch with useFetch in component setup
+- Updated dependencies [73ecfb0]
+- Updated dependencies [6b4a3c3]
+- Updated dependencies [be8a6ec]
+- Updated dependencies [2056005]
+- Updated dependencies [9946289]
+- Updated dependencies [40bad87]
+- Updated dependencies [3a88c94]
+- Updated dependencies [96be9bd]
+- Updated dependencies [ab0d3a3]
+- Updated dependencies [cd0722d]
+- Updated dependencies [5129cdc]
+- Updated dependencies [be8a6ec]
+  - @scalar/api-reference@1.28.34
+  - @scalar/api-client@2.3.34
+  - @scalar/types@0.1.16
+
+## 0.3.33
+
+### Patch Changes
+
+- Updated dependencies [f711ab5]
+- Updated dependencies [ec30edd]
+- Updated dependencies [90b773e]
+- Updated dependencies [e7f61ce]
+- Updated dependencies [52dd8a1]
+- Updated dependencies [0222ad4]
+- Updated dependencies [cb9428c]
+- Updated dependencies [ffe6338]
+- Updated dependencies [2dadcfb]
+- Updated dependencies [67aa0f4]
+- Updated dependencies [ac16fca]
+- Updated dependencies [1966c5a]
+- Updated dependencies [ac16fca]
+  - @scalar/api-reference@1.28.33
+  - @scalar/api-client@2.3.33
+  - @scalar/types@0.1.15
+
 ## 0.3.32
 
 ### Patch Changes

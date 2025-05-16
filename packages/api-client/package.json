@@ -18,9 +18,9 @@
     "rest",
     "testing"
   ],
-  "version": "2.3.32",
+  "version": "2.3.34",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "build": "scalar-build-vite",
