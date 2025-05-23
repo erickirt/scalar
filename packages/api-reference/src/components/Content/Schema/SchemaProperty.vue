@@ -5,20 +5,19 @@ import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types'
 import { computed, type Component } from 'vue'
 
 import {
-  discriminators,
+  compositions,
   optimizeValueForDisplay,
 } from '@/components/Content/Schema/helpers/optimizeValueForDisplay'
 import { SpecificationExtension } from '@/components/SpecificationExtension'
-import { usePluginManager } from '@/plugins'
 
 import Schema from './Schema.vue'
-import SchemaDiscriminator from './SchemaDiscriminator.vue'
+import SchemaComposition from './SchemaComposition.vue'
 import SchemaPropertyHeading from './SchemaPropertyHeading.vue'
 
 /**
  * Note: We’re taking in a prop called `value` which should be a JSON Schema.
  *
- * We’re using `optimizeValueForDisplay` to merge null types in discriminators (anyOf, allOf, oneOf, not).
+ * We’re using `optimizeValueForDisplay` to merge null types in compositions (anyOf, allOf, oneOf, not).
  * So you should basically use the optimizedValue everywhere in the component.
  */
 
@@ -121,7 +120,7 @@ const remainingEnumValues = computed(() =>
   getEnumFromValue(optimizedValue.value).slice(initialEnumCount.value),
 )
 
-/** Simplified discriminators with `null` type. */
+/** Simplified composition with `null` type. */
 const optimizedValue = computed(() => optimizeValueForDisplay(props.value))
 
 // Display the property heading if any of the following are true
@@ -269,7 +268,8 @@ const displayPropertyHeading = (
         :level="level + 1"
         :name="name"
         :noncollapsible="noncollapsible"
-        :value="optimizedValue" />
+        :value="optimizedValue"
+        :schemas="schemas" />
     </div>
     <!-- Array of objects -->
     <template
@@ -287,18 +287,19 @@ const displayPropertyHeading = (
           :level="level + 1"
           :name="name"
           :noncollapsible="noncollapsible"
-          :value="optimizedValue.items" />
+          :value="optimizedValue.items"
+          :schemas="schemas" />
       </div>
     </template>
-    <!-- Discriminators -->
+    <!-- Compositions -->
     <template
-      v-for="discriminator in discriminators"
-      :key="discriminator">
-      <!-- Property discriminator -->
-      <template v-if="optimizedValue?.[discriminator]">
-        <SchemaDiscriminator
+      v-for="composition in compositions"
+      :key="composition">
+      <!-- Property composition -->
+      <template v-if="optimizedValue?.[composition]">
+        <SchemaComposition
           :compact="compact"
-          :discriminator="discriminator"
+          :composition="composition"
           :hideHeading="hideHeading"
           :level="level"
           :name="name"
@@ -307,17 +308,18 @@ const displayPropertyHeading = (
           :value="optimizedValue" />
       </template>
 
-      <!-- Array item discriminator -->
+      <!-- Array item composition -->
       <template
         v-else-if="
           optimizedValue?.items &&
-          typeof discriminator === 'string' &&
+          typeof composition === 'string' &&
           typeof optimizedValue.items === 'object' &&
-          discriminator in optimizedValue.items
+          !('type' in optimizedValue.items) &&
+          composition in optimizedValue.items
         ">
-        <SchemaDiscriminator
+        <SchemaComposition
           :compact="compact"
-          :discriminator="discriminator"
+          :composition="composition"
           :hideHeading="hideHeading"
           :level="level"
           :name="name"
@@ -339,7 +341,6 @@ const displayPropertyHeading = (
   font-size: var(--scalar-mini);
   position: relative;
 }
-
 /* increase z-index for example hovers */
 .property:hover {
   z-index: 1;
@@ -349,6 +350,15 @@ const displayPropertyHeading = (
 .property--compact.property--level-1 {
   padding: 8px 0;
 }
+.composition-panel .property.property.property.property--level-0 {
+  padding: 0px;
+}
+.property--compact.property--level-0
+  .composition-panel
+  .property--compact.property--level-1 {
+  padding: 8px;
+}
+
 /*  if a property doesn't have a heading, remove the top padding */
 .property:has(> .property-rule:nth-of-type(1)):not(.property--compact) {
   padding-top: 8px;
@@ -405,22 +415,17 @@ const displayPropertyHeading = (
   padding: 6px;
   border-top: var(--scalar-border-width) solid var(--scalar-border-color);
 }
-.property-rule,
-.property-rule:has(> .discriminator-tab-list)
-  :deep(.property-rule .schema-properties.schema-properties-open) {
+.property-rule {
   border-radius: var(--scalar-radius-lg);
   display: flex;
   flex-direction: column;
 }
-.property-rule:has(.discriminator-tab-list)
-  :deep(.schema-card .schema-properties.schema-properties-open) {
+.property-rule
+  :deep(
+    .composition-panel .schema-card .schema-properties.schema-properties-open
+  ) {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
-}
-.property-rule:has(.discriminator-tab-list)
-  :deep(.children .schema-card .schema-properties.schema-properties-open) {
-  border-top-left-radius: var(--scalar-radius-lg);
-  border-top-right-radius: var(--scalar-radius-lg);
 }
 .property-enum-value {
   color: var(--scalar-color-3);

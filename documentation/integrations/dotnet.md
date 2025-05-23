@@ -208,7 +208,7 @@ To configure API key authentication:
 
 ```csharp
 app.MapScalarApiReference(options => options
-    .WithPreferredScheme("ApiKey") // Optional: Sets the default security scheme
+    .AddPreferredSecuritySchemes("ApiKey") // Optional: Sets the default security scheme
     .AddApiKeyAuthentication("ApiKey", apiKey =>
     {
         apiKey.Value = "your-api-key";
@@ -222,7 +222,7 @@ Scalar supports various OAuth2 flows through specific helper methods, but all of
 
 ```csharp
 app.MapScalarApiReference(options => options
-    .WithPreferredScheme("OAuth2")
+    .AddPreferredSecuritySchemes("OAuth2")
     .AddOAuth2Authentication("OAuth2", scheme => 
     {
         // Configure flows manually
@@ -256,7 +256,7 @@ app.MapScalarApiReference(options => options
 
 ```csharp
 app.MapScalarApiReference(options => options
-    .WithPreferredScheme("OAuth2")
+    .AddPreferredSecuritySchemes("OAuth2")
     .AddAuthorizationCodeFlow("OAuth2", flow =>
     {
         flow.ClientId = "your-client-id";
@@ -271,7 +271,7 @@ app.MapScalarApiReference(options => options
 
 ```csharp
 app.MapScalarApiReference(options => options
-    .WithPreferredScheme("OAuth2")
+    .AddPreferredSecuritySchemes("OAuth2")
     .AddClientCredentialsFlow("OAuth2", flow =>
     {
         flow.ClientId = "your-client-id";
@@ -284,7 +284,7 @@ app.MapScalarApiReference(options => options
 
 ```csharp
 app.MapScalarApiReference(options => options
-    .WithPreferredScheme("OAuth2")
+    .AddPreferredSecuritySchemes("OAuth2")
     .AddImplicitFlow("OAuth2", flow =>
     {
         flow.ClientId = "your-client-id";
@@ -296,7 +296,7 @@ app.MapScalarApiReference(options => options
 
 ```csharp
 app.MapScalarApiReference(options => options
-    .WithPreferredScheme("OAuth2")
+    .AddPreferredSecuritySchemes("OAuth2")
     .AddPasswordFlow("OAuth2", flow =>
     {
         flow.ClientId = "your-client-id";
@@ -312,7 +312,7 @@ You can configure multiple OAuth2 flows for a single security scheme:
 
 ```csharp
 app.MapScalarApiReference(options => options
-    .WithPreferredScheme("OAuth2")
+    .AddPreferredSecuritySchemes("OAuth2")
     .AddOAuth2Flows("OAuth2", flows =>
     {
         // Authorization Code flow
@@ -343,11 +343,12 @@ app.MapScalarApiReference(options => options
 
 ```csharp
 app.MapScalarApiReference(options => options
-    .WithPreferredScheme("BearerAuth")
+    .AddPreferredSecuritySchemes("BearerAuth")
     .AddHttpAuthentication("BearerAuth", auth =>
     {
         auth.Token = "ey...";
-    });
+    })
+    .WithPersistentAuthentication() // Persists authentication between page refreshes
 );
 ```
 
@@ -355,7 +356,7 @@ app.MapScalarApiReference(options => options
 
 ```csharp
 app.MapScalarApiReference(options => options
-    .WithPreferredScheme("BasicAuth")
+    .AddPreferredSecuritySchemes("BasicAuth")
     .AddHttpAuthentication("BasicAuth", auth =>
     {
         auth.Username = "your-username";
@@ -370,8 +371,8 @@ You can configure multiple security schemes at once:
 
 ```csharp
 app.MapScalarApiReference(options => options
-    // Set the preferred (default) scheme
-    .WithPreferredScheme("OAuth2")
+    // Set the preferred (default) schemes - you can specify multiple preferred schemes
+    .AddPreferredSecuritySchemes("OAuth2", "ApiKey")
     
     // Configure OAuth2
     .AddAuthorizationCodeFlow("OAuth2", flow =>
@@ -396,6 +397,23 @@ app.MapScalarApiReference(options => options
 
 > [!NOTE]
 > For more detailed information about authentication, including how to configure security schemes in your OpenAPI document, refer to the [authentication documentation](https://github.com/scalar/scalar/blob/main/integrations/aspnetcore/docs/authentication.md).
+
+#### Persisting Authentication
+
+By default, authentication information is not persisted when the page is refreshed. To enable persistence of authentication data in the browser's local storage, use the `WithPersistentAuthentication` method:
+
+```csharp
+app.MapScalarApiReference(options => options
+    .AddPreferredSecuritySchemes("OAuth2", "ApiKey")
+    // Configure your authentication schemes here
+    .WithPersistentAuthentication() // Enable persistence (default is true)
+);
+```
+
+With this configuration, users won't need to re-enter their authentication credentials after refreshing the page.
+
+> [!WARNING]
+> Persisting authentication information in the browser's local storage may present security risks in certain environments. Use this feature with caution based on your security requirements.
 
 ### Custom HTTP Client
 

@@ -20,6 +20,7 @@ const {
   environment,
   envVariables,
   layout = 'client',
+  persistAuth = false,
   selectedSchemeOptions = [],
   server,
   workspace,
@@ -28,6 +29,7 @@ const {
   environment: Environment
   envVariables: EnvVariable[]
   layout: 'client' | 'reference'
+  persistAuth: boolean
   selectedSchemeOptions: { id: string; label: string }[]
   server: Server | undefined
   workspace: Workspace
@@ -64,7 +66,8 @@ watch(
   <form @submit.prevent>
     <div
       v-if="selectedSchemeOptions.length > 1"
-      class="box-content flex h-8 flex-wrap gap-x-2.5 overflow-hidden border-t px-3">
+      class="box-content flex h-8 flex-wrap gap-x-2.5 overflow-hidden border border-b-0 px-3"
+      :class="layout === 'client' && 'border-r-0'">
       <div
         v-for="(option, index) in selectedSchemeOptions"
         :key="option.id"
@@ -87,7 +90,7 @@ watch(
     <DataTable
       v-if="activeScheme.length"
       class="flex-1"
-      :class="layout === 'reference' && 'border-0'"
+      :class="layout === 'reference' && 'rounded-b-lg border border-t-0'"
       :columns="['']"
       presentational>
       <RequestAuthTab
@@ -95,6 +98,7 @@ watch(
         :envVariables="envVariables"
         :environment="environment"
         :layout="layout"
+        :persistAuth="persistAuth"
         :securitySchemeUids="activeScheme"
         :server="server"
         :workspace="workspace" />
@@ -102,7 +106,10 @@ watch(
 
     <div
       v-else
-      class="text-c-3 bg-b-1 flex min-h-[calc(4rem+1px)] items-center justify-center border-t px-4 text-sm">
+      class="text-c-3 bg-b-1 flex min-h-16 items-center justify-center border-t px-4 text-sm"
+      :class="
+        layout === 'reference' && 'min-h-[calc(4rem+0.5px)] rounded-b-lg border'
+      ">
       No authentication selected
     </div>
 

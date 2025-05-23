@@ -12,7 +12,12 @@ export function upgradeFromTwoToThree(originalSpecification: UnknownObject) {
   let specification = originalSpecification
 
   // Version
-  if (specification !== null && typeof specification.swagger === 'string' && specification.swagger?.startsWith('2.0')) {
+  if (
+    specification !== null &&
+    typeof specification === 'object' &&
+    typeof specification.swagger === 'string' &&
+    specification.swagger?.startsWith('2.0')
+  ) {
     specification.openapi = '3.0.4'
     delete specification.swagger
   } else {
@@ -47,7 +52,8 @@ export function upgradeFromTwoToThree(originalSpecification: UnknownObject) {
 
     // Rewrite $refs to definitions
     specification = traverse(specification, (schema) => {
-      if (schema.$ref?.startsWith('#/definitions/')) {
+      // Rewrite $refs to components
+      if (typeof schema.$ref === 'string' && schema.$ref.startsWith('#/definitions/')) {
         schema.$ref = schema.$ref.replace(/^#\/definitions\//, '#/components/schemas/')
       }
 
@@ -55,6 +61,7 @@ export function upgradeFromTwoToThree(originalSpecification: UnknownObject) {
     })
   }
 
+  // Transform file type to string with binary format
   specification = traverse(specification, (schema) => {
     if (schema.type === 'file') {
       schema.type = 'string'
