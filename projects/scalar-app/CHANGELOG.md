@@ -1,5 +1,113 @@
 # scalar-app
 
+## 0.1.199
+
+### Patch Changes
+
+- Updated dependencies [85877aa]
+  - @scalar/themes@0.13.1
+  - @scalar/api-client@2.5.1
+  - @scalar/components@0.14.4
+  - @scalar/import@0.4.5
+
+## 0.1.198
+
+### Patch Changes
+
+- Updated dependencies [785939b]
+- Updated dependencies [1e87feb]
+- Updated dependencies [0113b84]
+- Updated dependencies [cad6277]
+- Updated dependencies [ffa93fa]
+- Updated dependencies [cedca9b]
+  - @scalar/components@0.14.3
+  - @scalar/api-client@2.5.0
+  - @scalar/themes@0.13.0
+  - @scalar/import@0.4.4
+
+## 0.1.197
+
+### Patch Changes
+
+- Updated dependencies [151ef09]
+  - @scalar/api-client@2.4.4
+  - @scalar/components@0.14.2
+  - @scalar/import@0.4.3
+
+## 0.1.196
+
+### Patch Changes
+
+- Updated dependencies [fbcce50]
+  - @scalar/api-client@2.4.3
+
+## 0.1.195
+
+### Patch Changes
+
+- Updated dependencies [2efdf8e]
+  - @scalar/api-client@2.4.2
+  - @scalar/import@0.4.2
+
+## 0.1.194
+
+### Patch Changes
+
+- Updated dependencies [4440949]
+  - @scalar/components@0.14.1
+  - @scalar/api-client@2.4.1
+  - @scalar/import@0.4.1
+  - @scalar/themes@0.12.1
+
+## 0.1.193
+
+### Patch Changes
+
+- 26476ed: feat: send cross-origin cookies in scalar app
+- Updated dependencies [26476ed]
+- Updated dependencies [30bab1d]
+- Updated dependencies [5613e40]
+- Updated dependencies [483ca93]
+- Updated dependencies [fe696ab]
+- Updated dependencies [0efcab4]
+- Updated dependencies [20cf550]
+  - @scalar/api-client@2.4.0
+  - @scalar/components@0.14.0
+  - @scalar/themes@0.12.0
+  - @scalar/import@0.4.0
+
+## 0.1.192
+
+### Patch Changes
+
+- Updated dependencies [6b4a3c3]
+- Updated dependencies [1843cfe]
+- Updated dependencies [cd0722d]
+  - @scalar/api-client@2.3.34
+  - @scalar/components@0.13.59
+  - @scalar/themes@0.11.3
+  - @scalar/import@0.3.27
+
+## 0.1.191
+
+### Patch Changes
+
+- Updated dependencies [f711ab5]
+- Updated dependencies [ec30edd]
+- Updated dependencies [90b773e]
+- Updated dependencies [e7f61ce]
+- Updated dependencies [52dd8a1]
+- Updated dependencies [cb9428c]
+- Updated dependencies [af38fa6]
+- Updated dependencies [67aa0f4]
+- Updated dependencies [ac16fca]
+- Updated dependencies [1966c5a]
+- Updated dependencies [ac16fca]
+  - @scalar/api-client@2.3.33
+  - @scalar/themes@0.11.2
+  - @scalar/components@0.13.58
+  - @scalar/import@0.3.26
+
 ## 0.1.190
 
 ### Patch Changes

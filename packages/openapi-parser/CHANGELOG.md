@@ -1,5 +1,34 @@
 # @scalar/openapi-parser
 
+## 0.13.0
+
+### Minor Changes
+
+- 1e87feb: fix: normalize doesn’t handle empty documents well
+
+## 0.12.0
+
+### Minor Changes
+
+- edf694b: feat: remove wildcard exports
+
+## 0.11.1
+
+### Patch Changes
+
+- ea20eb4: fix: swagger upgrade fails if you pass something that is not an object
+
+## 0.11.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- bd602d3: chore: mark pipeline syntax as deprecated
+- 1d1470c: feat: speed up the upgrade utility
+
 ## 0.10.17
 
 ### Patch Changes

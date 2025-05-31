@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import { toRef } from 'vue'
 
-import { createEmptySpecification, parse } from '../../helpers'
+import { parse } from '@/helpers/parse'
+import { createEmptySpecification } from '@/libs/openapi'
+import { dereference } from '@scalar/openapi-parser'
+import type { OpenAPIV3_1 } from '@scalar/openapi-types'
 import { useSearchIndex } from './useSearchIndex'
 
 // Mock the useConfig hook
@@ -18,7 +21,7 @@ vi.mock('@/hooks/useNavState', () => ({
 
 describe('useSearchIndex', () => {
   it('should create the search index from an OpenAPI document', async () => {
-    const specification = await parse(
+    const { schema: dereferencedDocument } = await dereference(
       createEmptySpecification({
         paths: {
           '/foobar': {
@@ -30,6 +33,8 @@ describe('useSearchIndex', () => {
         },
       }),
     )
+
+    const specification = await parse(dereferencedDocument as OpenAPIV3_1.Document)
 
     const { searchText, fuseSearch, searchResultsWithPlaceholderResults } = useSearchIndex({
       specification: toRef(specification),

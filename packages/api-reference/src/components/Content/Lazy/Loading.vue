@@ -4,7 +4,7 @@ const hasLoaded = ref(false)
 </script>
 <script lang="ts" setup>
 import type { Collection, Server } from '@scalar/oas-utils/entities/spec'
-import type { OpenAPIV3 } from '@scalar/openapi-types'
+import type { OpenAPIV3_1 } from '@scalar/openapi-types'
 import type {
   Spec,
   Tag as TagType,
@@ -12,21 +12,21 @@ import type {
 } from '@scalar/types/legacy'
 import { onMounted, ref, watch } from 'vue'
 
-import { Operation } from '@/features/Operation'
-
-import { getModels, scrollToId } from '../../../helpers'
-import { useNavState } from '../../../hooks'
-import { Anchor } from '../../Anchor'
+import { Anchor } from '@/components/Anchor'
+import { lazyBus } from '@/components/Content/Lazy/lazyBus'
+import { Schema } from '@/components/Content/Schema'
+import { TagSection } from '@/components/Content/Tag'
 import {
   Section,
   SectionContainer,
   SectionContent,
   SectionHeader,
   SectionHeaderTag,
-} from '../../Section'
-import { Schema } from '../Schema'
-import { TagSection } from '../Tag'
-import { lazyBus } from './lazyBus'
+} from '@/components/Section'
+import { Operation } from '@/features/Operation'
+import { scrollToId } from '@/helpers/scroll-to-id'
+import { useNavState } from '@/hooks/useNavState'
+import { getModels } from '@/libs/openapi'
 
 /**
  * Loads a "fake" tag/modal/operation if the user is deep linking
@@ -113,6 +113,14 @@ watch(
           operationIndex + 2,
         ),
       })
+
+      // Check if hash contains a markdown heading with the new description format
+      if (hash.value.includes('/description/')) {
+        if (typeof window !== 'undefined') {
+          scrollToId(hash.value)
+        }
+        setTimeout(() => (isIntersectionEnabled.value = true), 1000)
+      }
     }
     // Models
     else if (hash.value.startsWith('model')) {
@@ -218,7 +226,7 @@ onMounted(() => {
               <Anchor :id="getModelId({ name })">
                 <SectionHeaderTag :level="2">
                   {{
-                    (getModels(parsedSpec)?.[name] as OpenAPIV3.SchemaObject)
+                    (getModels(parsedSpec)?.[name] as OpenAPIV3_1.SchemaObject)
                       .title ?? name
                   }}
                 </SectionHeaderTag>

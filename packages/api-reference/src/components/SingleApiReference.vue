@@ -3,9 +3,8 @@ import type { ApiReferenceConfiguration } from '@scalar/types/api-reference'
 import { useColorMode } from '@scalar/use-hooks/useColorMode'
 import { useSeoMeta } from '@unhead/vue'
 import { useFavicon } from '@vueuse/core'
-import { computed, toRef, watch } from 'vue'
+import { computed, watch } from 'vue'
 
-import { useReactiveSpec } from '../hooks'
 import { Layouts } from './Layouts'
 
 const { configuration } = defineProps<{
@@ -32,11 +31,6 @@ if (configuration.metaData) {
   useSeoMeta(configuration.metaData)
 }
 
-const { parsedSpec, rawSpec } = useReactiveSpec({
-  proxyUrl: toRef(() => configuration.proxyUrl || ''),
-  specConfig: toRef(() => configuration || {}),
-})
-
 // TODO: defineSlots
 
 const favicon = computed(() => configuration.favicon)
@@ -53,8 +47,6 @@ useFavicon(favicon)
   <Layouts
     :configuration="configuration"
     :isDark="isDarkMode"
-    :parsedSpec="parsedSpec"
-    :rawSpec="rawSpec"
     @toggleDarkMode="() => toggleColorMode()"
     @updateContent="$emit('updateContent', $event)">
     <template #footer><slot name="footer" /></template>
@@ -63,6 +55,7 @@ useFavicon(favicon)
     <template #document-selector>
       <slot name="document-selector" />
     </template>
+    <template #sidebar-start><slot name="sidebar-start" /></template>
   </Layouts>
 </template>
 <style>

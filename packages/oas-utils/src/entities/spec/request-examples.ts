@@ -484,16 +484,26 @@ export function createExampleFromRequest(request: Request, name: string, server?
       body.activeBody = 'formData'
       body.formData = {
         encoding: contentType === 'application/x-www-form-urlencoded' ? 'urlencoded' : 'form-data',
-        value: (requestBody?.params || []).map((param) => ({
-          key: param.name,
-          value: param.value || '',
-          enabled: true,
-        })),
+        value: (requestBody?.params || []).map((param) => {
+          if (param.value instanceof File) {
+            return {
+              key: param.name,
+              value: 'BINARY',
+              file: param.value,
+              enabled: true,
+            }
+          }
+          return {
+            key: param.name,
+            value: param.value || '',
+            enabled: true,
+          }
+        }),
       }
     }
 
-    // Add the content-type header if it doesn't exist
-    if (requestBody?.mimeType && !contentTypeHeader) {
+    // Add the content-type header if it doesn't exist and if it's not multipart request
+    if (requestBody?.mimeType && !contentTypeHeader && !requestBody.mimeType.startsWith('multipart/')) {
       parameters.headers.push({
         key: 'Content-Type',
         value: requestBody.mimeType,

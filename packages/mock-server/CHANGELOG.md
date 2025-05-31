@@ -1,5 +1,87 @@
 # @scalar/mock-server
 
+## 0.5.2
+
+### Patch Changes
+
+- @scalar/oas-utils@0.4.1
+
+## 0.5.1
+
+### Patch Changes
+
+- Updated dependencies [1e87feb]
+- Updated dependencies [1e87feb]
+- Updated dependencies [cad6277]
+  - @scalar/openapi-parser@0.13.0
+  - @scalar/oas-utils@0.4.0
+  - @scalar/openapi-types@0.3.1
+
+## 0.5.0
+
+### Minor Changes
+
+- edf694b: refactor!: use openapi-parser utils, remove the deprecated pipeline syntax
+
+### Patch Changes
+
+- Updated dependencies [151ef09]
+- Updated dependencies [442c0a3]
+- Updated dependencies [edf694b]
+  - @scalar/oas-utils@0.3.2
+  - @scalar/openapi-parser@0.12.0
+
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies [ea20eb4]
+  - @scalar/openapi-parser@0.11.1
+  - @scalar/oas-utils@0.3.1
+
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [4440949]
+  - @scalar/oas-utils@0.3.1
+  - @scalar/openapi-types@0.3.1
+  - @scalar/openapi-parser@0.11.0
+
+## 0.4.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- Updated dependencies [bd602d3]
+- Updated dependencies [30bab1d]
+- Updated dependencies [483ca93]
+- Updated dependencies [1d1470c]
+  - @scalar/openapi-parser@0.11.0
+  - @scalar/oas-utils@0.3.0
+  - @scalar/openapi-types@0.3.0
+
+## 0.3.28
+
+### Patch Changes
+
+- @scalar/oas-utils@0.2.144
+- @scalar/openapi-parser@0.10.17
+
+## 0.3.27
+
+### Patch Changes
+
+- cb9428c: Support additional query parameters for the OAuth authorization request (prompt, audience, anything), and handle OAuth authorization denials
+- Updated dependencies [cb9428c]
+- Updated dependencies [67aa0f4]
+  - @scalar/openapi-types@0.2.3
+  - @scalar/oas-utils@0.2.143
+  - @scalar/openapi-parser@0.10.17
+
 ## 0.3.26
 
 ### Patch Changes

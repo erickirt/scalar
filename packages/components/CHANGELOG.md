@@ -1,5 +1,93 @@
 # @scalar/components
 
+## 0.14.4
+
+### Patch Changes
+
+- Updated dependencies [85877aa]
+  - @scalar/themes@0.13.1
+  - @scalar/code-highlight@0.1.1
+  - @scalar/oas-utils@0.4.1
+
+## 0.14.3
+
+### Patch Changes
+
+- 785939b: feat: adds id to markdown heading
+- cad6277: feat(themes)!: migrate to tailwind v4
+- ffa93fa: feat(themes): use .scalar-app as the base class for all tailwind styles
+- cedca9b: feat(components): export file upload component
+- Updated dependencies [785939b]
+- Updated dependencies [1e87feb]
+- Updated dependencies [cad6277]
+  - @scalar/code-highlight@0.1.1
+  - @scalar/oas-utils@0.4.0
+  - @scalar/themes@0.13.0
+  - @scalar/use-hooks@0.2.2
+  - @scalar/icons@0.4.2
+  - @scalar/use-toasts@0.8.0
+
+## 0.14.2
+
+### Patch Changes
+
+- Updated dependencies [151ef09]
+- Updated dependencies [442c0a3]
+  - @scalar/oas-utils@0.3.2
+
+## 0.14.1
+
+### Patch Changes
+
+- 4440949: chore: bumping packages
+- Updated dependencies [4440949]
+  - @scalar/oas-utils@0.3.1
+  - @scalar/themes@0.12.1
+  - @scalar/code-highlight@0.1.0
+  - @scalar/use-hooks@0.2.1
+  - @scalar/icons@0.4.1
+
+## 0.14.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- 5613e40: feat(components): scalar tooltip overhaul
+- 0efcab4: chore: remove old helper file from components
+- Updated dependencies [30bab1d]
+- Updated dependencies [5613e40]
+- Updated dependencies [483ca93]
+  - @scalar/oas-utils@0.3.0
+  - @scalar/themes@0.12.0
+  - @scalar/code-highlight@0.1.0
+  - @scalar/use-toasts@0.8.0
+  - @scalar/use-hooks@0.2.0
+  - @scalar/icons@0.4.0
+
+## 0.13.59
+
+### Patch Changes
+
+- 1843cfe: fix(components): set search result item to use an anchor tag
+  - @scalar/themes@0.11.3
+  - @scalar/code-highlight@0.0.29
+  - @scalar/use-hooks@0.1.50
+  - @scalar/icons@0.3.7
+
+## 0.13.58
+
+### Patch Changes
+
+- af38fa6: feat: updates scalar loading component style
+- Updated dependencies [90b773e]
+  - @scalar/themes@0.11.2
+  - @scalar/code-highlight@0.0.29
+  - @scalar/use-hooks@0.1.49
+  - @scalar/icons@0.3.6
+
 ## 0.13.57
 
 ### Patch Changes

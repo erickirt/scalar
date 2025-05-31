@@ -21,6 +21,7 @@ import { computed, ref, useId } from 'vue'
 
 import ViewLayoutCollapse from '@/components/ViewLayout/ViewLayoutCollapse.vue'
 import { useLayout } from '@/hooks/useLayout'
+import { CLIENT_LS_KEYS } from '@/libs/local-storage'
 import type { EnvVariable } from '@/store/active-entities'
 import { useWorkspace } from '@/store/store'
 import type { SecuritySchemeOption } from '@/views/Request/consts'
@@ -40,6 +41,7 @@ const {
   envVariables,
   layout,
   operation,
+  persistAuth = false,
   selectedSecuritySchemeUids,
   server,
   title,
@@ -50,6 +52,7 @@ const {
   envVariables: EnvVariable[]
   layout: 'client' | 'reference'
   operation?: Operation | undefined
+  persistAuth?: boolean
   selectedSecuritySchemeUids: SelectedSecuritySchemeUids
   server: Server | undefined
   title: string
@@ -169,6 +172,25 @@ const editSelectedSchemeUids = (uids: SelectedSecuritySchemeUids) => {
   // Set as selected on the collection for the modal
   if (collection.useCollectionSecurity) {
     collectionMutators.edit(collection.uid, 'selectedSecuritySchemeUids', uids)
+
+    if (!persistAuth) {
+      return
+    }
+
+    // We must convert the uids to nameKeys first
+    const nameKeys = uids.map((uids) => {
+      // Handle complex auth
+      if (Array.isArray(uids)) {
+        return uids.map((uid) => securitySchemes[uid]?.nameKey)
+      }
+
+      return securitySchemes[uids]?.nameKey
+    })
+
+    localStorage.setItem(
+      CLIENT_LS_KEYS.SELECTED_SECURITY_SCHEMES,
+      JSON.stringify(nameKeys),
+    )
   }
   // Set as selected on request
   else if (operation?.uid) {
@@ -242,7 +264,7 @@ const schemeOptions = computed(() =>
           <ScalarButton
             ref="comboboxButtonRef"
             :aria-describedby="titleId"
-            class="hover:bg-b-3 text-c-1 hover:text-c-1 py-0.25 h-fit px-1.5 font-normal"
+            class="hover:bg-b-3 text-c-1 hover:text-c-1 h-fit px-1.5 py-0.25 font-normal"
             fullWidth
             variant="ghost">
             <div class="text-c-1">
@@ -272,6 +294,7 @@ const schemeOptions = computed(() =>
       :envVariables="envVariables"
       :environment="environment"
       :layout="layout"
+      :persistAuth="persistAuth"
       :selectedSchemeOptions="selectedSchemeOptions"
       :server="server"
       :workspace="workspace" />
