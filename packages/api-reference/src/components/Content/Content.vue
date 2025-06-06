@@ -7,9 +7,9 @@ import type { Spec } from '@scalar/types/legacy'
 import { computed } from 'vue'
 
 import { BaseUrl } from '@/features/BaseUrl'
-import { getModels, hasModels } from '@/helpers'
-import { useSidebar } from '@/hooks'
 import { useConfig } from '@/hooks/useConfig'
+import { useSidebar } from '@/hooks/useSidebar'
+import { getModels, hasModels } from '@/libs/openapi'
 
 import { ClientLibraries } from './ClientLibraries'
 import { Introduction } from './Introduction'
@@ -101,7 +101,7 @@ const introCardsSlot = computed(() =>
             :class="{ 'introduction-card-row': layout === 'classic' }">
             <div
               v-if="activeCollection?.servers?.length"
-              class="scalar-reference-intro-server scalar-client introduction-card-item divide-y text-sm [--scalar-address-bar-height:0px]">
+              class="scalar-reference-intro-server scalar-client introduction-card-item text-sm leading-normal [--scalar-address-bar-height:0px]">
               <BaseUrl
                 :collection="activeCollection"
                 :server="activeServer" />
@@ -112,12 +112,13 @@ const introCardsSlot = computed(() =>
                 activeWorkspace &&
                 Object.keys(securitySchemes ?? {}).length
               "
-              class="scalar-reference-intro-auth scalar-client introduction-card-item">
+              class="scalar-reference-intro-auth scalar-client introduction-card-item leading-normal">
               <RequestAuth
                 :collection="activeCollection"
                 :envVariables="activeEnvVariables"
                 :environment="activeEnvironment"
                 layout="reference"
+                :persistAuth="config.persistAuth"
                 :selectedSecuritySchemeUids="
                   activeCollection?.selectedSecuritySchemeUids ?? []
                 "
@@ -194,17 +195,9 @@ const introCardsSlot = computed(() =>
 }
 .introduction-card-item {
   display: flex;
-  overflow: hidden;
-  border: var(--scalar-border-width) solid var(--scalar-border-color);
-  border-radius: var(--scalar-radius-lg);
   margin-bottom: 12px;
   flex-direction: column;
   justify-content: start;
-}
-@container narrow-references-container (max-width: 900px) {
-  .introduction-card-item {
-    border-bottom: var(--scalar-border-width) solid var(--scalar-border-color);
-  }
 }
 .introduction-card-item:has(.description) :deep(.server-form-container) {
   border-bottom-left-radius: 0;

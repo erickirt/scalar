@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { ScalarErrorBoundary } from '@scalar/components'
 import type { Collection, Server } from '@scalar/oas-utils/entities/spec'
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types'
+import type { OpenAPIV3_1 } from '@scalar/openapi-types'
 import type { Spec, Tag as TagType } from '@scalar/types/legacy'
 import { computed } from 'vue'
 
 import { Lazy } from '@/components/Content/Lazy'
 import { Operation } from '@/features/Operation'
-import { useNavState, useSidebar } from '@/hooks'
+import { operationIdParams } from '@/features/traverse-schema'
+import { useNavState } from '@/hooks/useNavState'
+import { useSidebar } from '@/hooks/useSidebar'
 
 import TagAccordion from './TagAccordion.vue'
 import TagSection from './TagSection.vue'
@@ -18,11 +20,7 @@ const { collection, tags, spec, layout, server } = defineProps<{
   spec: Spec
   layout?: 'modern' | 'classic'
   server?: Server
-  schemas?:
-    | OpenAPIV2.DefinitionsObject
-    | Record<string, OpenAPIV3.SchemaObject>
-    | Record<string, OpenAPIV3_1.SchemaObject>
-    | unknown
+  schemas?: Record<string, OpenAPIV3_1.SchemaObject> | unknown
 }>()
 
 const { getOperationId, getTagId, hash } = useNavState()
@@ -60,7 +58,7 @@ const isLazy = (index: number) =>
       :tag="tag">
       <Lazy
         v-for="(operation, operationIndex) in tag.operations"
-        :id="getOperationId(operation, tag)"
+        :id="getOperationId(operationIdParams(operation), tag)"
         :key="`${operation.httpVerb}-${operation.operationId}`"
         :isLazy="
           isLazy(index) ||
@@ -68,7 +66,7 @@ const isLazy = (index: number) =>
         ">
         <ScalarErrorBoundary>
           <Operation
-            :id="getOperationId(operation, tag)"
+            :id="getOperationId(operationIdParams(operation), tag)"
             :collection="collection"
             :layout="layout"
             :schemas="schemas"

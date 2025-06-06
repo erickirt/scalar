@@ -4,13 +4,12 @@ import { keysOf } from '@scalar/object-utils/arrays'
 import { type ENTITY_BRANDS, nanoidSchema } from '@scalar/types/utils'
 import { z } from 'zod'
 
-import { isDefined } from '@/helpers/is-defined'
-import { getObjectKeys } from '@/helpers/object'
-
 import { getRequestBodyFromOperation } from '@/spec-getters/get-request-body-from-operation'
 import type { RequestParameter, ParameterContent } from './parameters'
 import type { Request } from './requests'
 import type { Server } from './server'
+import { isDefined } from '@scalar/helpers/array/is-defined'
+import { objectKeys } from '@scalar/helpers/object/object-keys'
 
 // ---------------------------------------------------------------------------
 // Example Parameters
@@ -292,7 +291,7 @@ export function createParamInstance(param: RequestParameter) {
   const schema = param.schema as any
 
   const firstExample = (() => {
-    if (param.examples && !Array.isArray(param.examples) && getObjectKeys(param.examples).length > 0) {
+    if (param.examples && !Array.isArray(param.examples) && objectKeys(param.examples).length > 0) {
       const exampleValues = Object.entries(param.examples).map(([_, example]) => {
         // returns the external value if it exists
         if (example.externalValue) {
@@ -335,7 +334,7 @@ export function createParamInstance(param: RequestParameter) {
 
     // content examples e.g. { content: { 'application/json': { examples: { foo: { value: 'bar' } } } } }
     if (param.content) {
-      const firstContentType = getObjectKeys(param.content)[0]
+      const firstContentType = objectKeys(param.content)[0]
       if (firstContentType) {
         const content = (param.content as ParameterContent)[firstContentType]
         if (content?.examples) {
@@ -484,16 +483,26 @@ export function createExampleFromRequest(request: Request, name: string, server?
       body.activeBody = 'formData'
       body.formData = {
         encoding: contentType === 'application/x-www-form-urlencoded' ? 'urlencoded' : 'form-data',
-        value: (requestBody?.params || []).map((param) => ({
-          key: param.name,
-          value: param.value || '',
-          enabled: true,
-        })),
+        value: (requestBody?.params || []).map((param) => {
+          if (param.value instanceof File) {
+            return {
+              key: param.name,
+              value: 'BINARY',
+              file: param.value,
+              enabled: true,
+            }
+          }
+          return {
+            key: param.name,
+            value: param.value || '',
+            enabled: true,
+          }
+        }),
       }
     }
 
-    // Add the content-type header if it doesn't exist
-    if (requestBody?.mimeType && !contentTypeHeader) {
+    // Add the content-type header if it doesn't exist and if it's not multipart request
+    if (requestBody?.mimeType && !contentTypeHeader && !requestBody.mimeType.startsWith('multipart/')) {
       parameters.headers.push({
         key: 'Content-Type',
         value: requestBody.mimeType,

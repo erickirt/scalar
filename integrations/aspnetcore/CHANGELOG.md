@@ -1,5 +1,185 @@
 # @scalar/aspnetcore
 
+## 2.4.13
+
+### Patch Changes
+
+- @scalar/api-reference@1.31.8
+
+## 2.4.12
+
+### Patch Changes
+
+- ad25353: docs(Scalar.AspNetCore): improve xml comments
+- Updated dependencies [24cfdfe]
+  - @scalar/api-reference@1.31.7
+
+## 2.4.11
+
+### Patch Changes
+
+- Updated dependencies [c584dcd]
+  - @scalar/api-reference@1.31.6
+
+## 2.4.10
+
+### Patch Changes
+
+- Updated dependencies [ec97505]
+  - @scalar/api-reference@1.31.5
+
+## 2.4.9
+
+### Patch Changes
+
+- Updated dependencies [00fc827]
+- Updated dependencies [14d1d55]
+- Updated dependencies [8165b3b]
+- Updated dependencies [8dcab87]
+- Updated dependencies [358eb63]
+- Updated dependencies [335a25c]
+  - @scalar/api-reference@1.31.4
+
+## 2.4.8
+
+### Patch Changes
+
+- 1d498e6: feat(Scalar.AspNetCore): add authentication extension methods
+- 99c4e8d: feat(Scalar.AspNetCore): improve mapper performance
+- Updated dependencies [dc6cd4c]
+- Updated dependencies [511bbc0]
+- Updated dependencies [bf2cb82]
+- Updated dependencies [7ca47ab]
+- Updated dependencies [494f7f0]
+  - @scalar/api-reference@1.31.3
+
+## 2.4.7
+
+### Patch Changes
+
+- @scalar/api-reference@1.31.2
+
+## 2.4.6
+
+### Patch Changes
+
+- Updated dependencies [e6c165c]
+- Updated dependencies [aeb94f0]
+- Updated dependencies [237cb44]
+  - @scalar/api-reference@1.31.1
+
+## 2.4.5
+
+### Patch Changes
+
+- 28feaf8: feat(Scalar.AspNetCore): add support for code samples
+- 7bc99ff: feat(Scalar.AspNetCore): support AdditionalQueryParameters
+- Updated dependencies [a9a4f9f]
+- Updated dependencies [8529040]
+- Updated dependencies [f5413ba]
+- Updated dependencies [fea1d52]
+- Updated dependencies [785939b]
+- Updated dependencies [1e87feb]
+- Updated dependencies [0113b84]
+- Updated dependencies [cad6277]
+- Updated dependencies [3a24cf9]
+- Updated dependencies [0dfb39a]
+- Updated dependencies [fea1d52]
+- Updated dependencies [ffa93fa]
+- Updated dependencies [785939b]
+- Updated dependencies [f1f9504]
+- Updated dependencies [42e73ee]
+  - @scalar/api-reference@1.31.0
+
+## 2.4.4
+
+### Patch Changes
+
+- Updated dependencies [5208e7a]
+- Updated dependencies [edb5490]
+- Updated dependencies [442c0a3]
+- Updated dependencies [edb5490]
+  - @scalar/api-reference@1.30.0
+
+## 2.4.3
+
+### Patch Changes
+
+- 165f80b: chore(Scalar.AspNetCore): remove obsolete license URL property
+- Updated dependencies [fbcce50]
+- Updated dependencies [0afb11d]
+- Updated dependencies [9fd408c]
+- Updated dependencies [0afb11d]
+- Updated dependencies [c944864]
+- Updated dependencies [9ffba73]
+  - @scalar/api-reference@1.29.3
+
+## 2.4.2
+
+### Patch Changes
+
+- Updated dependencies [2efdf8e]
+  - @scalar/api-reference@1.29.2
+
+## 2.4.1
+
+### Patch Changes
+
+- @scalar/api-reference@1.29.1
+
+## 2.4.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- 15da731: feat(Scalar.AspNetCore): add support for persistent authentication state
+- 0ed0415: refactor(Scalar.AspNetCore): Improve Gzip check
+- Updated dependencies [fce282f]
+- Updated dependencies [ca403fe]
+- Updated dependencies [3af1364]
+- Updated dependencies [b899177]
+- Updated dependencies [cf922d4]
+- Updated dependencies [483ca93]
+- Updated dependencies [0efcab4]
+- Updated dependencies [fe696ab]
+  - @scalar/api-reference@1.29.0
+
+## 2.3.1
+
+### Patch Changes
+
+- 85e2a85: feat(Scalar.AspNetCore): Support GZip compression for embedded ressources
+- Updated dependencies [73ecfb0]
+- Updated dependencies [2056005]
+- Updated dependencies [9946289]
+- Updated dependencies [40bad87]
+- Updated dependencies [3a88c94]
+- Updated dependencies [96be9bd]
+- Updated dependencies [ab0d3a3]
+- Updated dependencies [5129cdc]
+- Updated dependencies [be8a6ec]
+  - @scalar/api-reference@1.28.34
+
+## 2.3.0
+
+### Minor Changes
+
+- 992f797: feat(Scalar.AspNetCore): support multiple preferred security schemes
+
+### Patch Changes
+
+- f2bee61: feat(Scalar.AspNetCore): support for custom JS configuration module
+- Updated dependencies [f711ab5]
+- Updated dependencies [90b773e]
+- Updated dependencies [52dd8a1]
+- Updated dependencies [0222ad4]
+- Updated dependencies [ffe6338]
+- Updated dependencies [2dadcfb]
+  - @scalar/api-reference@1.28.33
+
 ## 2.2.7
 
 ### Patch Changes

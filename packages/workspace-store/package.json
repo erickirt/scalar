@@ -1,0 +1,68 @@
+{
+  "name": "@scalar/workspace-store",
+  "description": "Store interface for openapi documents",
+  "license": "MIT",
+  "author": "Scalar (https://github.com/scalar)",
+  "homepage": "https://github.com/scalar/scalar",
+  "bugs": "https://github.com/scalar/scalar/issues/new/choose",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scalar/scalar.git",
+    "directory": "packages/workspace-store"
+  },
+  "keywords": [
+    "workspace",
+    "store",
+    "openapi",
+    "scalar"
+  ],
+  "version": "0.3.2",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "scalar-build-esbuild",
+    "dev": "vite-node ./src/index.ts",
+    "format": "scalar-format",
+    "format:check": "scalar-format-check",
+    "lint:check": "eslint .",
+    "lint:fix": "eslint .  --fix",
+    "test": "vitest",
+    "types:build": "scalar-types-build",
+    "types:check": "scalar-types-check"
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "type": "module",
+  "exports": {
+    "./client": {
+      "import": "./dist/client.js",
+      "types": "./dist/client.d.ts",
+      "default": "./dist/client.js"
+    },
+    "./schemas": {
+      "import": "./dist/schemas.js",
+      "types": "./dist/schemas.d.ts",
+      "default": "./dist/schemas.js"
+    },
+    "./server": {
+      "import": "./dist/server.js",
+      "types": "./dist/server.d.ts",
+      "default": "./dist/server.js"
+    }
+  },
+  "dependencies": {
+    "@scalar/openapi-parser": "workspace:*",
+    "@scalar/openapi-types": "workspace:*",
+    "@sinclair/typebox": "catalog:*",
+    "vue": "catalog:*"
+  },
+  "devDependencies": {
+    "@scalar/build-tooling": "workspace:*",
+    "fastify": "catalog:*",
+    "vite": "catalog:*",
+    "vitest": "catalog:*"
+  }
+}

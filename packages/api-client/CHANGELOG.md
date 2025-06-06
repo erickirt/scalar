@@ -1,5 +1,267 @@
 # @scalar/api-client
 
+## 2.5.5
+
+### Patch Changes
+
+- Updated dependencies [11fabae]
+  - @scalar/openapi-parser@0.16.0
+  - @scalar/import@0.4.9
+  - @scalar/oas-utils@0.4.4
+
+## 2.5.4
+
+### Patch Changes
+
+- Updated dependencies [8bc9f20]
+  - @scalar/helpers@0.0.3
+  - @scalar/import@0.4.8
+  - @scalar/oas-utils@0.4.4
+  - @scalar/postman-to-openapi@0.3.7
+  - @scalar/components@0.14.7
+  - @scalar/use-codemirror@0.12.8
+
+## 2.5.3
+
+### Patch Changes
+
+- 79975dd: fix: updates auth section display logic
+- 8165b3b: feat(helpers): added new helpers package
+- Updated dependencies [17bc0d8]
+- Updated dependencies [b9dacba]
+- Updated dependencies [a73e9be]
+- Updated dependencies [ba84a3c]
+- Updated dependencies [8165b3b]
+- Updated dependencies [49c04cf]
+- Updated dependencies [ba84a3c]
+- Updated dependencies [f4332eb]
+- Updated dependencies [358eb63]
+- Updated dependencies [05c22c7]
+  - @scalar/openapi-parser@0.15.0
+  - @scalar/themes@0.13.2
+  - @scalar/postman-to-openapi@0.3.6
+  - @scalar/oas-utils@0.4.3
+  - @scalar/helpers@0.0.2
+  - @scalar/import@0.4.7
+  - @scalar/components@0.14.6
+  - @scalar/openapi-types@0.3.2
+  - @scalar/use-codemirror@0.12.7
+  - @scalar/draggable@0.2.0
+  - @scalar/icons@0.4.2
+  - @scalar/object-utils@1.2.1
+  - @scalar/snippetz@0.3.0
+  - @scalar/types@0.2.2
+  - @scalar/use-hooks@0.2.2
+  - @scalar/use-toasts@0.8.0
+  - @scalar/use-tooltip@1.1.0
+
+## 2.5.2
+
+### Patch Changes
+
+- c06aa6a: fix(api-client): move global styles out of client layout
+- 3ad9393: fix: updates string template for empety values susbtitution
+- b461b62: fix: updates request section auth hidden logic"
+- a47fa60: fix: override Electron default User-Agent header
+- Updated dependencies [f1c0c01]
+- Updated dependencies [ee3eb77]
+- Updated dependencies [df7efac]
+- Updated dependencies [7ca47ab]
+  - @scalar/components@0.14.5
+  - @scalar/openapi-parser@0.14.0
+  - @scalar/oas-utils@0.4.2
+  - @scalar/use-codemirror@0.12.6
+  - @scalar/import@0.4.6
+  - @scalar/postman-to-openapi@0.3.5
+
+## 2.5.1
+
+### Patch Changes
+
+- Updated dependencies [85877aa]
+  - @scalar/themes@0.13.1
+  - @scalar/components@0.14.4
+  - @scalar/oas-utils@0.4.1
+  - @scalar/use-codemirror@0.12.5
+  - @scalar/import@0.4.5
+  - @scalar/postman-to-openapi@0.3.4
+
+## 2.5.0
+
+### Minor Changes
+
+- 1e87feb: refactor!: use dereferenced documents as a content source
+
+### Patch Changes
+
+- 0113b84: fix(api-reference): add id prefix for useId
+- cad6277: feat(themes)!: migrate to tailwind v4
+- ffa93fa: feat(themes): use .scalar-app as the base class for all tailwind styles
+- Updated dependencies [1e87feb]
+- Updated dependencies [785939b]
+- Updated dependencies [1e87feb]
+- Updated dependencies [cad6277]
+- Updated dependencies [ffa93fa]
+- Updated dependencies [cedca9b]
+  - @scalar/openapi-parser@0.13.0
+  - @scalar/components@0.14.3
+  - @scalar/oas-utils@0.4.0
+  - @scalar/themes@0.13.0
+  - @scalar/use-hooks@0.2.2
+  - @scalar/icons@0.4.2
+  - @scalar/draggable@0.2.0
+  - @scalar/import@0.4.4
+  - @scalar/object-utils@1.2.1
+  - @scalar/openapi-types@0.3.1
+  - @scalar/postman-to-openapi@0.3.3
+  - @scalar/snippetz@0.3.0
+  - @scalar/types@0.2.1
+  - @scalar/use-codemirror@0.12.4
+  - @scalar/use-toasts@0.8.0
+  - @scalar/use-tooltip@1.1.0
+
+## 2.4.4
+
+### Patch Changes
+
+- 151ef09: fix(oas-utils): do not add content-type for multipart requests
+- Updated dependencies [151ef09]
+- Updated dependencies [442c0a3]
+- Updated dependencies [edf694b]
+  - @scalar/oas-utils@0.3.2
+  - @scalar/openapi-parser@0.12.0
+  - @scalar/components@0.14.2
+  - @scalar/import@0.4.3
+  - @scalar/postman-to-openapi@0.3.2
+  - @scalar/use-codemirror@0.12.3
+
+## 2.4.3
+
+### Patch Changes
+
+- fbcce50: fix: adds server selector x axis overflow for long content
+- Updated dependencies [ca8d9bc]
+  - @scalar/use-codemirror@0.12.2
+
+## 2.4.2
+
+### Patch Changes
+
+- 2efdf8e: fix: updates introduction card and auth style
+- Updated dependencies [ea20eb4]
+  - @scalar/openapi-parser@0.11.1
+  - @scalar/import@0.4.2
+  - @scalar/oas-utils@0.3.1
+
+## 2.4.1
+
+### Patch Changes
+
+- Updated dependencies [4440949]
+  - @scalar/components@0.14.1
+  - @scalar/oas-utils@0.3.1
+  - @scalar/object-utils@1.2.1
+  - @scalar/openapi-types@0.3.1
+  - @scalar/types@0.2.1
+  - @scalar/use-codemirror@0.12.1
+  - @scalar/import@0.4.1
+  - @scalar/postman-to-openapi@0.3.1
+  - @scalar/openapi-parser@0.11.0
+  - @scalar/snippetz@0.3.0
+  - @scalar/themes@0.12.1
+  - @scalar/use-hooks@0.2.1
+  - @scalar/icons@0.4.1
+
+## 2.4.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- 26476ed: feat: send cross-origin cookies in scalar app
+- 30bab1d: support unexploded serialization of array query params
+- 5613e40: feat(components): scalar tooltip overhaul
+- fe696ab: fix: adds server variable form border for api reference
+- 20cf550: fix: array query params showing on code snippet
+- Updated dependencies [bd602d3]
+- Updated dependencies [b77f67a]
+- Updated dependencies [30bab1d]
+- Updated dependencies [5613e40]
+- Updated dependencies [483ca93]
+- Updated dependencies [1d1470c]
+- Updated dependencies [0efcab4]
+- Updated dependencies [20cf550]
+  - @scalar/openapi-parser@0.11.0
+  - @scalar/snippetz@0.3.0
+  - @scalar/oas-utils@0.3.0
+  - @scalar/components@0.14.0
+  - @scalar/themes@0.12.0
+  - @scalar/postman-to-openapi@0.3.0
+  - @scalar/use-codemirror@0.12.0
+  - @scalar/openapi-types@0.3.0
+  - @scalar/object-utils@1.2.0
+  - @scalar/use-tooltip@1.1.0
+  - @scalar/use-toasts@0.8.0
+  - @scalar/draggable@0.2.0
+  - @scalar/use-hooks@0.2.0
+  - @scalar/import@0.4.0
+  - @scalar/icons@0.4.0
+  - @scalar/types@0.2.0
+
+## 2.3.34
+
+### Patch Changes
+
+- 6b4a3c3: chore: export decodeBuffer
+- cd0722d: fix(api-client): add aria label to request table code inputs
+- Updated dependencies [be8a6ec]
+- Updated dependencies [1843cfe]
+  - @scalar/types@0.1.16
+  - @scalar/components@0.13.59
+  - @scalar/oas-utils@0.2.144
+  - @scalar/openapi-parser@0.10.17
+  - @scalar/snippetz@0.2.20
+  - @scalar/themes@0.11.3
+  - @scalar/use-codemirror@0.11.104
+  - @scalar/import@0.3.27
+  - @scalar/postman-to-openapi@0.2.17
+  - @scalar/use-hooks@0.1.50
+  - @scalar/icons@0.3.7
+
+## 2.3.33
+
+### Patch Changes
+
+- f711ab5: feat: add auth persistance to references
+- ec30edd: feat: adds collection environment page
+- e7f61ce: feat: support fallback for +json MIME types
+- 52dd8a1: fix: displays wrapped auth description on hover
+- cb9428c: Support additional query parameters for the OAuth authorization request (prompt, audience, anything), and handle OAuth authorization denials
+- 67aa0f4: fix: render correct queries with form data
+- ac16fca: fix: updates border style on request section
+- 1966c5a: fix: remove streaming header check as it was incorrect
+- ac16fca: fix: sidebar search visual indicator on navigation
+- Updated dependencies [f711ab5]
+- Updated dependencies [90b773e]
+- Updated dependencies [0222ad4]
+- Updated dependencies [cb9428c]
+- Updated dependencies [af38fa6]
+- Updated dependencies [67aa0f4]
+  - @scalar/types@0.1.15
+  - @scalar/themes@0.11.2
+  - @scalar/openapi-types@0.2.3
+  - @scalar/components@0.13.58
+  - @scalar/oas-utils@0.2.143
+  - @scalar/openapi-parser@0.10.17
+  - @scalar/snippetz@0.2.20
+  - @scalar/use-codemirror@0.11.103
+  - @scalar/use-hooks@0.1.49
+  - @scalar/postman-to-openapi@0.2.16
+  - @scalar/import@0.3.26
+  - @scalar/icons@0.3.6
+
 ## 2.3.32
 
 ### Patch Changes

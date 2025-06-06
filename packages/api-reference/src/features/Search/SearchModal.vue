@@ -7,16 +7,20 @@ import {
   type Icon,
   type ModalState,
 } from '@scalar/components'
+import { scrollToId } from '@scalar/helpers/dom/scroll-to-id'
 import type { Spec } from '@scalar/types/legacy'
 import type { FuseResult } from 'fuse.js'
 import { nanoid } from 'nanoid'
 import { ref, toRef, watch } from 'vue'
 
-import { lazyBus } from '../../components/Content/Lazy/lazyBus'
-import SidebarHttpBadge from '../../components/Sidebar/SidebarHttpBadge.vue'
-import { scrollToId } from '../../helpers'
-import { useSidebar } from '../../hooks'
-import { useSearchIndex, type EntryType, type FuseData } from './useSearchIndex'
+import { lazyBus } from '@/components/Content/Lazy/lazyBus'
+import SidebarHttpBadge from '@/components/Sidebar/SidebarHttpBadge.vue'
+import {
+  useSearchIndex,
+  type EntryType,
+  type FuseData,
+} from '@/features/Search/useSearchIndex'
+import { useSidebar } from '@/hooks/useSidebar'
 
 const props = defineProps<{
   parsedSpec: Spec

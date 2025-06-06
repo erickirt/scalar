@@ -1,9 +1,11 @@
 import type { UnknownObject } from '@scalar/types/utils'
+import type { CompositionKeyword } from './schema-composition'
+import { mergeAllOfSchemas } from './merge-all-of-schemas'
 
-export const discriminators = ['oneOf', 'anyOf', 'allOf', 'not']
+export const compositions: CompositionKeyword[] = ['oneOf', 'anyOf', 'allOf', 'not']
 
 /**
- * Optimize the value by removing nulls from discriminators.
+ * Optimize the value by removing nulls from compositions.
  */
 export function optimizeValueForDisplay(value: UnknownObject | undefined): Record<string, any> | undefined {
   if (!value || typeof value !== 'object') {
@@ -13,48 +15,57 @@ export function optimizeValueForDisplay(value: UnknownObject | undefined): Recor
   // Clone the value to avoid mutating the original value
   let newValue = { ...value }
 
-  // Find the discriminator type
-  const discriminatorType = discriminators.find((r) => newValue?.[r])
+  // Find the composition keyword
+  const composition = compositions.find((keyword) => newValue?.[keyword])
 
-  // If there’s no discriminator type, return the original value
-  if (!discriminatorType) {
+  // If there’s no composition keyword, return the original value
+  if (!composition) {
     return newValue
   }
 
-  // Ignore the 'not' discriminator type
-  if (discriminatorType === 'not') {
+  // Ignore the 'not' composition keyword
+  if (composition === 'not') {
     return newValue
   }
 
-  // Get the schemas for the discriminator type
-  const schemas = newValue?.[discriminatorType]
+  // Get the schemas for the composition keyword
+  const schemas = newValue?.[composition]
 
   if (!Array.isArray(schemas)) {
     return newValue
   }
 
-  // If there’s an object with type 'null' in the anyOf, oneOf, allOf, mark the property as nullable
-  if (schemas.some((schema: any) => schema.type === 'null')) {
+  // Process schemas to merge allOf and handle nulls
+  const processedSchemas = schemas.map((schema: any) => {
+    // If this schema has allOf, merge it
+    if (schema.allOf && Array.isArray(schema.allOf)) {
+      return mergeAllOfSchemas(schema.allOf)
+    }
+    return schema
+  })
+
+  // If there's an object with type 'null' in the anyOf, oneOf, allOf, mark the property as nullable
+  if (processedSchemas.some((schema: any) => schema.type === 'null')) {
     newValue.nullable = true
   }
 
   // Remove objects with type 'null' from the schemas
-  const newSchemas = schemas.filter((schema: any) => !(schema.type === 'null'))
+  const newSchemas = processedSchemas.filter((schema: any) => !(schema.type === 'null'))
 
   // If there’s only one schema, overwrite the original value with the schema
   // Skip it for arrays for now, need to handle that specifically.
-  if (newSchemas.length === 1 && newValue?.[discriminatorType]) {
+  if (newSchemas.length === 1 && newValue?.[composition]) {
     newValue = { ...newValue, ...newSchemas[0] }
 
-    // Delete the original discriminator type
-    delete newValue?.[discriminatorType]
+    // Delete the original composition keyword
+    delete newValue?.[composition]
 
     return newValue
   }
 
   // Overwrite the original schemas with the new schemas
-  if (Array.isArray(newValue?.[discriminatorType]) && newValue?.[discriminatorType]?.length > 1) {
-    newValue[discriminatorType] = newSchemas
+  if (Array.isArray(newValue?.[composition]) && newValue?.[composition]?.length > 1) {
+    newValue[composition] = newSchemas
   }
 
   return newValue

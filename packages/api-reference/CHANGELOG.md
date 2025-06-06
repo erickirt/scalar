@@ -1,5 +1,318 @@
 # @scalar/api-reference
 
+## 1.31.8
+
+### Patch Changes
+
+- Updated dependencies [11fabae]
+  - @scalar/openapi-parser@0.16.0
+  - @scalar/workspace-store@0.3.2
+  - @scalar/api-client@2.5.5
+  - @scalar/oas-utils@0.4.4
+
+## 1.31.7
+
+### Patch Changes
+
+- 24cfdfe: feat: adds multiple of in schema property heading
+- Updated dependencies [373214a]
+  - @scalar/workspace-store@0.3.1
+
+## 1.31.6
+
+### Patch Changes
+
+- c584dcd: Fix classic layout mobile header
+
+## 1.31.5
+
+### Patch Changes
+
+- ec97505: Flatten layouts and add workspace store
+- Updated dependencies [bbad7c7]
+- Updated dependencies [8bc9f20]
+  - @scalar/workspace-store@0.3.0
+  - @scalar/helpers@0.0.3
+  - @scalar/api-client@2.5.4
+  - @scalar/oas-utils@0.4.4
+  - @scalar/components@0.14.7
+
+## 1.31.4
+
+### Patch Changes
+
+- 00fc827: feat: updates markdown overall style
+- 14d1d55: fix: enhances allof within anyof handling
+- 8165b3b: feat(helpers): added new helpers package
+- 8dcab87: fix: z-index of download button
+- 358eb63: fix(api-reference): fix markdown styles pt2
+- 335a25c: fix: updates schema composition and propertuy style
+- Updated dependencies [00fc827]
+- Updated dependencies [79975dd]
+- Updated dependencies [17bc0d8]
+- Updated dependencies [b9dacba]
+- Updated dependencies [a73e9be]
+- Updated dependencies [ba84a3c]
+- Updated dependencies [8165b3b]
+- Updated dependencies [49c04cf]
+- Updated dependencies [ba84a3c]
+- Updated dependencies [f4332eb]
+- Updated dependencies [358eb63]
+- Updated dependencies [05c22c7]
+  - @scalar/code-highlight@0.1.2
+  - @scalar/api-client@2.5.3
+  - @scalar/openapi-parser@0.15.0
+  - @scalar/themes@0.13.2
+  - @scalar/oas-utils@0.4.3
+  - @scalar/helpers@0.0.2
+  - @scalar/components@0.14.6
+  - @scalar/openapi-types@0.3.2
+  - @scalar/icons@0.4.2
+  - @scalar/snippetz@0.3.0
+  - @scalar/types@0.2.2
+  - @scalar/use-hooks@0.2.2
+  - @scalar/use-toasts@0.8.0
+
+## 1.31.3
+
+### Patch Changes
+
+- dc6cd4c: feat: updates download link component
+- 511bbc0: fix: updates header properties style
+- bf2cb82: feat: updates schema composition name handling
+- 7ca47ab: fix: add ssr safe alias for local storage
+- 494f7f0: chore(api-reference): delete rogue Tailwind v3 config
+- Updated dependencies [c06aa6a]
+- Updated dependencies [3ad9393]
+- Updated dependencies [f1c0c01]
+- Updated dependencies [b461b62]
+- Updated dependencies [a47fa60]
+- Updated dependencies [ee3eb77]
+- Updated dependencies [df7efac]
+- Updated dependencies [7ca47ab]
+  - @scalar/api-client@2.5.2
+  - @scalar/components@0.14.5
+  - @scalar/openapi-parser@0.14.0
+  - @scalar/oas-utils@0.4.2
+
+## 1.31.2
+
+### Patch Changes
+
+- Updated dependencies [85877aa]
+  - @scalar/themes@0.13.1
+  - @scalar/api-client@2.5.1
+  - @scalar/code-highlight@0.1.1
+  - @scalar/components@0.14.4
+  - @scalar/oas-utils@0.4.1
+
+## 1.31.1
+
+### Patch Changes
+
+- e6c165c: feat: adds schema discriminator and example support
+- aeb94f0: fix(api-reference): size icons for Tailwind v4
+- 237cb44: chore: bump for tailwind fix
+
+## 1.31.0
+
+### Minor Changes
+
+- 1e87feb: refactor!: use dereferenced documents as a content source
+
+### Patch Changes
+
+- a9a4f9f: fix: updates schema property heading logic
+- 8529040: fix: updates search button style
+- f5413ba: fix(api-reference): add tailwind plugin to standalone vite config
+- fea1d52: fix: passes required property to nested schema
+- 785939b: feat: adds id to markdown heading
+- 0113b84: fix(api-reference): add id prefix for useId
+- cad6277: feat(themes)!: migrate to tailwind v4
+- 3a24cf9: feat: save selected client on local storage
+- 0dfb39a: fix: updates schema description handling
+- fea1d52: fix: extracts render schema computed function
+- ffa93fa: feat(themes): use .scalar-app as the base class for all tailwind styles
+- 785939b: feat: updates scroll to hash to handle markdown heading
+- f1f9504: fix: increases z index for references header
+- 42e73ee: fix error when using complex type definitions
+- Updated dependencies [1e87feb]
+- Updated dependencies [785939b]
+- Updated dependencies [1e87feb]
+- Updated dependencies [0113b84]
+- Updated dependencies [cad6277]
+- Updated dependencies [ffa93fa]
+- Updated dependencies [cedca9b]
+  - @scalar/openapi-parser@0.13.0
+  - @scalar/code-highlight@0.1.1
+  - @scalar/components@0.14.3
+  - @scalar/api-client@2.5.0
+  - @scalar/oas-utils@0.4.0
+  - @scalar/themes@0.13.0
+  - @scalar/use-hooks@0.2.2
+  - @scalar/icons@0.4.2
+  - @scalar/openapi-types@0.3.1
+  - @scalar/snippetz@0.3.0
+  - @scalar/types@0.2.1
+  - @scalar/use-toasts@0.8.0
+
+## 1.30.0
+
+### Patch Changes
+
+- 5208e7a: fix: decreases level on single property schema
+- edb5490: feat: adds schema discriminator helper functions
+- 442c0a3: feat: added support for callbacks
+- edb5490: feat: adds schema discriminator support
+- Updated dependencies [151ef09]
+- Updated dependencies [442c0a3]
+- Updated dependencies [edf694b]
+  - @scalar/api-client@2.4.4
+  - @scalar/oas-utils@0.3.2
+  - @scalar/openapi-parser@0.12.0
+  - @scalar/components@0.14.2
+
+## 1.29.3
+
+### Patch Changes
+
+- fbcce50: fix: moves download link to section column in introduction component
+- 0afb11d: fix: asses schemas to children object in schema property
+- 9fd408c: fix: updates schema property heading type handling
+- 0afb11d: fix: adds model name function in schema property heading
+- c944864: fix: updates schema composition style and missing value
+- 9ffba73: fix: displays schema references name in property heading
+- Updated dependencies [fbcce50]
+  - @scalar/api-client@2.4.3
+
+## 1.29.2
+
+### Patch Changes
+
+- 2efdf8e: fix: updates introduction card and auth style
+- Updated dependencies [ea20eb4]
+- Updated dependencies [2efdf8e]
+  - @scalar/openapi-parser@0.11.1
+  - @scalar/api-client@2.4.2
+  - @scalar/oas-utils@0.3.1
+
+## 1.29.1
+
+### Patch Changes
+
+- Updated dependencies [4440949]
+  - @scalar/components@0.14.1
+  - @scalar/oas-utils@0.3.1
+  - @scalar/openapi-types@0.3.1
+  - @scalar/types@0.2.1
+  - @scalar/api-client@2.4.1
+  - @scalar/openapi-parser@0.11.0
+  - @scalar/snippetz@0.3.0
+  - @scalar/themes@0.12.1
+  - @scalar/code-highlight@0.1.0
+  - @scalar/use-hooks@0.2.1
+  - @scalar/icons@0.4.1
+
+## 1.29.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- fce282f: fix: updates schema property heading logic
+- ca403fe: feat(api-reference): reorder getModelNameFromSchema to prefer schema.title over name; extract displayType helper for type rendering; update tests accordingly
+- 3af1364: feat: separates composition from discriminator
+- b899177: fix: displays array item const in property
+- cf922d4: feat: adds nested discriminator schema support
+- 0efcab4: fix: layout slot propogation
+- fe696ab: fix: adds server variable form border for api reference
+- Updated dependencies [26476ed]
+- Updated dependencies [bd602d3]
+- Updated dependencies [b77f67a]
+- Updated dependencies [30bab1d]
+- Updated dependencies [5613e40]
+- Updated dependencies [483ca93]
+- Updated dependencies [fe696ab]
+- Updated dependencies [1d1470c]
+- Updated dependencies [0efcab4]
+- Updated dependencies [20cf550]
+  - @scalar/api-client@2.4.0
+  - @scalar/openapi-parser@0.11.0
+  - @scalar/snippetz@0.3.0
+  - @scalar/oas-utils@0.3.0
+  - @scalar/components@0.14.0
+  - @scalar/themes@0.12.0
+  - @scalar/code-highlight@0.1.0
+  - @scalar/openapi-types@0.3.0
+  - @scalar/use-toasts@0.8.0
+  - @scalar/use-hooks@0.2.0
+  - @scalar/icons@0.4.0
+  - @scalar/types@0.2.0
+
+## 1.28.34
+
+### Patch Changes
+
+- 73ecfb0: fix: adds missing schemas to schema property
+- 2056005: fix(api-reference): improve handling of schema discriminators
+- 9946289: feat: show response schema in the response list
+- 40bad87: fix: copy correct path when pathRouting enabled
+- 3a88c94: fix(api-reference): restrict mobile header width
+- 96be9bd: fix(api-reference): handle really long property titles
+- ab0d3a3: fix(api-reference): render required for request body
+- 5129cdc: fix: adds max depth to merge all of schemas
+- be8a6ec: refactor: clean up helpers, remove barrel files
+- Updated dependencies [6b4a3c3]
+- Updated dependencies [be8a6ec]
+- Updated dependencies [1843cfe]
+- Updated dependencies [cd0722d]
+  - @scalar/api-client@2.3.34
+  - @scalar/types@0.1.16
+  - @scalar/components@0.13.59
+  - @scalar/oas-utils@0.2.144
+  - @scalar/openapi-parser@0.10.17
+  - @scalar/snippetz@0.2.20
+  - @scalar/themes@0.11.3
+  - @scalar/code-highlight@0.0.29
+  - @scalar/use-hooks@0.1.50
+  - @scalar/icons@0.3.7
+
+## 1.28.33
+
+### Patch Changes
+
+- f711ab5: feat: add auth persistance to references
+- 90b773e: feat: updates heading variables
+- 52dd8a1: fix: displays wrapped auth description on hover
+- 0222ad4: feat: render specification extensions with React
+- ffe6338: fix: displays null and empty default value in property heading
+- 2dadcfb: fix: displays const falsy values
+- Updated dependencies [f711ab5]
+- Updated dependencies [ec30edd]
+- Updated dependencies [90b773e]
+- Updated dependencies [e7f61ce]
+- Updated dependencies [52dd8a1]
+- Updated dependencies [0222ad4]
+- Updated dependencies [cb9428c]
+- Updated dependencies [af38fa6]
+- Updated dependencies [67aa0f4]
+- Updated dependencies [ac16fca]
+- Updated dependencies [1966c5a]
+- Updated dependencies [ac16fca]
+  - @scalar/api-client@2.3.33
+  - @scalar/types@0.1.15
+  - @scalar/themes@0.11.2
+  - @scalar/openapi-types@0.2.3
+  - @scalar/components@0.13.58
+  - @scalar/oas-utils@0.2.143
+  - @scalar/openapi-parser@0.10.17
+  - @scalar/snippetz@0.2.20
+  - @scalar/code-highlight@0.0.29
+  - @scalar/use-hooks@0.1.49
+  - @scalar/icons@0.3.6
+
 ## 1.28.32
 
 ### Patch Changes

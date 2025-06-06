@@ -5,7 +5,7 @@ import type {
   Operation,
   Server,
 } from '@scalar/oas-utils/entities/spec'
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types'
+import type { OpenAPIV3_1 } from '@scalar/openapi-types'
 import type { TransformedOperation } from '@scalar/types/legacy'
 import { computed, useId } from 'vue'
 
@@ -22,14 +22,16 @@ import {
 } from '@/components/Section'
 import { ExampleRequest } from '@/features/ExampleRequest'
 import { ExampleResponses } from '@/features/ExampleResponses'
+import type { Schemas } from '@/features/Operation/types/schemas'
 import { TestRequestButton } from '@/features/TestRequestButton'
 import { useConfig } from '@/hooks/useConfig'
 import {
   getOperationStability,
   getOperationStabilityColor,
   isOperationDeprecated,
-} from '@/libs/operation'
+} from '@/libs/openapi'
 
+import Callbacks from '../components/callbacks/Callbacks.vue'
 import OperationParameters from '../components/OperationParameters.vue'
 import OperationResponses from '../components/OperationResponses.vue'
 
@@ -40,11 +42,11 @@ const { operation } = defineProps<{
   operation: Operation
   /** @deprecated Use `operation` instead */
   transformedOperation: TransformedOperation
-  schemas?:
-    | OpenAPIV2.DefinitionsObject
-    | Record<string, OpenAPIV3.SchemaObject>
-    | Record<string, OpenAPIV3_1.SchemaObject>
-    | unknown
+  schemas?: Schemas
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void
 }>()
 
 const labelId = useId()
@@ -52,6 +54,10 @@ const config = useConfig()
 
 /** The title of the operation (summary or path) */
 const title = computed(() => operation.summary || operation.path)
+
+const handleDiscriminatorChange = (type: string) => {
+  emit('update:modelValue', type)
+}
 </script>
 
 <template>
@@ -82,13 +88,27 @@ const title = computed(() => operation.summary || operation.path)
           <div class="operation-details">
             <ScalarMarkdown
               :value="operation.description"
-              withImages />
+              withImages
+              withAnchors
+              transformType="heading"
+              :anchorPrefix="id" />
             <OperationParameters
               :operation="operation"
-              :schemas="schemas" />
+              :schemas="schemas"
+              @update:modelValue="handleDiscriminatorChange">
+            </OperationParameters>
             <OperationResponses
               :operation="transformedOperation"
               :schemas="schemas" />
+
+            <!-- Callbacks -->
+            <ScalarErrorBoundary>
+              <Callbacks
+                v-if="operation.callbacks"
+                :callbacks="operation.callbacks"
+                :collection="collection"
+                :schemas="schemas" />
+            </ScalarErrorBoundary>
           </div>
         </SectionColumn>
         <SectionColumn>
@@ -99,7 +119,9 @@ const title = computed(() => operation.summary || operation.path)
                 fallback
                 :operation="operation"
                 :server="server"
-                :transformedOperation="transformedOperation">
+                :transformedOperation="transformedOperation"
+                :schemas="schemas"
+                @update:modelValue="handleDiscriminatorChange">
                 <template #header>
                   <OperationPath
                     class="example-path"

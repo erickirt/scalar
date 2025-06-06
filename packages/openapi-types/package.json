@@ -16,16 +16,16 @@
     "swagger",
     "typescript"
   ],
-  "version": "0.2.2",
+  "version": "0.3.2",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "build": "scalar-build-esbuild",
     "lint:check": "eslint .",
     "lint:fix": "eslint .  --fix",
     "test:prepare": "vite-node scripts/load-files.ts",
-    "test:unit": "vite-node scripts/load-files.ts && vitest",
+    "test": "vite-node scripts/load-files.ts && vitest",
     "types:build": "scalar-types-build",
     "types:check": "scalar-types-check"
   },

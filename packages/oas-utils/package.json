@@ -16,9 +16,9 @@
     "specification",
     "yaml"
   ],
-  "version": "0.2.142",
+  "version": "0.4.4",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "build": "scalar-build-esbuild",
@@ -96,6 +96,7 @@
   "dependencies": {
     "@hyperjump/browser": "^1.1.0",
     "@hyperjump/json-schema": "^1.9.6",
+    "@scalar/helpers": "workspace:*",
     "@scalar/object-utils": "workspace:*",
     "@scalar/openapi-types": "workspace:*",
     "@scalar/themes": "workspace:*",

@@ -1,5 +1,183 @@
 # @scalar/api-reference-react
 
+## 0.7.13
+
+### Patch Changes
+
+- @scalar/api-reference@1.31.8
+
+## 0.7.12
+
+### Patch Changes
+
+- Updated dependencies [24cfdfe]
+  - @scalar/api-reference@1.31.7
+
+## 0.7.11
+
+### Patch Changes
+
+- c584dcd: Fix classic layout mobile header
+- Updated dependencies [c584dcd]
+  - @scalar/api-reference@1.31.6
+
+## 0.7.10
+
+### Patch Changes
+
+- Updated dependencies [ec97505]
+  - @scalar/api-reference@1.31.5
+
+## 0.7.9
+
+### Patch Changes
+
+- Updated dependencies [00fc827]
+- Updated dependencies [14d1d55]
+- Updated dependencies [8165b3b]
+- Updated dependencies [8dcab87]
+- Updated dependencies [358eb63]
+- Updated dependencies [335a25c]
+  - @scalar/api-reference@1.31.4
+  - @scalar/types@0.2.2
+
+## 0.7.8
+
+### Patch Changes
+
+- Updated dependencies [dc6cd4c]
+- Updated dependencies [511bbc0]
+- Updated dependencies [bf2cb82]
+- Updated dependencies [7ca47ab]
+- Updated dependencies [494f7f0]
+  - @scalar/api-reference@1.31.3
+
+## 0.7.7
+
+### Patch Changes
+
+- @scalar/api-reference@1.31.2
+
+## 0.7.6
+
+### Patch Changes
+
+- Updated dependencies [e6c165c]
+- Updated dependencies [aeb94f0]
+- Updated dependencies [237cb44]
+  - @scalar/api-reference@1.31.1
+
+## 0.7.5
+
+### Patch Changes
+
+- Updated dependencies [a9a4f9f]
+- Updated dependencies [8529040]
+- Updated dependencies [f5413ba]
+- Updated dependencies [fea1d52]
+- Updated dependencies [785939b]
+- Updated dependencies [1e87feb]
+- Updated dependencies [0113b84]
+- Updated dependencies [cad6277]
+- Updated dependencies [3a24cf9]
+- Updated dependencies [0dfb39a]
+- Updated dependencies [fea1d52]
+- Updated dependencies [ffa93fa]
+- Updated dependencies [785939b]
+- Updated dependencies [f1f9504]
+- Updated dependencies [42e73ee]
+  - @scalar/api-reference@1.31.0
+  - @scalar/types@0.2.1
+
+## 0.7.4
+
+### Patch Changes
+
+- Updated dependencies [5208e7a]
+- Updated dependencies [edb5490]
+- Updated dependencies [442c0a3]
+- Updated dependencies [edb5490]
+  - @scalar/api-reference@1.30.0
+
+## 0.7.3
+
+### Patch Changes
+
+- Updated dependencies [fbcce50]
+- Updated dependencies [0afb11d]
+- Updated dependencies [9fd408c]
+- Updated dependencies [0afb11d]
+- Updated dependencies [c944864]
+- Updated dependencies [9ffba73]
+  - @scalar/api-reference@1.29.3
+
+## 0.7.2
+
+### Patch Changes
+
+- Updated dependencies [2efdf8e]
+  - @scalar/api-reference@1.29.2
+
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [4440949]
+  - @scalar/types@0.2.1
+  - @scalar/api-reference@1.29.1
+
+## 0.7.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- dada855: Add default export
+- Updated dependencies [fce282f]
+- Updated dependencies [ca403fe]
+- Updated dependencies [3af1364]
+- Updated dependencies [b899177]
+- Updated dependencies [cf922d4]
+- Updated dependencies [483ca93]
+- Updated dependencies [0efcab4]
+- Updated dependencies [fe696ab]
+  - @scalar/api-reference@1.29.0
+  - @scalar/types@0.2.0
+
+## 0.6.31
+
+### Patch Changes
+
+- Updated dependencies [73ecfb0]
+- Updated dependencies [be8a6ec]
+- Updated dependencies [2056005]
+- Updated dependencies [9946289]
+- Updated dependencies [40bad87]
+- Updated dependencies [3a88c94]
+- Updated dependencies [96be9bd]
+- Updated dependencies [ab0d3a3]
+- Updated dependencies [5129cdc]
+- Updated dependencies [be8a6ec]
+  - @scalar/api-reference@1.28.34
+  - @scalar/types@0.1.16
+
+## 0.6.30
+
+### Patch Changes
+
+- Updated dependencies [f711ab5]
+- Updated dependencies [90b773e]
+- Updated dependencies [52dd8a1]
+- Updated dependencies [0222ad4]
+- Updated dependencies [cb9428c]
+- Updated dependencies [ffe6338]
+- Updated dependencies [2dadcfb]
+- Updated dependencies [67aa0f4]
+  - @scalar/api-reference@1.28.33
+  - @scalar/types@0.1.15
+
 ## 0.6.29
 
 ### Patch Changes

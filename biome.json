@@ -171,7 +171,8 @@
       },
       "performance": {
         "noDelete": "off",
-        "noReExportAll": "warn"
+        "noReExportAll": "warn",
+        "noBarrelFile": "off"
       },
       "nursery": {
         "noDescendingSpecificity": "warn",
@@ -210,6 +211,16 @@
       "include": ["**/*.tsx"],
       "javascript": {
         "jsxRuntime": "reactClassic"
+      }
+    },
+    {
+      "include": ["packages/api-reference/**/*.ts", "packages/openapi-parser/**/*.ts"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noReExportAll": "error"
+          }
+        }
       }
     }
   ]

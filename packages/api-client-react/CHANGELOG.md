@@ -1,5 +1,126 @@
 # @scalar/api-client-react
 
+## 1.3.10
+
+### Patch Changes
+
+- @scalar/api-client@2.5.5
+
+## 1.3.9
+
+### Patch Changes
+
+- @scalar/api-client@2.5.4
+
+## 1.3.8
+
+### Patch Changes
+
+- Updated dependencies [79975dd]
+- Updated dependencies [8165b3b]
+  - @scalar/api-client@2.5.3
+  - @scalar/types@0.2.2
+
+## 1.3.7
+
+### Patch Changes
+
+- Updated dependencies [c06aa6a]
+- Updated dependencies [3ad9393]
+- Updated dependencies [b461b62]
+- Updated dependencies [a47fa60]
+  - @scalar/api-client@2.5.2
+
+## 1.3.6
+
+### Patch Changes
+
+- @scalar/api-client@2.5.1
+
+## 1.3.5
+
+### Patch Changes
+
+- Updated dependencies [1e87feb]
+- Updated dependencies [0113b84]
+- Updated dependencies [cad6277]
+- Updated dependencies [ffa93fa]
+  - @scalar/api-client@2.5.0
+  - @scalar/types@0.2.1
+
+## 1.3.4
+
+### Patch Changes
+
+- Updated dependencies [151ef09]
+  - @scalar/api-client@2.4.4
+
+## 1.3.3
+
+### Patch Changes
+
+- Updated dependencies [fbcce50]
+  - @scalar/api-client@2.4.3
+
+## 1.3.2
+
+### Patch Changes
+
+- Updated dependencies [2efdf8e]
+  - @scalar/api-client@2.4.2
+
+## 1.3.1
+
+### Patch Changes
+
+- Updated dependencies [4440949]
+  - @scalar/types@0.2.1
+  - @scalar/api-client@2.4.1
+
+## 1.3.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- Updated dependencies [26476ed]
+- Updated dependencies [30bab1d]
+- Updated dependencies [5613e40]
+- Updated dependencies [483ca93]
+- Updated dependencies [fe696ab]
+- Updated dependencies [20cf550]
+  - @scalar/api-client@2.4.0
+  - @scalar/types@0.2.0
+
+## 1.2.34
+
+### Patch Changes
+
+- Updated dependencies [6b4a3c3]
+- Updated dependencies [be8a6ec]
+- Updated dependencies [cd0722d]
+  - @scalar/api-client@2.3.34
+  - @scalar/types@0.1.16
+
+## 1.2.33
+
+### Patch Changes
+
+- Updated dependencies [f711ab5]
+- Updated dependencies [ec30edd]
+- Updated dependencies [e7f61ce]
+- Updated dependencies [52dd8a1]
+- Updated dependencies [0222ad4]
+- Updated dependencies [cb9428c]
+- Updated dependencies [67aa0f4]
+- Updated dependencies [ac16fca]
+- Updated dependencies [1966c5a]
+- Updated dependencies [ac16fca]
+  - @scalar/api-client@2.3.33
+  - @scalar/types@0.1.15
+
 ## 1.2.32
 
 ### Patch Changes

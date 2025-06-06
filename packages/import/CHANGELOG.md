@@ -1,5 +1,114 @@
 # @scalar/import
 
+## 0.4.9
+
+### Patch Changes
+
+- Updated dependencies [11fabae]
+  - @scalar/openapi-parser@0.16.0
+
+## 0.4.8
+
+### Patch Changes
+
+- Updated dependencies [8bc9f20]
+  - @scalar/helpers@0.0.3
+
+## 0.4.7
+
+### Patch Changes
+
+- 8165b3b: feat(helpers): added new helpers package
+- Updated dependencies [17bc0d8]
+- Updated dependencies [b9dacba]
+- Updated dependencies [a73e9be]
+- Updated dependencies [8165b3b]
+- Updated dependencies [49c04cf]
+- Updated dependencies [f4332eb]
+  - @scalar/openapi-parser@0.15.0
+  - @scalar/helpers@0.0.2
+
+## 0.4.6
+
+### Patch Changes
+
+- Updated dependencies [ee3eb77]
+- Updated dependencies [7ca47ab]
+  - @scalar/openapi-parser@0.14.0
+  - @scalar/oas-utils@0.4.2
+
+## 0.4.5
+
+### Patch Changes
+
+- @scalar/oas-utils@0.4.1
+
+## 0.4.4
+
+### Patch Changes
+
+- Updated dependencies [1e87feb]
+- Updated dependencies [1e87feb]
+- Updated dependencies [cad6277]
+  - @scalar/openapi-parser@0.13.0
+  - @scalar/oas-utils@0.4.0
+
+## 0.4.3
+
+### Patch Changes
+
+- Updated dependencies [151ef09]
+- Updated dependencies [442c0a3]
+- Updated dependencies [edf694b]
+  - @scalar/oas-utils@0.3.2
+  - @scalar/openapi-parser@0.12.0
+
+## 0.4.2
+
+### Patch Changes
+
+- Updated dependencies [ea20eb4]
+  - @scalar/openapi-parser@0.11.1
+  - @scalar/oas-utils@0.3.1
+
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [4440949]
+  - @scalar/oas-utils@0.3.1
+  - @scalar/openapi-parser@0.11.0
+
+## 0.4.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- Updated dependencies [bd602d3]
+- Updated dependencies [30bab1d]
+- Updated dependencies [483ca93]
+- Updated dependencies [1d1470c]
+  - @scalar/openapi-parser@0.11.0
+  - @scalar/oas-utils@0.3.0
+
+## 0.3.27
+
+### Patch Changes
+
+- @scalar/oas-utils@0.2.144
+- @scalar/openapi-parser@0.10.17
+
+## 0.3.26
+
+### Patch Changes
+
+- Updated dependencies [67aa0f4]
+  - @scalar/oas-utils@0.2.143
+  - @scalar/openapi-parser@0.10.17
+
 ## 0.3.25
 
 ### Patch Changes

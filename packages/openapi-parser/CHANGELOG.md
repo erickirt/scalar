@@ -1,5 +1,59 @@
 # @scalar/openapi-parser
 
+## 0.16.0
+
+### Minor Changes
+
+- 11fabae: fix(openapi-parser): webpack bundle errors because of the barrel files
+
+## 0.15.0
+
+### Minor Changes
+
+- b9dacba: fix(openapi-parser): multi entry build for bundler plugins
+- a73e9be: chore(openapi-parser): bring back pipeline syntax
+- f4332eb: feat: external reference resolution and partial bundle of the openapi document
+
+### Patch Changes
+
+- 17bc0d8: fix: collectionFormat is not migrated to new style and explode keywords
+- 49c04cf: fix(openapi-parser): use dynamic imports inside the plugin
+
+## 0.14.0
+
+### Minor Changes
+
+- ee3eb77: feat(openapi-parser): bundle openapi documents
+
+## 0.13.0
+
+### Minor Changes
+
+- 1e87feb: fix: normalize doesn’t handle empty documents well
+
+## 0.12.0
+
+### Minor Changes
+
+- edf694b: feat: remove wildcard exports
+
+## 0.11.1
+
+### Patch Changes
+
+- ea20eb4: fix: swagger upgrade fails if you pass something that is not an object
+
+## 0.11.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- bd602d3: chore: mark pipeline syntax as deprecated
+- 1d1470c: feat: speed up the upgrade utility
+
 ## 0.10.17
 
 ### Patch Changes
