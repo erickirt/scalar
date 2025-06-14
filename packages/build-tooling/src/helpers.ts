@@ -5,6 +5,7 @@
  *
  */
 import fs from 'node:fs/promises'
+import path from 'node:path'
 
 import { glob } from 'glob'
 import { fileURLToPath } from 'node:url'
@@ -46,6 +47,25 @@ type PackageExports = Record<
 >
 
 /**
+ * Handles multiple formats for entry points
+ *
+ * To point to a folder barrel file use `./some/folder/index.ts`
+ * To include all files in a folder use `./some/folder/*`
+ * To point to a specific file use `./some/folder/file.ts`
+ */
+function formatEntry(filepath: string, namespacePath: string) {
+  if (filepath.endsWith('index')) {
+    return namespacePath
+  }
+
+  if (filepath.endsWith('/*')) {
+    return `${namespacePath}/*`
+  }
+
+  return `${namespacePath}/${filepath}`
+}
+
+/**
  * For a series of imports we add package.json exports to enable nested typescript definitions
  * and path nested imports
  *
@@ -65,7 +85,9 @@ export async function addPackageFileExports({
 
   paths.forEach((entry) => {
     // Get the nested path that will be transpiled to dist with preserved modules
-    const segments = entry.split('/').filter((s) => !['.', 'src'].includes(s))
+    // Always use forward slashes for paths in package.json regardless of OS
+    const normalizedEntry = entry.split(path.sep).join('/')
+    const segments = normalizedEntry.split('/').filter((s) => !['.', 'src'].includes(s))
 
     /** Nested folder the entry files lives in for a path scoped export */
     const namespace = segments.slice(0, -1)
@@ -79,7 +101,10 @@ export async function addPackageFileExports({
       return
     }
 
-    packageExports[namespace.length ? `./${namespace.join('/')}` : '.'] = {
+    const namespacePath = namespace.length ? `./${namespace.join('/')}` : '.'
+
+    // Add support for wildcard exports
+    packageExports[formatEntry(filepath, namespacePath)] = {
       import: `./dist/${filepath}.js`,
       types: `./dist/${filepath}.d.ts`,
       default: `./dist/${filepath}.js`,

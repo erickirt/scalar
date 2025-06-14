@@ -1,25 +1,21 @@
 <script setup lang="ts">
 import { ScalarIconButton } from '@scalar/components'
 
-import { useSidebar } from '../hooks'
+import { useSidebar } from '@/features/sidebar'
+
+const { isSidebarOpen } = useSidebar()
 
 defineProps<{
-  open?: boolean
+  breadcrumb: string
 }>()
-
-defineEmits<{
-  (event: 'update:open', open: boolean): void
-}>()
-
-const { breadcrumb } = useSidebar()
 </script>
 <template>
   <div class="references-mobile-header t-doc__header">
     <ScalarIconButton
-      :icon="open ? 'Close' : 'Menu'"
-      :label="open ? 'Close Menu' : 'Open Menu'"
+      :icon="isSidebarOpen ? 'Close' : 'Menu'"
+      :label="isSidebarOpen ? 'Close Menu' : 'Open Menu'"
       size="md"
-      @click="$emit('update:open', !open)" />
+      @click="isSidebarOpen = !isSidebarOpen" />
     <span class="references-mobile-breadcrumbs">{{ breadcrumb }}</span>
     <div class="references-mobile-header-actions">
       <slot name="actions" />
@@ -31,7 +27,7 @@ const { breadcrumb } = useSidebar()
   display: none;
   align-items: center;
   height: 100%;
-  width: 100%;
+  width: 100dvw;
   padding: 0 8px;
   background: var(--scalar-background-1);
   border-bottom: 1px solid var(--scalar-border-color);

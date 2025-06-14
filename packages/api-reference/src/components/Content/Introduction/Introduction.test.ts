@@ -1,9 +1,35 @@
 import { DownloadLink } from '@/features/DownloadLink'
 import type { Spec } from '@scalar/types/legacy'
 import { mount } from '@vue/test-utils'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { reactive, ref, computed } from 'vue'
+import { useSidebar } from '@/features/sidebar/hooks/useSidebar'
+import type { Mock } from 'vitest'
 
 import Introduction from './Introduction.vue'
+
+// Mock the useSidebar hook and SIDEBAR_SYMBOL
+vi.mock('@/features/sidebar/hooks/useSidebar', () => ({
+  useSidebar: vi.fn(),
+  SIDEBAR_SYMBOL: Symbol(),
+}))
+
+const mockUseSidebar = useSidebar as Mock<[], ReturnType<typeof useSidebar>>
+
+// Set default values for the mocks
+beforeEach(() => {
+  mockUseSidebar.mockReturnValue({
+    collapsedSidebarItems: reactive({}),
+    isSidebarOpen: ref(false),
+    items: computed(() => ({
+      entries: [],
+      titles: new Map<string, string>(),
+    })),
+    scrollToOperation: vi.fn(),
+    setCollapsedSidebarItem: vi.fn(),
+    toggleCollapsedSidebarItem: vi.fn(),
+  })
+})
 
 describe('Introduction', () => {
   it('renders the given information', () => {
@@ -18,19 +44,13 @@ describe('Introduction', () => {
 
     const wrapper = mount(Introduction, {
       props: {
-        parsedSpec: example,
-        info: {
-          title: 'Hello World',
-          description: 'Example description',
-          version: '1.0.0',
-        },
+        document: example,
       },
     })
 
     expect(wrapper.html()).toContain('Hello World')
     expect(wrapper.html()).toContain('Example description')
     expect(wrapper.html()).toContain('v1.0.0')
-    expect(wrapper.html()).toContain('OAS 3.1.1')
   })
 
   it('renders loading state when info is empty', () => {
@@ -45,8 +65,7 @@ describe('Introduction', () => {
 
     const wrapper = mount(Introduction, {
       props: {
-        parsedSpec: example,
-        info: example.info,
+        document: example,
       },
     })
 
@@ -69,17 +88,13 @@ describe('Introduction', () => {
 
     const wrapper = mount(Introduction, {
       props: {
-        parsedSpec: example,
-        info: example.info,
+        document: example,
       },
     })
 
     const section = wrapper.get('.introduction-section')
 
     expect(section.html()).toContain('Hello World')
-    expect(section.html()).toContain('Example description')
-    expect(section.html()).toContain('v1.0.0')
-    expect(section.html()).toContain('OAS 3.1.1')
   })
 
   it('generates filename from title', () => {
@@ -94,13 +109,12 @@ describe('Introduction', () => {
 
     const wrapper = mount(Introduction, {
       props: {
-        parsedSpec: example,
-        info: example.info,
+        document: example,
       },
     })
 
     const downloadLink = wrapper.findComponent(DownloadLink)
-    expect(downloadLink.props('specTitle')).toBe('hello-world-api')
+    expect(downloadLink.props('title')).toBe('Hello World API!')
   })
 
   it('shows version badge when version exists', () => {
@@ -115,8 +129,7 @@ describe('Introduction', () => {
 
     const wrapper = mount(Introduction, {
       props: {
-        parsedSpec: example,
-        info: example.info,
+        document: example,
       },
     })
 
@@ -135,8 +148,7 @@ describe('Introduction', () => {
 
     const wrapper = mount(Introduction, {
       props: {
-        parsedSpec: example,
-        info: example.info,
+        document: example,
       },
     })
 
@@ -156,8 +168,7 @@ describe('Introduction', () => {
 
     const wrapper = mount(Introduction, {
       props: {
-        parsedSpec: example,
-        info: example.info,
+        document: example,
       },
     })
 
@@ -178,9 +189,7 @@ describe('Introduction', () => {
     const wrapper = mount(Introduction, {
       props: {
         // @ts-expect-error testing invalid type
-        parsedSpec: example,
-        // @ts-expect-error testing invalid type
-        info: example.info,
+        document: example,
       },
     })
 
@@ -201,52 +210,10 @@ describe('Introduction', () => {
     const wrapper = mount(Introduction, {
       props: {
         // @ts-expect-error testing invalid type
-        parsedSpec: example,
-        // @ts-expect-error testing invalid type
-        info: example.info,
+        document: example,
       },
     })
 
     expect(wrapper.html()).not.toContain('foobar')
-  })
-
-  it('shows OpenAPI version badge for OpenAPI spec', () => {
-    const example = {
-      openapi: '3.0.0',
-      info: {
-        title: 'Test API',
-        description: '',
-        version: '1.0.0',
-      },
-    } satisfies Spec
-
-    const wrapper = mount(Introduction, {
-      props: {
-        parsedSpec: example,
-        info: example.info,
-      },
-    })
-
-    expect(wrapper.html()).toContain('OAS 3.0.0')
-  })
-
-  it('shows OpenAPI version badge for version 2.0', () => {
-    const example = {
-      swagger: '2.0',
-      info: {
-        title: 'Test API',
-        description: '',
-        version: '1.0.0',
-      },
-    } satisfies Spec
-
-    const wrapper = mount(Introduction, {
-      props: {
-        parsedSpec: example,
-        info: example.info,
-      },
-    })
-
-    expect(wrapper.html()).toContain('OAS 2.0')
   })
 })

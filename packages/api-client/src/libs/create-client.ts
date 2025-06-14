@@ -3,11 +3,13 @@ import { type ClientLayout, LAYOUT_SYMBOL } from '@/hooks/useLayout'
 import { SIDEBAR_SYMBOL, createSidebarState } from '@/hooks/useSidebar'
 import { getRequestUidByPathMethod } from '@/libs/get-request-uid-by-path-method'
 import { loadAllResources } from '@/libs/local-storage'
+import { PLUGIN_MANAGER_SYMBOL, createPluginManager } from '@/plugins'
 import { ACTIVE_ENTITIES_SYMBOL, createActiveEntitiesStore } from '@/store/active-entities'
 import { WORKSPACE_SYMBOL, type WorkspaceStore, createWorkspaceStore } from '@/store/store'
 import type { SecurityScheme } from '@scalar/oas-utils/entities/spec'
 import { type Workspace, workspaceSchema } from '@scalar/oas-utils/entities/workspace'
-import { LS_KEYS, prettyPrintJson } from '@scalar/oas-utils/helpers'
+import { prettyPrintJson } from '@scalar/oas-utils/helpers'
+import { LS_KEYS } from '@scalar/helpers/object/local-storage'
 import { DATA_VERSION, DATA_VERSION_LS_LEY } from '@scalar/oas-utils/migrations'
 import type { Path, PathValue } from '@scalar/object-utils/nested'
 import { type ApiClientConfiguration, apiClientConfigurationSchema } from '@scalar/types/api-reference'
@@ -110,6 +112,11 @@ export const createApiClient = ({
   // Create the sidebar state
   const sidebarState = createSidebarState({ layout })
 
+  // Create the plugin manager
+  const pluginManager = createPluginManager({
+    plugins: configuration.value.plugins ?? [],
+  })
+
   // Safely check for localStorage availability
   const hasLocalStorage = () => {
     try {
@@ -144,7 +151,7 @@ export const createApiClient = ({
     }
   }
   // Create the default store
-  else if (!isReadOnly || (!configuration.value.url && !configuration.value.content)) {
+  else if (!isReadOnly && !configuration.value.url && !configuration.value.content) {
     // Create default workspace
     store.workspaceMutators.add({
       uid: 'default' as Workspace['uid'],
@@ -182,6 +189,10 @@ export const createApiClient = ({
   app.provide(SIDEBAR_SYMBOL, sidebarState)
   // Provide the client config
   app.provide(CLIENT_CONFIGURATION_SYMBOL, configuration)
+  // Provide the plugin manager
+  app.provide(PLUGIN_MANAGER_SYMBOL, pluginManager)
+  // Set an id prefix for useId so we don't have collisions with other Vue apps
+  app.config.idPrefix = 'scalar-client'
 
   const {
     collectionMutators,
@@ -234,9 +245,21 @@ export const createApiClient = ({
     }
   }
 
+  /** Reset the client store */
+  const resetStore = () => {
+    store.collectionMutators.reset()
+    store.requestMutators.reset()
+    store.requestExampleMutators.reset()
+    store.securitySchemeMutators.reset()
+    store.serverMutators.reset()
+    store.tagMutators.reset()
+    workspaceMutators.edit(activeWorkspace.value?.uid, 'collections', [])
+  }
+
   return {
     /** The vue app instance for the modal, be careful with this */
     app,
+    resetStore,
     /**
      * Update the API client config
      *
@@ -259,13 +282,7 @@ export const createApiClient = ({
         newConfig.showSidebar
       ) {
         // Update the spec, reset the store first
-        store.collectionMutators.reset()
-        store.requestMutators.reset()
-        store.requestExampleMutators.reset()
-        store.securitySchemeMutators.reset()
-        store.serverMutators.reset()
-        store.tagMutators.reset()
-        workspaceMutators.edit(activeWorkspace.value?.uid, 'collections', [])
+        resetStore()
 
         /** Add any extra properties to the config */
         const config = {

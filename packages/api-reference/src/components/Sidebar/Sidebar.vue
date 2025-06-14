@@ -1,27 +1,24 @@
 <script setup lang="ts">
-import type { Spec } from '@scalar/types/legacy'
+import { sleep } from '@scalar/helpers/testing/sleep'
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 
-import { sleep } from '../../helpers'
-import { useNavState, useSidebar, type SorterOption } from '../../hooks'
-import SidebarElement from './SidebarElement.vue'
-import SidebarGroup from './SidebarGroup.vue'
+import SidebarElement from '@/components/Sidebar/SidebarElement.vue'
+import SidebarGroup from '@/components/Sidebar/SidebarGroup.vue'
+import { useSidebar } from '@/features/sidebar'
+import type { TraversedEntry } from '@/features/traverse-schema'
+import type {
+  TraversedDescription,
+  TraversedTag,
+} from '@/features/traverse-schema/types'
+import { useNavState } from '@/hooks/useNavState'
 
-const props = defineProps<
-  {
-    parsedSpec: Spec
-  } & SorterOption
->()
+const { title } = defineProps<{
+  title: string
+}>()
 
 const { hash, isIntersectionEnabled } = useNavState()
-
-const { items, toggleCollapsedSidebarItem, collapsedSidebarItems } = useSidebar(
-  {
-    parsedSpec: props.parsedSpec,
-    tagsSorter: props.tagsSorter,
-    operationsSorter: props.operationsSorter,
-  },
-)
+const { items, toggleCollapsedSidebarItem, collapsedSidebarItems } =
+  useSidebar()
 
 // This offset determines how far down the sidebar the items scroll
 const SCROLL_OFFSET = -160
@@ -89,6 +86,23 @@ const observeSidebarElement = (id: string) => {
   return observer
 }
 
+/** Determines if an item is active based on the current hash */
+const isItemActive = (itemId: string) => {
+  // Exact match - this handles all normal cases
+  if (hash.value === itemId) {
+    return true
+  }
+
+  // Check if current hash is a markdown heading within this operation
+  if (hash.value.includes('/description/')) {
+    // Extract the operation ID (everything before /description/)
+    const operationId = hash.value.split('/description/')[0]
+    return operationId === itemId
+  }
+
+  return false
+}
+
 onMounted(() => {
   const observer = observeSidebarElement(hash.value)
 
@@ -102,21 +116,26 @@ onMounted(() => {
     observer?.disconnect()
   })
 })
+
+const hasChildren = (
+  item: TraversedEntry,
+): item is TraversedTag | TraversedDescription =>
+  'children' in item && (item.children?.length ?? 0) > 0
 </script>
 <template>
   <div class="sidebar">
     <slot name="sidebar-start" />
     <nav
       ref="scrollerEl"
-      :aria-label="`Table of contents for ${parsedSpec.info?.title}`"
+      :aria-label="`Table of contents for ${title}`"
       class="sidebar-pages custom-scroll custom-scroll-self-contain-overflow">
       <SidebarGroup :level="0">
         <template
           v-for="item in items.entries"
           :key="item.id">
-          <template v-if="item.isGroup">
+          <template v-if="'isGroup' in item && item.isGroup">
             <li class="sidebar-group-title">
-              {{ item.displayTitle ?? item.title }}
+              {{ item.title }}
             </li>
             <template
               v-for="group in item.children"
@@ -124,15 +143,9 @@ onMounted(() => {
               <SidebarElement
                 :id="`sidebar-${group.id}`"
                 data-sidebar-type="heading"
-                :hasChildren="group.children && group.children.length > 0"
-                :isActive="hash === group.id"
-                :item="{
-                  id: group.id,
-                  title: group.displayTitle ?? group.title,
-                  select: group.select,
-                  httpVerb: group.httpVerb,
-                  deprecated: group.deprecated ?? false,
-                }"
+                :hasChildren="hasChildren(group)"
+                :isActive="isItemActive(group.id)"
+                :item="group"
                 :open="collapsedSidebarItems[group.id] ?? false"
                 @toggleOpen="
                   async () => {
@@ -142,22 +155,15 @@ onMounted(() => {
                     disableScroll = false
                   }
                 ">
-                <template v-if="group.children && group.children?.length > 0">
+                <template v-if="hasChildren(group)">
                   <SidebarGroup :level="1">
                     <template
                       v-for="child in group.children"
                       :key="child.id">
                       <SidebarElement
-                        v-if="item.show"
                         :id="`sidebar-${child.id}`"
-                        :isActive="hash === child.id"
-                        :item="{
-                          id: child.id,
-                          title: child.displayTitle ?? child.title,
-                          select: child.select,
-                          httpVerb: child.httpVerb,
-                          deprecated: child.deprecated ?? false,
-                        }" />
+                        :isActive="isItemActive(child.id)"
+                        :item="child" />
                     </template>
                   </SidebarGroup>
                 </template>
@@ -166,18 +172,11 @@ onMounted(() => {
           </template>
           <template v-else>
             <SidebarElement
-              v-if="item.show"
               :id="`sidebar-${item.id}`"
               data-sidebar-type="heading"
-              :hasChildren="item.children && item.children.length > 0"
-              :isActive="hash === item.id"
-              :item="{
-                id: item.id,
-                title: item.displayTitle ?? item.title,
-                select: item.select,
-                httpVerb: item.httpVerb,
-                deprecated: item.deprecated ?? false,
-              }"
+              :hasChildren="hasChildren(item)"
+              :isActive="isItemActive(item.id)"
+              :item="item"
               :open="collapsedSidebarItems[item.id] ?? false"
               @toggleOpen="
                 async () => {
@@ -187,22 +186,15 @@ onMounted(() => {
                   disableScroll = false
                 }
               ">
-              <template v-if="item.children && item.children?.length > 0">
+              <template v-if="hasChildren(item)">
                 <SidebarGroup :level="1">
                   <template
                     v-for="child in item.children"
                     :key="child.id">
                     <SidebarElement
-                      v-if="item.show"
                       :id="`sidebar-${child.id}`"
-                      :isActive="hash === child.id"
-                      :item="{
-                        id: child.id,
-                        title: child.displayTitle ?? child.title,
-                        select: child.select,
-                        httpVerb: child.httpVerb,
-                        deprecated: child.deprecated ?? false,
-                      }" />
+                      :isActive="isItemActive(child.id)"
+                      :item="child" />
                   </template>
                 </SidebarGroup>
               </template>

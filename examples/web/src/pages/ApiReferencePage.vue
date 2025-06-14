@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import {
   ApiReferenceLayout,
-  useReactiveSpec,
   type ApiReferenceConfiguration,
 } from '@scalar/api-reference'
+import { useColorMode } from '@scalar/use-hooks/useColorMode'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 
 import DevReferencesOptions from '../components/DevReferencesOptions.vue'
@@ -46,6 +46,11 @@ const configProxy = computed({
   set: (v) => Object.assign(configuration, v),
 })
 
+const { toggleColorMode, isDarkMode } = useColorMode({
+  initialColorMode: configuration.darkMode ? 'dark' : undefined,
+  overrideColorMode: configuration.forceDarkModeState,
+})
+
 watch(
   () => configuration.darkMode,
   (isDark) => {
@@ -53,19 +58,12 @@ watch(
     document.body.classList.toggle('light-mode', !isDark)
   },
 )
-
-const { parsedSpec } = useReactiveSpec({
-  proxyUrl: () => configuration.proxyUrl ?? '',
-  specConfig: () => ({
-    content: content.value,
-  }),
-})
 </script>
 <template>
   <ApiReferenceLayout
+    :isDark="isDarkMode"
+    @toggleDarkMode="() => toggleColorMode()"
     :configuration="configuration"
-    :parsedSpec="parsedSpec"
-    :rawSpec="content"
     @changeTheme="configuration.theme = $event.id"
     @updateContent="(v) => (content = v)">
     <template #header>

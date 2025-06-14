@@ -2,9 +2,11 @@
 import { TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/vue'
 import { useWorkspace } from '@scalar/api-client/store'
 import { ScalarCodeBlock, ScalarMarkdown } from '@scalar/components'
-import { computed, ref, toRaw, useId, watch } from 'vue'
+import { REFERENCE_LS_KEYS } from '@scalar/helpers/object/local-storage'
+import { computed, onMounted, ref, useId, watch } from 'vue'
 
-import { useHttpClientStore } from '../../../stores'
+import { useHttpClientStore } from '@/stores/useHttpClientStore'
+
 import ClientSelector from './ClientSelector.vue'
 import { useFeaturedHttpClients } from './useFeaturedHttpClients'
 
@@ -48,6 +50,14 @@ function handleChange(i: number) {
   }
   setHttpClient(tab)
 }
+
+// Restore selected client from localStorage
+onMounted(() => {
+  const storedClient = localStorage.getItem(REFERENCE_LS_KEYS.SELECTED_CLIENT)
+  if (storedClient) {
+    setHttpClient(JSON.parse(storedClient))
+  }
+})
 
 const installationInstructions = computed(() => {
   // Get the current collection from the store
@@ -107,20 +117,21 @@ const installationInstructions = computed(() => {
           <div
             v-if="installationInstructions.description"
             class="selected-client card-footer -outline-offset-2"
+            :class="installationInstructions.source && 'rounded-b-none'"
             role="tabpanel"
             tabindex="0">
             <ScalarMarkdown :value="installationInstructions.description" />
           </div>
           <div
             v-if="installationInstructions.source"
-            class="selected-client card-footer -outline-offset-2"
+            class="selected-client card-footer border-t-0 p-0"
             role="tabpanel"
             tabindex="1">
             <ScalarCodeBlock
               lang="shell"
               :content="installationInstructions.source"
-              :copy="false"
-              class="min-h-6 p-1" />
+              :copy="true"
+              class="rounded-t-none rounded-b-lg px-3 py-2 -outline-offset-1 has-focus:outline" />
           </div>
         </template>
         <template v-else-if="httpClient && isFeatured(httpClient)">
@@ -156,7 +167,9 @@ const installationInstructions = computed(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   background: var(--scalar-background-1);
-  border-top: var(--scalar-border-width) solid var(--scalar-border-color);
+  border: var(--scalar-border-width) solid var(--scalar-border-color);
+  border-bottom-left-radius: var(--scalar-radius-lg);
+  border-bottom-right-radius: var(--scalar-radius-lg);
   min-height: fit-content;
 }
 .client-libraries-heading {
@@ -168,5 +181,11 @@ const installationInstructions = computed(() => {
   display: flex;
   align-items: center;
   max-height: 32px;
+  border: var(--scalar-border-width) solid var(--scalar-border-color);
+  border-top-left-radius: var(--scalar-radius-lg);
+  border-top-right-radius: var(--scalar-radius-lg);
+}
+:deep(.scalar-codeblock-pre .hljs) {
+  margin-top: 8px;
 }
 </style>

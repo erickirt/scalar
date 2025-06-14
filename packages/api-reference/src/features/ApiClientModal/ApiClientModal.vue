@@ -1,21 +1,25 @@
 <script setup lang="ts">
 import { useActiveEntities, useWorkspace } from '@scalar/api-client/store'
-import { mutateSecuritySchemeDiff } from '@scalar/api-client/views/Request/libs'
+import {
+  combineRenameDiffs,
+  mutateSecuritySchemeDiff,
+} from '@scalar/api-client/views/Request/libs'
 import { getServersFromOpenApiDocument } from '@scalar/oas-utils/transforms'
+import type { OpenAPIV3_1 } from '@scalar/openapi-types'
 import type { ApiClientConfiguration } from '@scalar/types/api-reference'
-import type { Spec } from '@scalar/types/legacy'
 import { watchDebounced } from '@vueuse/core'
-import { useExampleStore } from '#legacy'
 import microdiff from 'microdiff'
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue'
 
-import { useNavState } from '@/hooks'
+import { useNavState } from '@/hooks/useNavState'
+import { useExampleStore } from '@/legacy/stores'
 
 import { useApiClient } from './useApiClient'
 
-const { configuration, parsedSpec } = defineProps<{
-  configuration: Partial<ApiClientConfiguration>
-  parsedSpec: Spec
+const { configuration, dereferencedDocument } = defineProps<{
+  // The plugins for @scalar/api-reference and @scalar/api-client are different (as of now, doesn’t have to be).
+  configuration: Partial<Omit<ApiClientConfiguration, 'plugins'>>
+  dereferencedDocument: OpenAPIV3_1.Document
 }>()
 
 const el = ref<HTMLDivElement | null>(null)
@@ -39,7 +43,32 @@ onMounted(() => {
   })
 })
 
-// Update the config on change
+// Ensure we have a document when doing the initial import
+watchDebounced(
+  () => dereferencedDocument,
+  (newDocument) => {
+    if (!newDocument) {
+      return
+    }
+
+    // If we already have a collection, remove the store
+    // TODO: add @redis diffing here... or just upgrade to the new store
+    if (activeEntities.activeCollection.value) {
+      client.value?.resetStore()
+    }
+
+    // [re]Import the store
+    store.importSpecFile(undefined, 'default', {
+      dereferencedDocument: newDocument,
+      shouldLoad: false,
+      documentUrl: configuration?.url,
+      useCollectionSecurity: true,
+      ...configuration,
+    })
+  },
+)
+
+// Update the config (non doucment related) on change
 watchDebounced(
   () => configuration,
   (newConfig, oldConfig) => {
@@ -49,7 +78,7 @@ watchDebounced(
     const collection = activeEntities.activeCollection.value
 
     const diff = microdiff(oldConfig, newConfig)
-    const hasContentChanged = diff.some(
+    const documentSourceHasChanged = diff.some(
       (d) =>
         d.path[0] === 'url' ||
         d.path[0] === 'content' ||
@@ -57,10 +86,9 @@ watchDebounced(
         d.path[1] === 'content',
     )
 
-    // If the content changes then we re-create the whole store
-    // TODO: we can easily use live sync for this as well
-    if (hasContentChanged) {
-      client.value?.updateConfig(newConfig)
+    // If the document source has changed, we re-create the whole store anyway.
+    if (documentSourceHasChanged) {
+      // Taken care of above
     }
     // Or we handle the specific diff changes, just auth and servers for now
     else {
@@ -80,7 +108,7 @@ watchDebounced(
 
         // Now we either use the new servers or restore the ones from the spec
         const newServers = getServersFromOpenApiDocument(
-          newConfig.servers ?? parsedSpec.servers,
+          newConfig.servers ?? dereferencedDocument.servers,
           {
             baseServerURL: newConfig.baseServerURL,
           },

@@ -1,24 +1,25 @@
 <script lang="ts" setup>
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 import { ScalarIcon, ScalarMarkdown } from '@scalar/components'
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types'
-import { computed, type Component } from 'vue'
+import { computed, inject, type Component } from 'vue'
 
 import {
-  discriminators,
+  compositions,
   optimizeValueForDisplay,
 } from '@/components/Content/Schema/helpers/optimizeValueForDisplay'
 import { SpecificationExtension } from '@/components/SpecificationExtension'
-import { usePluginManager } from '@/plugins'
+import type { Schemas } from '@/features/Operation/types/schemas'
+import { DISCRIMINATOR_CONTEXT } from '@/hooks/useDiscriminator'
 
 import Schema from './Schema.vue'
+import SchemaComposition from './SchemaComposition.vue'
 import SchemaDiscriminator from './SchemaDiscriminator.vue'
 import SchemaPropertyHeading from './SchemaPropertyHeading.vue'
 
 /**
  * Note: We’re taking in a prop called `value` which should be a JSON Schema.
  *
- * We’re using `optimizeValueForDisplay` to merge null types in discriminators (anyOf, allOf, oneOf, not).
+ * We’re using `optimizeValueForDisplay` to merge null types in compositions (anyOf, allOf, oneOf, not).
  * So you should basically use the optimizedValue everywhere in the component.
  */
 
@@ -35,20 +36,25 @@ const props = withDefaults(
     additional?: boolean
     pattern?: boolean
     withExamples?: boolean
-    schemas?:
-      | OpenAPIV2.DefinitionsObject
-      | Record<string, OpenAPIV3.SchemaObject>
-      | Record<string, OpenAPIV3_1.SchemaObject>
-      | unknown
+    hideModelNames?: boolean
+    schemas?: Schemas
     hideHeading?: boolean
+    discriminatorMapping?: Record<string, string>
+    discriminatorPropertyName?: string
+    isDiscriminator?: boolean
   }>(),
   {
     level: 0,
     required: false,
     compact: false,
     withExamples: true,
+    hideModelNames: false,
   },
 )
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void
+}>()
 
 const descriptions: Record<string, Record<string, string>> = {
   integer: {
@@ -121,8 +127,35 @@ const remainingEnumValues = computed(() =>
   getEnumFromValue(optimizedValue.value).slice(initialEnumCount.value),
 )
 
-/** Simplified discriminators with `null` type. */
+/** Simplified composition with `null` type. */
 const optimizedValue = computed(() => optimizeValueForDisplay(props.value))
+
+// Inject the discriminator context
+const discriminatorContext = inject(DISCRIMINATOR_CONTEXT, null)
+
+/** Handle schema value according to discriminator context */
+const schema = computed(() => {
+  // Prevent recursion in discriminator context presence
+  if (props.level > 0) {
+    return optimizedValue.value
+  }
+
+  if (discriminatorContext?.value?.mergedSchema) {
+    return discriminatorContext.value.mergedSchema
+  }
+
+  return optimizedValue.value
+})
+
+/** Get the current selected discriminator schema with the first as default */
+const currentDiscriminator = computed(() => {
+  return (
+    discriminatorContext?.value?.selectedType ||
+    (props.discriminatorMapping
+      ? Object.keys(props.discriminatorMapping)[0]
+      : '')
+  )
+})
 
 // Display the property heading if any of the following are true
 const displayPropertyHeading = (
@@ -146,6 +179,78 @@ const displayPropertyHeading = (
     required
   )
 }
+
+// Handle discriminator type change
+const handleDiscriminatorChange = (type: string) => {
+  emit('update:modelValue', type)
+}
+
+/**
+ * Checks if array items have complex structure
+ * like: objects, references, discriminators, or compositions
+ */
+const hasComplexArrayItems = computed(() => {
+  const value = optimizedValue.value
+  if (!value?.items || typeof value.items !== 'object') {
+    return false
+  }
+
+  const items = value.items
+  return (
+    ('type' in items && ['object'].includes(items.type)) ||
+    '$ref' in items ||
+    'discriminator' in items ||
+    'allOf' in items ||
+    'oneOf' in items ||
+    'anyOf' in items
+  )
+})
+
+const shouldRenderArrayItemComposition = (composition: string): boolean => {
+  const value = optimizedValue.value
+  if (
+    !value?.items ||
+    typeof value.items !== 'object' ||
+    !(composition in value.items)
+  ) {
+    return false
+  }
+
+  return !hasComplexArrayItems.value
+}
+
+const shouldRenderArrayOfObjects = computed(() => hasComplexArrayItems.value)
+
+/**
+ * Determine if object properties should be displayed
+ * Handles both single type ('object') and array types (['object', 'null'])
+ */
+const shouldRenderObjectProperties = computed(() => {
+  if (!optimizedValue.value) {
+    return false
+  }
+
+  const value = optimizedValue.value
+  const isObjectType =
+    value.type === 'object' ||
+    (Array.isArray(value.type) && value.type.includes('object'))
+
+  const hasPropertiesToRender = value.properties || value.additionalProperties
+
+  return isObjectType && hasPropertiesToRender
+})
+
+const shouldShowEnumDescriptions = computed(() => {
+  if (!optimizedValue.value?.['x-enumDescriptions']) {
+    return false
+  }
+
+  const enumDescriptions = optimizedValue.value['x-enumDescriptions']
+
+  return (
+    typeof enumDescriptions === 'object' && !Array.isArray(enumDescriptions)
+  )
+})
 </script>
 <template>
   <component
@@ -174,7 +279,8 @@ const displayPropertyHeading = (
       :pattern="pattern"
       :required="required"
       :value="optimizedValue"
-      :schemas="schemas">
+      :schemas="schemas"
+      :hideModelNames="hideModelNames">
       <template
         v-if="name"
         #name>
@@ -202,9 +308,9 @@ const displayPropertyHeading = (
     </div>
     <!-- Enum -->
     <div
-      v-if="getEnumFromValue(optimizedValue)?.length > 0"
+      v-if="getEnumFromValue(optimizedValue)?.length > 0 && !isDiscriminator"
       class="property-enum">
-      <template v-if="Array.isArray(optimizedValue?.['x-enumDescriptions'])">
+      <template v-if="shouldShowEnumDescriptions">
         <div class="property-list">
           <div
             v-for="enumValue in getEnumFromValue(optimizedValue)"
@@ -217,7 +323,7 @@ const displayPropertyHeading = (
             </div>
             <div class="property-description">
               <ScalarMarkdown
-                :value="optimizedValue['x-enumDescriptions'][enumValue]" />
+                :value="optimizedValue?.['x-enumDescriptions']?.[enumValue]" />
             </div>
           </div>
         </div>
@@ -259,46 +365,65 @@ const displayPropertyHeading = (
     </div>
     <!-- Object -->
     <div
-      v-if="
-        optimizedValue?.type === 'object' &&
-        (optimizedValue?.properties || optimizedValue?.additionalProperties)
-      "
+      v-if="shouldRenderObjectProperties"
       class="children">
       <Schema
         :compact="compact"
         :level="level + 1"
         :name="name"
         :noncollapsible="noncollapsible"
-        :value="optimizedValue" />
+        :value="schema"
+        :resolvedSchema="schema"
+        :discriminatorMapping="discriminatorMapping"
+        :discriminatorPropertyName="discriminatorPropertyName"
+        :schemas="schemas"
+        @update:modelValue="handleDiscriminatorChange" />
     </div>
     <!-- Array of objects -->
     <template
-      v-if="
-        optimizedValue?.items &&
-        typeof optimizedValue.items === 'object' &&
-        'type' in optimizedValue.items &&
-        typeof optimizedValue.items.type === 'string'
-      ">
+      v-if="optimizedValue?.items && typeof optimizedValue.items === 'object'">
       <div
-        v-if="['object'].includes(optimizedValue?.items?.type)"
+        v-if="shouldRenderArrayOfObjects"
         class="children">
         <Schema
           :compact="compact"
           :level="level + 1"
           :name="name"
           :noncollapsible="noncollapsible"
-          :value="optimizedValue.items" />
+          :value="
+            schema && typeof schema === 'object' && 'items' in schema
+              ? schema.items
+              : optimizedValue.items
+          "
+          :resolvedSchema="
+            schema && typeof schema === 'object' && 'items' in schema
+              ? schema.items
+              : optimizedValue.items
+          "
+          :discriminatorMapping="discriminatorMapping"
+          :discriminatorPropertyName="discriminatorPropertyName"
+          :schemas="schemas"
+          @update:modelValue="handleDiscriminatorChange" />
       </div>
     </template>
-    <!-- Discriminators -->
+    <!-- Compositions -->
     <template
-      v-for="discriminator in discriminators"
-      :key="discriminator">
-      <!-- Property discriminator -->
-      <template v-if="optimizedValue?.[discriminator]">
-        <SchemaDiscriminator
+      v-for="composition in compositions"
+      :key="composition">
+      <!-- Property composition -->
+      <template
+        v-if="
+          optimizedValue?.[composition] &&
+          !(
+            optimizedValue?.items &&
+            typeof composition === 'string' &&
+            typeof optimizedValue.items === 'object' &&
+            composition in optimizedValue.items
+          )
+        ">
+        <SchemaComposition
           :compact="compact"
-          :discriminator="discriminator"
+          :composition="composition"
           :hideHeading="hideHeading"
           :level="level"
           :name="name"
@@ -307,25 +432,26 @@ const displayPropertyHeading = (
           :value="optimizedValue" />
       </template>
 
-      <!-- Array item discriminator -->
+      <!-- Array item composition -->
       <template
-        v-else-if="
-          optimizedValue?.items &&
-          typeof discriminator === 'string' &&
-          typeof optimizedValue.items === 'object' &&
-          discriminator in optimizedValue.items
-        ">
-        <SchemaDiscriminator
+        v-else-if="shouldRenderArrayItemComposition(composition)"
+        :key="composition">
+        <SchemaComposition
           :compact="compact"
-          :discriminator="discriminator"
+          :composition="composition"
           :hideHeading="hideHeading"
           :level="level"
           :name="name"
           :noncollapsible="noncollapsible"
           :schemas="schemas"
-          :value="optimizedValue.items" />
+          :value="optimizedValue?.items" />
       </template>
     </template>
+    <SchemaDiscriminator
+      v-if="isDiscriminator && discriminatorMapping && compact"
+      :discriminator-mapping="discriminatorMapping"
+      :discriminator="currentDiscriminator"
+      @update:modelValue="handleDiscriminatorChange" />
     <SpecificationExtension :value="optimizedValue" />
   </component>
 </template>
@@ -339,7 +465,11 @@ const displayPropertyHeading = (
   font-size: var(--scalar-mini);
   position: relative;
 }
-
+.property.property--level-0:has(
+    .property-rule .schema-properties.schema-properties-open > ul li.property
+  ) {
+  padding-top: 0;
+}
 /* increase z-index for example hovers */
 .property:hover {
   z-index: 1;
@@ -349,6 +479,15 @@ const displayPropertyHeading = (
 .property--compact.property--level-1 {
   padding: 8px 0;
 }
+.composition-panel .property.property.property.property--level-0 {
+  padding: 0px;
+}
+.property--compact.property--level-0
+  .composition-panel
+  .property--compact.property--level-1 {
+  padding: 8px;
+}
+
 /*  if a property doesn't have a heading, remove the top padding */
 .property:has(> .property-rule:nth-of-type(1)):not(.property--compact) {
   padding-top: 8px;
@@ -388,13 +527,17 @@ const displayPropertyHeading = (
 .property:not(:last-of-type) {
   border-bottom: var(--scalar-border-width) solid var(--scalar-border-color);
 }
-.property-description + .children {
+
+.property-description + .children,
+.children + .property-rule {
   margin-top: 9px;
 }
+
 .children {
   display: flex;
   flex-direction: column;
 }
+
 .children .property--compact.property--level-1 {
   padding: 12px;
 }
@@ -405,22 +548,17 @@ const displayPropertyHeading = (
   padding: 6px;
   border-top: var(--scalar-border-width) solid var(--scalar-border-color);
 }
-.property-rule,
-.property-rule:has(> .discriminator-tab-list)
-  :deep(.property-rule .schema-properties.schema-properties-open) {
+.property-rule {
   border-radius: var(--scalar-radius-lg);
   display: flex;
   flex-direction: column;
 }
-.property-rule:has(.discriminator-tab-list)
-  :deep(.schema-card .schema-properties.schema-properties-open) {
+.property-rule
+  :deep(
+    .composition-panel .schema-card .schema-properties.schema-properties-open
+  ) {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
-}
-.property-rule:has(.discriminator-tab-list)
-  :deep(.children .schema-card .schema-properties.schema-properties-open) {
-  border-top-left-radius: var(--scalar-radius-lg);
-  border-top-right-radius: var(--scalar-radius-lg);
 }
 .property-enum-value {
   color: var(--scalar-color-3);

@@ -3,10 +3,11 @@ import type { Collection } from '@scalar/oas-utils/entities/spec'
 import type { Spec, Tag as TagType } from '@scalar/types/legacy'
 import { computed, nextTick, ref, useId } from 'vue'
 
-import { useNavState, useSidebar } from '../../../hooks'
-import { SectionContainer } from '../../Section'
-import ShowMoreButton from '../../ShowMoreButton.vue'
-import Tag from './Tag.vue'
+import Tag from '@/components/Content/Tag/Tag.vue'
+import { SectionContainer } from '@/components/Section'
+import ShowMoreButton from '@/components/ShowMoreButton.vue'
+import { useSidebar } from '@/features/sidebar'
+import { useNavState } from '@/hooks/useNavState'
 
 const props = defineProps<{
   id?: string
@@ -22,6 +23,7 @@ const headerId = useId()
 
 const { collapsedSidebarItems } = useSidebar()
 const { getTagId } = useNavState()
+const tagId = computed(() => props.id || getTagId(props.tag) || '')
 
 const moreThanOneTag = computed(
   () => props.spec.tags?.length && props.spec.tags?.length > 1,
@@ -51,11 +53,11 @@ async function focusContents() {
       :id="id"
       :collection="collection"
       :headerId="headerId"
-      :isCollapsed="!collapsedSidebarItems[getTagId(tag)]"
+      :isCollapsed="!collapsedSidebarItems[tagId]"
       :tag="tag" />
     <ShowMoreButton
-      v-if="!collapsedSidebarItems[getTagId(tag)] && moreThanOneTag"
-      :id="id ?? ''"
+      v-if="!collapsedSidebarItems[tagId] && moreThanOneTag"
+      :id="tagId"
       :aria-label="`Show all ${tag['x-displayName'] ?? tag.name} endpoints`"
       @click="focusContents" />
     <div

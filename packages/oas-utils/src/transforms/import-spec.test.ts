@@ -140,6 +140,7 @@ describe('importSpecToWorkspace', () => {
         'updatePlanet',
         'deletePlanet',
         'uploadImage',
+        'createCelestialBody',
         'createUser',
         'getToken',
         'getMe',
@@ -1056,7 +1057,7 @@ describe('parseSchema', () => {
   it('handles invalid JSON', async () => {
     const { errors } = await parseSchema('"invalid')
 
-    expect(errors).toMatchObject([{ code: 'MISSING_CHAR' }])
+    expect(errors).toMatchObject([{ code: 'NO_CONTENT' }])
     expect(errors).toHaveLength(1)
   })
 
