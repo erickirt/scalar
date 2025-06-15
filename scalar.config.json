@@ -1,4 +1,5 @@
 {
+  "$schema": "https://cdn.scalar.com/schema/scalar-config.json",
   "siteMeta": {
     "title": "Scalar Documentation",
     "description": "Guides for Scalar, covering your favorite frameworks, languages and use cases."
@@ -12,12 +13,16 @@
       "name": "Scalar",
       "sidebar": [
         {
+          "name": "Introduction",
+          "description": "Introduction to Scalar",
+          "icon": "solid/interface-home-house",
           "path": "documentation/guides/introduction.md",
           "type": "page"
         },
         {
           "name": "Scalar Docs",
           "type": "folder",
+          "icon": "solid/interface-content-book-open-pages",
           "children": [
             {
               "path": "documentation/guides/docs/getting-started.md",
@@ -25,6 +30,44 @@
             },
             {
               "path": "documentation/guides/docs/github-sync.md",
+              "type": "page"
+            }
+          ]
+        },
+        {
+          "name": "Scalar Registry",
+          "type": "folder",
+          "icon": "solid/programming-script-code",
+          "children": [
+            {
+              "path": "documentation/guides/registry/getting-started.md",
+              "type": "page"
+            },
+            {
+              "path": "documentation/guides/registry/dashboard.md",
+              "type": "page"
+            },
+            {
+              "path": "documentation/guides/registry/cli.md",
+              "type": "page"
+            },
+            {
+              "path": "documentation/guides/registry/github-workflows.md",
+              "type": "page"
+            }
+          ]
+        },
+        {
+          "name": "Scalar CLI",
+          "type": "folder",
+          "icon": "brand/programming-language-shell",
+          "children": [
+            {
+              "path": "documentation/guides/cli/getting-started.md",
+              "type": "page"
+            },
+            {
+              "path": "documentation/guides/cli/commands.md",
               "type": "page"
             }
           ]
@@ -41,6 +84,16 @@
             {
               "name": "AdonisJS",
               "path": "documentation/integrations/adonisjs.md",
+              "type": "page"
+            },
+            {
+              "name": "Django",
+              "path": "documentation/integrations/django.md",
+              "type": "page"
+            },
+            {
+              "name": "Django Ninja",
+              "path": "documentation/integrations/django-ninja.md",
               "type": "page"
             },
             {
@@ -65,7 +118,7 @@
             },
             {
               "name": "HTML/CDN",
-              "path": "documentation/integrations/html.md",
+              "path": "documentation/integrations/html-js.md",
               "type": "page"
             },
             {
@@ -103,8 +156,14 @@
       ]
     }
   ],
-  "references": [],
+  "references": [
+    {
+      "liveLink": "https://registry.scalar.com/@scalar/apis/access-service/latest",
+      "name": "Scalar API"
+    }
+  ],
   "siteConfig": {
+    "headScript": "function addFathomAnalytics(){let t=document.createElement(\"script\");t.src=\"https:\/\/cdn.usefathom.com\/script.js\",t.setAttribute(\"data-spa\",\"auto\"),t.setAttribute(\"data-site\",\"RSYAEMNM\"),t.defer=!0,document.head.appendChild(t)}\"loading\"===document.readyState?document.addEventListener(\"DOMContentLoaded\",addFathomAnalytics):addFathomAnalytics();",
     "logo": {
       "darkMode": "https://scalar.com/logo-light.svg",
       "lightMode": "https://scalar.com/logo-dark.svg"

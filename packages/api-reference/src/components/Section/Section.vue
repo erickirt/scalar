@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { useNavState, useSidebar } from '../../hooks'
-import IntersectionObserver from '../IntersectionObserver.vue'
+import IntersectionObserver from '@/components/IntersectionObserver.vue'
+import { useSidebar } from '@/features/sidebar'
+import { useNavState } from '@/hooks/useNavState'
 
 const props = defineProps<{
   id?: string

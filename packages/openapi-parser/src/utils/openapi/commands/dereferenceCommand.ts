@@ -1,5 +1,5 @@
-import type { DereferenceResult, Queue, Task } from '../../../types/index'
-import type { DereferenceOptions } from '../../dereference'
+import type { DereferenceResult, Queue, Task } from '@/types/index'
+import type { DereferenceOptions } from '@/utils/dereference'
 import { details } from '../actions/details'
 import { files } from '../actions/files'
 import { get } from '../actions/get'

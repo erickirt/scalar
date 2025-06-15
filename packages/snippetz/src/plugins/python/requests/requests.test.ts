@@ -167,10 +167,39 @@ describe('pythonRequests', () => {
     })
 
     expect(result).toBe(`requests.post("https://example.com",
-    files={"file": open("test.txt", "rb")},
+    files=[
+      ("file", open("test.txt", "rb"))
+    ],
     data={
       "field": "value"
     }
+)`)
+  })
+
+  it('handles multipart form data with multiple files', () => {
+    const result = pythonRequests.generate({
+      url: 'https://example.com',
+      method: 'POST',
+      postData: {
+        mimeType: 'multipart/form-data',
+        params: [
+          {
+            name: 'file',
+            fileName: 'test.txt',
+          },
+          {
+            name: 'file',
+            fileName: 'another.txt',
+          },
+        ],
+      },
+    })
+
+    expect(result).toBe(`requests.post("https://example.com",
+    files=[
+      ("file", open("test.txt", "rb")),
+      ("file", open("another.txt", "rb"))
+    ]
 )`)
   })
 
@@ -333,7 +362,9 @@ describe('pythonRequests', () => {
     })
 
     expect(result).toBe(`requests.post("https://example.com",
-    files={"file": open("", "rb")}
+    files=[
+      ("file", open("", "rb"))
+    ]
 )`)
   })
 
@@ -367,8 +398,8 @@ describe('pythonRequests', () => {
       "nested": {
         "array": [
           "item1",
-          null,
-          null
+          None,
+          None
         ]
       }
     }
@@ -431,6 +462,86 @@ describe('pythonRequests', () => {
         }
       },
       "simple": "value"
+    }
+)`)
+  })
+
+  it('converts true/false/null to Python syntax', () => {
+    const result = pythonRequests.generate({
+      url: 'https://example.com',
+      method: 'POST',
+      headers: [
+        {
+          name: 'Content-Type',
+          value: 'application/json',
+        },
+      ],
+      postData: {
+        mimeType: 'application/json',
+        text: JSON.stringify({
+          boolTrue: true,
+          boolFalse: false,
+          nullValue: null,
+          nested: {
+            boolArray: [true, false, null],
+          },
+          nullValue2: null,
+        }),
+      },
+    })
+
+    expect(result).toBe(`requests.post("https://example.com",
+    headers={
+      "Content-Type": "application/json"
+    },
+    json={
+      "boolTrue": True,
+      "boolFalse": False,
+      "nullValue": None,
+      "nested": {
+        "boolArray": [
+          True,
+          False,
+          None
+        ]
+      },
+      "nullValue2": None
+    }
+)`)
+  })
+
+  it('does not replace true/false/null in string literals', () => {
+    const result = pythonRequests.generate({
+      url: 'https://example.com',
+      method: 'POST',
+      headers: [
+        {
+          name: 'Content-Type',
+          value: 'application/json',
+        },
+      ],
+      postData: {
+        mimeType: 'application/json',
+        text: JSON.stringify({
+          stringWithTrue: 'This string contains true',
+          stringWithTrue2: 'aaa   true,   aa',
+          array: ['true,', '     true\n', 'true'],
+        }),
+      },
+    })
+
+    expect(result).toBe(`requests.post("https://example.com",
+    headers={
+      "Content-Type": "application/json"
+    },
+    json={
+      "stringWithTrue": "This string contains true",
+      "stringWithTrue2": "aaa   true,   aa",
+      "array": [
+        "true,",
+        "     true\\n",
+        "true"
+      ]
     }
 )`)
   })

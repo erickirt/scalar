@@ -84,19 +84,35 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
-  // Disable CORS
+  // Allow cross-origin cookies (same logic we use in the proxy, just in Electron)
   mainWindow.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
     const { requestHeaders } = details
 
-    upsertKeyValue(requestHeaders, 'Access-Control-Allow-Origin', ['*'])
+    if (requestHeaders['X-Scalar-Cookie']) {
+      // Add the `Cookie` header
+      requestHeaders['Cookie'] = requestHeaders['X-Scalar-Cookie']
+
+      // Remove the `X-Scalar-Cookie` header
+      delete requestHeaders['X-Scalar-Cookie']
+    }
+
+    if (requestHeaders['X-Scalar-User-Agent']) {
+      // replace the `User-Agent` header with the `X-Scalar-User-Agent`
+      requestHeaders['User-Agent'] = requestHeaders['X-Scalar-User-Agent']
+
+      delete requestHeaders['X-Scalar-User-Agent']
+    }
+
     callback({ requestHeaders })
   })
 
+  // Add wildcard CORS headers to all responses (so we don’t need a proxy)
   mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
     const { responseHeaders } = details
 
     // If headers have already been modified, skip
     if (!responseHeaders?.[MODIFIED_HEADERS_KEY]) {
+      // Add wildcard CORS headers
       upsertKeyValue(responseHeaders, 'Access-Control-Allow-Origin', ['*'])
       upsertKeyValue(responseHeaders, 'Access-Control-Allow-Methods', ['POST, GET, OPTIONS, PUT, DELETE, PATCH'])
       upsertKeyValue(responseHeaders, 'Access-Control-Allow-Headers', ['*'])

@@ -17,9 +17,9 @@
     "parser",
     "typescript"
   ],
-  "version": "0.10.17",
+  "version": "0.17.0",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "build": "scalar-build-esbuild",
@@ -28,7 +28,6 @@
     "lint:fix": "eslint .  --fix",
     "test": "NODE_OPTIONS=--max_old_space_size=8192 vitest",
     "test:prepare": "vite-node scripts/load-files.ts",
-    "test:unit": "vite-node scripts/load-files.ts && vitest",
     "types:build": "scalar-types-build",
     "types:check": "scalar-types-check"
   },
@@ -40,6 +39,16 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./plugins": {
+      "import": "./dist/plugins.js",
+      "types": "./dist/plugins.d.ts",
+      "default": "./dist/plugins.js"
+    },
+    "./plugins-browser": {
+      "import": "./dist/plugins-browser.js",
+      "types": "./dist/plugins-browser.d.ts",
+      "default": "./dist/plugins-browser.js"
     },
     "./plugins/fetch-urls": {
       "import": "./dist/plugins/fetch-urls/index.js",
@@ -68,14 +77,14 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
-    "@babel/code-frame": "^7.24.7",
     "@scalar/build-tooling": "workspace:*",
     "@scalar/openapi-types": "workspace:*",
     "@scalar/types": "workspace:*",
     "@types/node": "catalog:*",
-    "glob": "^10.3.10",
+    "fastify": "catalog:*",
     "json-to-ast": "^2.1.0",
     "just-diff": "^6.0.2",
-    "tinybench": "^2.8.0"
+    "tinybench": "^2.8.0",
+    "vite": "catalog:*"
   }
 }

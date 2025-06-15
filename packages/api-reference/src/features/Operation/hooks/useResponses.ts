@@ -1,23 +1,18 @@
-import type { OpenAPI } from '@scalar/openapi-types'
-import type { RequestBodyMimeTypes, TransformedOperation } from '@scalar/types/legacy'
+import type { OpenAPI, OpenAPIV3_1 } from '@scalar/openapi-types'
+import type { RequestBodyMimeTypes } from '@scalar/types/legacy'
 import { computed } from 'vue'
 
 /**
  * Generates the responses for the request from the parameters in the OpenAPI document
  */
-export function useResponses(operation: TransformedOperation) {
+export function useResponses(responses: OpenAPIV3_1.ResponseObject | undefined) {
   const r = computed(() => {
-    if (!operation.information) {
-      return []
-    }
-
-    const { responses } = operation.information
-
     const res: {
       name: string
       description: string
       content: RequestBodyMimeTypes
       headers?: { [key: string]: OpenAPI.HeaderObject }
+      schema?: OpenAPI.SchemaObject
     }[] = []
 
     if (!responses) {
@@ -30,9 +25,9 @@ export function useResponses(operation: TransformedOperation) {
         description: response.description,
         content: response.content,
         headers: response.headers,
+        schema: response.content?.schema,
       })
     })
-
     return res
   })
 

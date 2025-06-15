@@ -3,34 +3,54 @@ import { useWorkspace } from '@scalar/api-client/store'
 import { getSnippet } from '@scalar/api-client/views/Components/CodeSnippet'
 import { filterSecurityRequirements } from '@scalar/api-client/views/Request/RequestSection'
 import { ScalarCodeBlock } from '@scalar/components'
-import type {
-  Collection,
-  Operation,
-  Server,
+import { freezeElement } from '@scalar/helpers/dom/freeze-element'
+import {
+  createExampleFromRequest,
+  requestSchema,
+  type Collection,
+  type Request,
+  type Server,
 } from '@scalar/oas-utils/entities/spec'
+import { isDereferenced } from '@scalar/openapi-types/helpers'
 import type { ClientId, TargetId } from '@scalar/snippetz'
-import type { TransformedOperation } from '@scalar/types/legacy'
-import { useExampleStore } from '#legacy'
-import { computed, ref, useId, watch, type ComponentPublicInstance } from 'vue'
+import type { OpenAPIV3_1 } from '@scalar/types/legacy'
+import {
+  computed,
+  inject,
+  onMounted,
+  ref,
+  useId,
+  watch,
+  type ComponentPublicInstance,
+} from 'vue'
 
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/Card'
 import { HttpMethod } from '@/components/HttpMethod'
 import ScreenReader from '@/components/ScreenReader.vue'
-import { freezeElement } from '@/helpers/freeze-element'
+import type { Schemas } from '@/features/Operation/types/schemas'
 import { useConfig } from '@/hooks/useConfig'
-import { useHttpClientStore, type HttpClientState } from '@/stores'
+import {
+  DISCRIMINATOR_CONTEXT,
+  EXAMPLE_CONTEXT,
+} from '@/hooks/useDiscriminator'
+import { useExampleStore } from '@/legacy/stores'
+import {
+  useHttpClientStore,
+  type HttpClientState,
+} from '@/stores/useHttpClientStore'
 
 import ExamplePicker from './ExamplePicker.vue'
 import TextSelect from './TextSelect.vue'
 
-const { transformedOperation, operation, collection, server } = defineProps<{
-  operation: Operation
+const { operation, request, collection, server, method } = defineProps<{
   server: Server | undefined
   collection: Collection
+  operation: OpenAPIV3_1.OperationObject
+  request: Request | undefined
+  method: OpenAPIV3_1.HttpMethods
   /** Show a simplified card if no example are available */
   fallback?: boolean
-  /** @deprecated Use `operation` instead */
-  transformedOperation: TransformedOperation
+  schemas?: Schemas
 }>()
 
 const { selectedExampleKey, operationId } = useExampleStore()
@@ -47,13 +67,26 @@ const {
 } = useHttpClientStore()
 
 const id = useId()
+/** Track example update to avoid maximum recursion */
+const isUpdating = ref(false)
+
+// Inject both contexts directly
+const exampleContext = inject(EXAMPLE_CONTEXT)
+
+const discriminatorContext = inject(DISCRIMINATOR_CONTEXT)
+
+const discriminator = computed(() => discriminatorContext?.value?.selectedType)
+
+const hasDiscriminator = computed(
+  () => discriminatorContext?.value?.hasDiscriminator || false,
+)
 
 const customRequestExamples = computed(() => {
   const keys = ['x-custom-examples', 'x-codeSamples', 'x-code-samples'] as const
 
   for (const key of keys) {
-    if (transformedOperation.information?.[key]) {
-      const examples = [...transformedOperation.information[key]]
+    if (operation?.[key]) {
+      const examples = [...operation[key]]
       return examples
     }
   }
@@ -106,10 +139,33 @@ const generateSnippet = () => {
   const clientKey = httpClient.clientKey as ClientId<TargetId>
   const targetKey = httpClient.targetKey
 
+  // Create a hacky request if we are a webhook
+  const _request =
+    request ||
+    requestSchema.parse({
+      uid: operation.operationId || 'temp-request',
+      method: method,
+      path: operation.path,
+      parameters: operation.parameters || [],
+      requestBody: operation.requestBody,
+      examples: [],
+      type: 'request',
+      selectedSecuritySchemeUids: [],
+      selectedServerUid: '',
+      servers: [],
+      summary: operation.summary || 'Example Request',
+    })
+
   // TODO: Currently we just grab the first one but we should sync up the store with the example picker
-  const example = requestExamples[operation.examples[0]]
+  let example = requestExamples[request?.examples?.[0] ?? '']
+
+  // This is for webhooks, super hacky code then we should redo this whole component with the new store
   if (!example) {
-    return ''
+    const examples = getExamplesFromOperation.value
+    const firstExampleKey = Object.keys(examples)[0]
+
+    // Create the example from the request
+    example = createExampleFromRequest(_request, firstExampleKey)
   }
 
   // Ensure the selected security is in the security requirements
@@ -120,7 +176,7 @@ const generateSnippet = () => {
   )
 
   const [error, payload] = getSnippet(targetKey, clientKey, {
-    operation,
+    operation: request,
     example,
     server,
     securitySchemes: schemes,
@@ -142,11 +198,13 @@ const generatedCode = computed<string>(() => {
 
 /** Get all examples from the operation for any content type */
 const getExamplesFromOperation = computed(() => {
-  const content = transformedOperation.information?.requestBody?.content ?? {}
+  if (!isDereferenced(operation.requestBody)) {
+    return {}
+  }
+  const content = operation.requestBody?.content ?? {}
 
   // Return first content type examples by default
   const firstContentType = Object.values(content)[0]
-
   return firstContentType?.examples ?? {}
 })
 
@@ -268,7 +326,7 @@ function handleExampleUpdate(value: string) {
   selectedExampleKey.value = value
   operationId.value = operation.operationId
 
-  const example = requestExamples[operation.examples[0]]
+  const example = requestExamples[request?.examples?.[0] ?? '']
   const selectedExample = getExamplesFromOperation.value[value]
 
   // Update the example body
@@ -284,6 +342,76 @@ function handleExampleUpdate(value: string) {
     }
   }
 }
+
+// Display initial discriminator type selection
+onMounted(() => {
+  if (hasDiscriminator.value && discriminator.value && !isUpdating.value) {
+    handleDiscriminatorChange(discriminator.value)
+  }
+})
+
+const handleDiscriminatorChange = (type: string) => {
+  if (isUpdating.value) {
+    return
+  }
+
+  try {
+    isUpdating.value = true
+
+    // Update the example with the selected type and merged properties
+    const example = requestExamples[operation.examples[0]]
+    if (example && exampleContext?.generateExampleValue) {
+      // Generate the new example value
+      const currentValue = example.body?.raw?.value
+        ? JSON.parse(example.body.raw.value)
+        : undefined
+      const updatedValue = exampleContext.generateExampleValue(
+        Array.isArray(currentValue),
+      )
+
+      // Update the example body
+      requestExampleMutators.edit(
+        example.uid,
+        'body.raw.value',
+        JSON.stringify(updatedValue, null, 2),
+      )
+
+      // Update the operation's example value directly
+      if (request?.examples?.[0]) {
+        const exampleRef = requestExamples[request?.examples?.[0]]
+        if (exampleRef) {
+          requestExampleMutators.edit(
+            exampleRef.uid,
+            'body.raw.value',
+            JSON.stringify(updatedValue, null, 2),
+          )
+        }
+      }
+
+      // Also update the transformed operation's examples
+      if (operation.requestBody?.content?.['application/json']?.examples) {
+        const examples =
+          operation.requestBody.content['application/json'].examples
+        Object.keys(examples).forEach((key) => {
+          if (examples[key]?.value) {
+            examples[key].value = updatedValue
+          }
+        })
+      }
+    }
+  } catch (error) {
+    console.error('[handleDiscriminatorChange]', error)
+  } finally {
+    isUpdating.value = false
+  }
+}
+
+// Watch for changes to discriminator type
+watch(discriminator, (newValue) => {
+  if (newValue && hasDiscriminator.value && !isUpdating.value) {
+    handleDiscriminatorChange(newValue)
+  }
+})
 </script>
 <template>
   <Card
@@ -300,7 +428,7 @@ function handleExampleUpdate(value: string) {
         <HttpMethod
           as="span"
           class="request-method"
-          :method="operation.method" />
+          :method="method" />
         <slot name="header" />
       </div>
       <template #actions>
@@ -367,7 +495,7 @@ function handleExampleUpdate(value: string) {
         <HttpMethod
           as="span"
           class="request-method"
-          :method="operation.method" />
+          :method="method" />
         <slot name="header" />
       </div>
       <slot name="footer" />

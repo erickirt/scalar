@@ -3,8 +3,9 @@
 const hasLoaded = ref(false)
 </script>
 <script lang="ts" setup>
+import { scrollToId } from '@scalar/helpers/dom/scroll-to-id'
 import type { Collection, Server } from '@scalar/oas-utils/entities/spec'
-import type { OpenAPIV3 } from '@scalar/openapi-types'
+import type { OpenAPIV3_1 } from '@scalar/openapi-types'
 import type {
   Spec,
   Tag as TagType,
@@ -12,21 +13,20 @@ import type {
 } from '@scalar/types/legacy'
 import { onMounted, ref, watch } from 'vue'
 
-import { Operation } from '@/features/Operation'
-
-import { getModels, scrollToId } from '../../../helpers'
-import { useNavState } from '../../../hooks'
-import { Anchor } from '../../Anchor'
+import { Anchor } from '@/components/Anchor'
+import { lazyBus } from '@/components/Content/Lazy/lazyBus'
+import { Schema } from '@/components/Content/Schema'
+import { TagSection } from '@/components/Content/Tag'
 import {
   Section,
   SectionContainer,
   SectionContent,
   SectionHeader,
   SectionHeaderTag,
-} from '../../Section'
-import { Schema } from '../Schema'
-import { TagSection } from '../Tag'
-import { lazyBus } from './lazyBus'
+} from '@/components/Section'
+import { Operation } from '@/features/Operation'
+import { useNavState } from '@/hooks/useNavState'
+import { getModels } from '@/libs/openapi'
 
 /**
  * Loads a "fake" tag/modal/operation if the user is deep linking
@@ -85,17 +85,11 @@ watch(
           (tag) => getTagId(tag) === sectionId,
         ) ?? 0
 
-      // Grab specific operation to load
-      const operationMatches = hash.value.match(/tag\/([^/]+)\/([^/]+)\/(.+)/)
-      if (operationMatches?.length === 4) {
-        const matchedVerb = operationMatches[2]
-        const matchedPath = '/' + operationMatches[3]
+      // TODO: hash prefix, path routing etc
+      operationIndex = props.parsedSpec.tags[tagIndex]?.operations.findIndex(
+        ({ id }) => id === hash.value,
+      )
 
-        operationIndex = props.parsedSpec.tags[tagIndex]?.operations.findIndex(
-          ({ httpVerb, path }) =>
-            matchedVerb === httpVerb && matchedPath === path,
-        )
-      }
       // Add a few tags to the loading section
       const tag = props.parsedSpec.tags[tagIndex]
 
@@ -108,11 +102,22 @@ watch(
 
       tags.value.push({
         ...tag,
-        lazyOperations: tag.operations.slice(
-          operationIndex,
-          operationIndex + 2,
-        ),
+        lazyOperations: tag.operations
+          .slice(operationIndex, operationIndex + 2)
+          .map((operation) => ({
+            ...operation,
+            // Prefix the id with lazy- to avoid collisions with the real ids
+            id: 'lazy-' + operation.id,
+          })),
       })
+
+      // Check if hash contains a markdown heading with the new description format
+      if (hash.value.includes('/description/')) {
+        if (typeof window !== 'undefined') {
+          scrollToId(hash.value)
+        }
+        setTimeout(() => (isIntersectionEnabled.value = true), 1000)
+      }
     }
     // Models
     else if (hash.value.startsWith('model')) {
@@ -198,7 +203,7 @@ onMounted(() => {
         :tag="tag">
         <Operation
           v-for="operation in tag.lazyOperations"
-          :key="`${operation.httpVerb}-${operation.operationId}`"
+          :key="operation.id"
           :collection="collection"
           :layout="layout"
           :server="server"
@@ -215,10 +220,10 @@ onMounted(() => {
         <template v-if="getModels(parsedSpec)?.[name]">
           <SectionContent>
             <SectionHeader>
-              <Anchor :id="getModelId({ name })">
+              <Anchor :id="'lazy-' + getModelId({ name })">
                 <SectionHeaderTag :level="2">
                   {{
-                    (getModels(parsedSpec)?.[name] as OpenAPIV3.SchemaObject)
+                    (getModels(parsedSpec)?.[name] as OpenAPIV3_1.SchemaObject)
                       .title ?? name
                   }}
                 </SectionHeaderTag>

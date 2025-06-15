@@ -60,6 +60,77 @@ describe('SchemaPropertyHeading', () => {
     expect(constElement.text()).toContain('example')
   })
 
+  it('renders const value: false', async () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          const: false,
+        },
+      },
+    })
+    const constElement = wrapper.find('.property-const')
+    expect(constElement.text()).toContain('const:')
+    expect(constElement.text()).toContain('false')
+  })
+
+  it('renders const value: 0', async () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          const: 0,
+        },
+      },
+    })
+    const constElement = wrapper.find('.property-const')
+    expect(constElement.text()).toContain('const:')
+    expect(constElement.text()).toContain('0')
+  })
+
+  it('renders const value: empty string', async () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          const: '',
+        },
+      },
+    })
+    const constElement = wrapper.find('.property-const')
+    expect(constElement.text()).toContain('const:')
+    expect(constElement.text()).toContain('')
+  })
+
+  it('renders const value: null', async () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          const: null,
+        },
+      },
+    })
+    const constElement = wrapper.find('.property-const')
+    expect(constElement.exists()).toBe(false)
+  })
+
+  it('renders const value in array items', async () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          type: 'array',
+          items: {
+            const: 'foo',
+          },
+        },
+      },
+    })
+
+    const typeElement = wrapper.find('.property-detail')
+    expect(typeElement.text()).toContain('array')
+
+    const constElement = wrapper.find('.property-const')
+    expect(constElement.text()).toContain('const:')
+    expect(constElement.text()).toContain('foo')
+  })
+
   it('renders pattern badge', async () => {
     const wrapper = mount(SchemaPropertyHeading, {
       props: {
@@ -86,5 +157,219 @@ describe('SchemaPropertyHeading', () => {
 
     const detailsElement = wrapper.find('.property-heading')
     expect(detailsElement.text()).toContain('array Model[]')
+  })
+
+  it('renders default value: null', async () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          default: null,
+        },
+      },
+    })
+    const defaultValueElement = wrapper.find('.property-heading')
+    expect(defaultValueElement.text()).toContain('default:')
+    expect(defaultValueElement.text()).toContain('null')
+  })
+
+  it('renders default value: empty', async () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          default: '',
+        },
+      },
+    })
+    const defaultValueElement = wrapper.find('.property-heading')
+    expect(defaultValueElement.text()).toContain('default:')
+    expect(defaultValueElement.text()).toContain('""')
+  })
+
+  it('prefers title over name for non-array schemas', () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          type: 'object',
+          name: 'ModelName',
+          title: 'PrettyModel',
+        },
+      },
+    })
+    const detailsElement = wrapper.find('.property-heading')
+    expect(detailsElement.text()).toContain('PrettyModel')
+  })
+
+  it('renders default value without type being present', () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          enum: ['bar', 'foo'],
+          default: 'foo',
+        },
+      },
+    })
+    const defaultValueElement = wrapper.find('.property-heading')
+    expect(defaultValueElement.text()).toContain('default:')
+    expect(defaultValueElement.text()).toContain('"foo"')
+  })
+
+  it('formats array type with model reference', () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          type: 'array',
+          items: { type: 'object', name: 'FooModel' },
+        },
+      },
+    })
+    const detailsElement = wrapper.find('.property-heading')
+    expect(detailsElement.text()).toContain('array FooModel[]')
+  })
+
+  it('formats object type with direct model reference', () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          type: 'object',
+          name: 'BarModel',
+        },
+      },
+    })
+    const detailsElement = wrapper.find('.property-heading')
+    expect(detailsElement.text()).toContain('BarModel')
+    expect(detailsElement.text()).not.toContain('[]')
+  })
+
+  it('formats array type with model reference correctly', () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          type: 'array',
+          items: { type: 'object', name: 'BarModel' },
+        },
+      },
+    })
+    const detailsElement = wrapper.find('.property-heading')
+    expect(detailsElement.text()).toContain('array BarModel[]')
+  })
+
+  it('displays plain type when no model name is present', () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          type: 'string',
+        },
+      },
+    })
+    const detailsElement = wrapper.find('.property-heading')
+    expect(detailsElement.text()).toContain('string')
+    expect(detailsElement.text()).not.toContain('[]')
+  })
+
+  it('displays model name for schema references a component schema', () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          type: 'object',
+          properties: {
+            title: { type: 'string' },
+            pages: { type: 'integer' },
+          },
+        },
+        schemas: {
+          Planet: {
+            type: 'object',
+            properties: {
+              title: { type: 'string' },
+              pages: { type: 'integer' },
+            },
+          },
+        },
+      },
+      slots: {
+        name: 'Planet',
+      },
+    })
+    const detailsElement = wrapper.find('.property-heading')
+    expect(detailsElement.text()).toContain('Planet')
+    expect(detailsElement.text()).not.toContain('object')
+  })
+
+  it('matches array schema to component schema by type and items', () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          type: 'array',
+          items: { type: 'string' },
+          deprecated: false,
+        },
+        schemas: {
+          Planet: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+          Satellite: {
+            type: 'string',
+          },
+        },
+      },
+    })
+    const detailsElement = wrapper.find('.property-heading')
+    expect(detailsElement.text()).toContain('array Planet[]')
+  })
+
+  it('doesn’t show model name when hideModelNames is true', () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          type: 'array',
+          items: { type: 'string' },
+        },
+        hideModelNames: true,
+        schemas: {
+          Planet: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+        },
+      },
+    })
+    const detailsElement = wrapper.find('.property-heading')
+    expect(detailsElement.text()).toContain('array string[]')
+    expect(detailsElement.text()).not.toContain('Planet')
+  })
+
+  it('shows model name when hideModelNames is false', () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          type: 'array',
+          items: { type: 'string' },
+        },
+        hideModelNames: false,
+        schemas: {
+          Planet: {
+            type: 'array',
+            items: { type: 'string' },
+          },
+        },
+      },
+    })
+    const detailsElement = wrapper.find('.property-heading')
+    expect(detailsElement.text()).toContain('array Planet[]')
+  })
+
+  it('renders multipleOf property', () => {
+    const wrapper = mount(SchemaPropertyHeading, {
+      props: {
+        value: {
+          type: 'number',
+          multipleOf: 0.001,
+        },
+      },
+    })
+    const detailsElement = wrapper.find('.property-heading')
+    expect(detailsElement.text()).toContain('multiple of:')
+    expect(detailsElement.text()).toContain('0.001')
   })
 })

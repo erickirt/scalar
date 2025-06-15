@@ -1,4 +1,4 @@
-import { ERRORS } from '../../configuration/index'
+import { ERRORS } from '@/configuration'
 import type {
   AnyApiDefinitionFormat,
   AnyObject,
@@ -6,11 +6,11 @@ import type {
   Filesystem,
   LoadResult,
   ThrowOnErrorOption,
-} from '../../types/index'
-import { getEntrypoint } from '../getEntrypoint'
-import { getListOfReferences } from '../getListOfReferences'
-import { makeFilesystem } from '../makeFilesystem'
-import { normalize } from '../normalize'
+} from '@/types/index'
+import { getEntrypoint } from '@/utils/get-entrypoint'
+import { getListOfReferences } from '@/utils/get-list-of-references'
+import { makeFilesystem } from '@/utils/make-filesystem'
+import { normalize } from '@/utils/normalize'
 
 export type LoadPlugin = {
   check: (value?: any) => boolean
@@ -27,6 +27,12 @@ export type LoadOptions = {
 } & ThrowOnErrorOption
 
 /**
+ * @deprecated This function is deprecated and will be removed in a future version.
+ * Please use the new bundler utility instead:
+ * ```ts
+ * import { bundle } from "@scalar/openapi-parser"
+ * ```
+ *
  * Loads an OpenAPI document, including any external references.
  *
  * This function handles loading content from various sources, normalizes the content,
