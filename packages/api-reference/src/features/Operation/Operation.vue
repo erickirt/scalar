@@ -1,36 +1,38 @@
 <script lang="ts" setup>
 import { useWorkspace } from '@scalar/api-client/store'
 import type { Collection, Server } from '@scalar/oas-utils/entities/spec'
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types'
+import type { OpenAPIV3_1 } from '@scalar/openapi-types'
 import type { TransformedOperation } from '@scalar/types/legacy'
 import { computed } from 'vue'
 
 import { getPointer } from '@/blocks/helpers/getPointer'
 import { useBlockProps } from '@/blocks/hooks/useBlockProps'
+import { useOperationDiscriminator } from '@/hooks/useOperationDiscriminator'
 
 import ClassicLayout from './layouts/ClassicLayout.vue'
 import ModernLayout from './layouts/ModernLayout.vue'
 
 const {
-  id,
   layout = 'modern',
   transformedOperation,
   collection,
   server,
+  schemas,
 } = defineProps<{
-  id?: string
   layout?: 'modern' | 'classic'
   transformedOperation: TransformedOperation
   collection: Collection
   server: Server | undefined
-  schemas?:
-    | OpenAPIV2.DefinitionsObject
-    | Record<string, OpenAPIV3.SchemaObject>
-    | Record<string, OpenAPIV3_1.SchemaObject>
-    | unknown
+  schemas?: Record<string, OpenAPIV3_1.SchemaObject> | unknown
 }>()
 
 const store = useWorkspace()
+
+// Setup discriminator handling
+const { handleDiscriminatorChange } = useOperationDiscriminator(
+  transformedOperation,
+  schemas,
+)
 
 /**
  * Resolve the matching operation from the store
@@ -69,24 +71,24 @@ const operationServer = computed(() => {
 </script>
 
 <template>
-  <template v-if="collection && operation">
+  <template v-if="collection">
     <template v-if="layout === 'classic'">
       <ClassicLayout
-        :id="id"
         :collection="collection"
-        :operation="operation"
+        :request="operation"
+        :transformedOperation="transformedOperation"
         :schemas="schemas"
         :server="operationServer"
-        :transformedOperation="transformedOperation" />
+        @update:modelValue="handleDiscriminatorChange" />
     </template>
     <template v-else>
       <ModernLayout
-        :id="id"
         :collection="collection"
-        :operation="operation"
+        :request="operation"
+        :transformedOperation="transformedOperation"
         :schemas="schemas"
         :server="operationServer"
-        :transformedOperation="transformedOperation" />
+        @update:modelValue="handleDiscriminatorChange" />
     </template>
   </template>
 </template>

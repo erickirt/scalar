@@ -1,30 +1,20 @@
 <script setup lang="ts">
-import {
-  ScalarIcon,
-  ScalarSidebarGroupToggle,
-  type Icon,
-} from '@scalar/components'
+import { ScalarSidebarGroupToggle } from '@scalar/components'
+import { scrollToId } from '@scalar/helpers/dom/scroll-to-id'
+import { getHttpMethodInfo } from '@scalar/helpers/http/http-info'
+import { sleep } from '@scalar/helpers/testing/sleep'
+import { ScalarIconWebhooksLogo } from '@scalar/icons'
 import { combineUrlAndPath } from '@scalar/oas-utils/helpers'
 
-import { scrollToId, sleep } from '@/helpers'
+import type { TraversedEntry } from '@/features/traverse-schema'
 import { useConfig } from '@/hooks/useConfig'
+import { useNavState } from '@/hooks/useNavState'
 
-import { useNavState } from '../../hooks'
 import SidebarHttpBadge from './SidebarHttpBadge.vue'
 
 const props = defineProps<{
   id: string
-  item: {
-    id: string
-    title: string
-    select?: () => void
-    link?: string
-    icon?: {
-      src: string
-    }
-    httpVerb?: string
-    deprecated?: boolean
-  }
+  item: TraversedEntry
   isActive?: boolean
   hasChildren?: boolean
   open?: boolean
@@ -46,7 +36,6 @@ const handleClick = async () => {
   if (props.hasChildren) {
     emit('toggleOpen')
   }
-  props.item?.select?.()
 
   // Re-enable intersection observer
   await sleep(100)
@@ -77,7 +66,6 @@ const onAnchorClick = async (ev: Event) => {
     if (props.hasChildren) {
       emit('toggleOpen')
     }
-    props.item?.select?.()
 
     // Make sure to open the section
     emit('toggleOpen')
@@ -102,7 +90,7 @@ const onAnchorClick = async (ev: Event) => {
       :class="{
         'sidebar-group-item__folder': hasChildren,
         'active_page': isActive,
-        'deprecated': item.deprecated ?? false,
+        'deprecated': 'deprecated' in item && item.deprecated,
       }"
       @click="handleClick">
       <!-- If children are detected then show the nesting icon -->
@@ -128,21 +116,26 @@ const onAnchorClick = async (ev: Event) => {
         :href="generateLink()"
         :tabindex="hasChildren ? -1 : 0"
         @click="onAnchorClick">
-        <ScalarIcon
-          v-if="item?.icon?.src"
-          class="sidebar-icon"
-          :icon="item.icon.src as Icon" />
         <p class="sidebar-heading-link-title">
           {{ item.title }}
         </p>
         <p
-          v-if="item.httpVerb && !hasChildren"
+          v-if="'method' in item && !hasChildren"
           class="sidebar-heading-link-method">
           &hairsp;
           <span class="sr-only">HTTP Method:&nbsp;</span>
           <SidebarHttpBadge
             :active="isActive"
-            :method="item.httpVerb" />
+            :method="item.method">
+            <template #default>
+              <ScalarIconWebhooksLogo
+                weight="bold"
+                v-if="'webhook' in item"
+                :style="{
+                  color: getHttpMethodInfo(item.method).colorVar,
+                }" />
+            </template>
+          </SidebarHttpBadge>
         </p>
       </a>
     </div>
@@ -157,11 +150,11 @@ const onAnchorClick = async (ev: Event) => {
 <style scoped>
 .sidebar-heading {
   display: flex;
-  gap: 6px;
+  gap: 4px;
 
   color: var(--scalar-sidebar-color-2, var(--scalar-color-2));
-  font-size: var(--scalar-mini);
-  font-weight: var(--scalar-semibold);
+  font-size: var(--scalar-small);
+  font-weight: var(--scalar-sidebar-font-weight, var(--scalar-regular));
   word-break: break-word;
   line-height: 1.385;
   max-width: 100%;
@@ -219,7 +212,7 @@ const onAnchorClick = async (ev: Event) => {
   content: '';
   position: absolute;
   top: 0;
-  left: calc((var(--scalar-sidebar-level) * 12px));
+  left: calc((var(--scalar-sidebar-level) * 15.5px));
   width: var(--scalar-border-width);
   height: 100%;
   background: var(--scalar-sidebar-indent-border);
@@ -247,7 +240,7 @@ const onAnchorClick = async (ev: Event) => {
   height: fit-content;
   display: flex;
   align-items: center;
-  font-weight: var(--scalar-sidebar-font-weight, var(--scalar-semibold));
+  font-weight: var(--scalar-sidebar-font-weight, var(--scalar-regular));
 }
 .sidebar-heading p:empty {
   display: none;
@@ -279,7 +272,8 @@ const onAnchorClick = async (ev: Event) => {
 /* Folder/page collapse icon */
 /* awkward pixel value to deal with hairspace alignment across browser*/
 .sidebar-heading-chevron {
-  margin: 5px -5.5px 5px -9px;
+  margin: 5px 0;
+  width: 16px;
 }
 .sidebar-heading-chevron .toggle-nested-icon:focus-visible {
   outline: none;
@@ -292,8 +286,8 @@ const onAnchorClick = async (ev: Event) => {
 }
 .toggle-nested-icon {
   color: var(--scalar-color-3);
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -339,7 +333,12 @@ const onAnchorClick = async (ev: Event) => {
   );
 }
 .sidebar-group-item__folder {
-  color: var(--scalar-sidebar-color-1, var(--scalar-color-1));
+  color: var(--scalar-sidebar-color-2, var(--scalar-color-2));
   text-transform: var(--scalar-tag-text-transform, initial);
+}
+.sidebar-group-item__folder:has(~ ul .sidebar-heading.active_page) {
+  --scalar-sidebar-font-weight: var(--scalar-sidebar-font-weight-active);
+  color: var(--scalar-sidebar-color-1, var(--scalar-color-1));
+  font-weight: var(--scalar-sidebar-font-weight-active, var(--scalar-semibold));
 }
 </style>

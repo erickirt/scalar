@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types'
+import type { OpenAPIV3_1 } from '@scalar/openapi-types'
 import { computed } from 'vue'
 
-import { useNavState } from '../../../hooks'
-import { Anchor } from '../../Anchor'
+import { Anchor } from '@/components/Anchor'
+import { useNavState } from '@/hooks/useNavState'
+
 import {
   SectionAccordion,
   SectionContainerAccordion,
@@ -13,11 +14,7 @@ import {
 import { SchemaHeading, SchemaProperty } from '../Schema'
 
 const props = defineProps<{
-  schemas?:
-    | OpenAPIV2.DefinitionsObject
-    | Record<string, OpenAPIV3.SchemaObject>
-    | Record<string, OpenAPIV3_1.SchemaObject>
-    | unknown
+  schemas?: Record<string, OpenAPIV3_1.SchemaObject> | unknown
 }>()
 
 const models = computed(() => {

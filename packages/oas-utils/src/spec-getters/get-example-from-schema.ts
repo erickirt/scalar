@@ -38,8 +38,11 @@ const genericExampleValues: Record<string, string> = {
 /**
  * We can use the `format` to generate some random values.
  */
-function guessFromFormat(schema: Record<string, any>, fallback: string = '') {
-  return genericExampleValues[schema.format] ?? fallback
+function guessFromFormat(schema: Record<string, any>, makeUpRandomData: boolean = false, fallback: string = '') {
+  if (schema.format === 'binary') {
+    return new File([''], 'filename')
+  }
+  return makeUpRandomData ? (genericExampleValues[schema.format] ?? fallback) : ''
 }
 
 /** Map of all the results */
@@ -295,7 +298,12 @@ export const getExampleFromSchema = (
       }
     }
 
-    if (schema.items?.type) {
+    // if it has type: 'object', or properties, it’s an object
+    const isObject = schema.items?.type === 'object' || schema.items?.properties !== undefined
+    // if it has type: 'array', or items, it’s an array
+    const isArray = schema.items?.type === 'array' || schema.items?.items !== undefined
+
+    if (schema.items?.type || isObject || isArray) {
       const exampleFromSchema = getExampleFromSchema(schema.items, options, level + 1)
 
       return wrapItems ? [{ [itemsXmlTagName]: exampleFromSchema }] : [exampleFromSchema]
@@ -305,7 +313,7 @@ export const getExampleFromSchema = (
   }
 
   const exampleValues: Record<any, any> = {
-    string: makeUpRandomData ? guessFromFormat(schema, options?.emptyString) : '',
+    string: guessFromFormat(schema, makeUpRandomData, options?.emptyString),
     boolean: true,
     integer: schema.min ?? 1,
     number: schema.min ?? 1,

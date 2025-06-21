@@ -140,6 +140,7 @@ describe('importSpecToWorkspace', () => {
         'updatePlanet',
         'deletePlanet',
         'uploadImage',
+        'createCelestialBody',
         'createUser',
         'getToken',
         'getMe',
@@ -828,6 +829,30 @@ describe('importSpecToWorkspace', () => {
       expect(res.collection.selectedSecuritySchemeUids).toEqual(selectedSecuritySchemeUids)
     })
 
+    it('handles complex security on the operation level', async () => {
+      const specWithComplexSecurity = {
+        ...galaxy,
+        security: [{ apiKeyHeader: [], basicAuth: [] }],
+        paths: {
+          '/test': {
+            get: {
+              security: [{ apiKeyHeader: [], basicAuth: [] }],
+            },
+          },
+        },
+      }
+
+      const res = await importSpecToWorkspace(specWithComplexSecurity)
+      if (res.error) {
+        throw res.error
+      }
+
+      expect(res.requests[0]!.security).toEqual([{ apiKeyHeader: [], basicAuth: [] }])
+      expect(res.requests[0]!.selectedSecuritySchemeUids).toEqual([
+        [findSchemeUidByKey('apiKeyHeader', res.securitySchemes), findSchemeUidByKey('basicAuth', res.securitySchemes)],
+      ])
+    })
+
     it('selects the first required scheme as selected', async () => {
       const specWithOrSecurity = {
         ...galaxy,
@@ -1056,7 +1081,7 @@ describe('parseSchema', () => {
   it('handles invalid JSON', async () => {
     const { errors } = await parseSchema('"invalid')
 
-    expect(errors).toMatchObject([{ code: 'MISSING_CHAR' }])
+    expect(errors).toMatchObject([{ code: 'NO_CONTENT' }])
     expect(errors).toHaveLength(1)
   })
 

@@ -65,6 +65,25 @@ const availableEnvironments = computed(() => {
     : []
 })
 
+const selectLatestEnvironment = () => {
+  const environments = availableEnvironments.value
+  if (environments.length > 0) {
+    // Get the latest created collection environment
+    const latestEnvironment = environments[environments.length - 1]
+
+    if (latestEnvironment?.uid) {
+      updateSelected(latestEnvironment.uid)
+    }
+  }
+}
+
+// Select for the collection its latest environment on creation
+watch(availableEnvironments, (newEnvs, oldEnvs) => {
+  if (newEnvs.length > oldEnvs.length) {
+    selectLatestEnvironment()
+  }
+})
+
 const setInitialEnvironment = (collection: Collection) => {
   const activeEnv = collection['x-scalar-active-environment']
   if (activeEnv && activeCollection.value && activeWorkspace.value) {
@@ -90,7 +109,7 @@ onMounted(() => {
       class="text-c-1 hover:bg-b-2 line-clamp-1 h-auto w-fit justify-start px-1.5 py-1.5 font-normal"
       fullWidth
       variant="ghost">
-      <h2 class="m-0 flex items-center gap-1.5 whitespace-nowrap font-medium">
+      <h2 class="m-0 flex items-center gap-1.5 font-medium whitespace-nowrap">
         {{ selectedEnvironment }}
       </h2>
     </ScalarButton>

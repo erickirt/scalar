@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types'
+import type { OpenAPIV3_1 } from '@scalar/openapi-types'
 import type { TransformedOperation } from '@scalar/types/legacy'
 
 import { useResponses } from '../hooks/useResponses'
@@ -7,20 +7,16 @@ import ParameterList from './ParameterList.vue'
 
 const props = withDefaults(
   defineProps<{
-    operation: TransformedOperation
+    responses: OpenAPIV3_1.ResponseObject | undefined
     collapsableItems?: boolean
-    schemas?:
-      | OpenAPIV2.DefinitionsObject
-      | Record<string, OpenAPIV3.SchemaObject>
-      | Record<string, OpenAPIV3_1.SchemaObject>
-      | unknown
+    schemas?: Record<string, OpenAPIV3_1.SchemaObject> | unknown
   }>(),
   {
     collapsableItems: true,
   },
 )
 
-const { responses } = useResponses(props.operation)
+const { responses } = useResponses(props.responses)
 </script>
 <template>
   <ParameterList

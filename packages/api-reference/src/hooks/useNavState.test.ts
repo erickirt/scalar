@@ -1,9 +1,9 @@
 import { useConfig } from '@/hooks/useConfig'
 import type { Heading, Tag } from '@scalar/types/legacy'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
 import { apiReferenceConfigurationSchema } from '@scalar/types/api-reference'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { computed, inject, ref } from 'vue'
+
 import { useNavState } from './useNavState'
 
 declare global {
@@ -114,7 +114,7 @@ describe('useNavState', () => {
 
     it('should generate operation ID', () => {
       const operation = {
-        httpVerb: 'GET',
+        method: 'get',
         path: '/test',
       } as const
       const parentTag = {
@@ -122,7 +122,7 @@ describe('useNavState', () => {
         description: 'Test Description',
         operations: [],
       } satisfies Tag
-      expect(navState.getOperationId(operation, parentTag)).toBe('tag/test-tag/GET/test')
+      expect(navState.getOperationId(operation, parentTag)).toBe('tag/test-tag/get/test')
     })
 
     it('should generate webhook ID', () => {
@@ -201,6 +201,53 @@ describe('useNavState', () => {
     it('should get section ID from hash', () => {
       navState.hash.value = 'tag/test-tag/operation'
       expect(navState.getSectionId()).toBe('tag/test-tag')
+    })
+  })
+
+  describe('getHashedUrl', () => {
+    it('should generate URL with hash routing', () => {
+      const mockConfig = computed(() => apiReferenceConfigurationSchema.parse({}))
+      vi.mocked(useConfig).mockReturnValue(mockConfig)
+
+      vi.mocked(inject).mockReturnValue({
+        isIntersectionEnabled: ref(false),
+        hash: ref(''),
+        hashPrefix: ref('prefix-'),
+      })
+      navState = useNavState()
+
+      const result = navState.getHashedUrl('test-hash', 'https://example.com', '?param=value')
+      expect(result).toBe('https://example.com/?param=value#prefix-test-hash')
+    })
+
+    it('should generate URL with path routing', () => {
+      const mockConfig = computed(() => {
+        return apiReferenceConfigurationSchema.parse({
+          pathRouting: {
+            basePath: '/docs',
+          },
+        })
+      })
+      vi.mocked(useConfig).mockReturnValue(mockConfig)
+      navState = useNavState()
+
+      const result = navState.getHashedUrl('test-path', 'https://example.com', '?param=value')
+      expect(result).toBe('https://example.com/docs/test-path?param=value')
+    })
+
+    it('should preserve search params when using path routing', () => {
+      const mockConfig = computed(() => {
+        return apiReferenceConfigurationSchema.parse({
+          pathRouting: {
+            basePath: '/docs',
+          },
+        })
+      })
+      vi.mocked(useConfig).mockReturnValue(mockConfig)
+      navState = useNavState()
+
+      const result = navState.getHashedUrl('test-path', 'https://example.com', '?param1=value1&param2=value2')
+      expect(result).toBe('https://example.com/docs/test-path?param1=value1&param2=value2')
     })
   })
 })

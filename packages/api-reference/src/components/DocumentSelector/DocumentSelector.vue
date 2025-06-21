@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import {
-  ScalarIcon,
-  ScalarListbox,
-  type ScalarListboxOption,
-} from '@scalar/components'
+import { ScalarListbox, type ScalarListboxOption } from '@scalar/components'
+import { ScalarIconCaretUpDown } from '@scalar/icons'
 import type { SpecConfiguration } from '@scalar/types/api-reference'
 import { computed } from 'vue'
 
@@ -41,24 +38,14 @@ const selectedOption = computed({
         v-model="selectedOption"
         :options="listboxOptions"
         resize>
-        <div
-          class="group/dropdown-label hover:bg-b-2 text-c-2 py-1.75 pl-1.75 flex w-full cursor-pointer items-center rounded border pr-1.5"
-          tabindex="0">
-          <ScalarIcon
-            class="mr-1.25 min-w-4"
-            icon="Versions"
-            size="sm"
-            thickness="2" />
-          <span
-            class="text-c-1 overflow-hidden text-ellipsis text-sm font-medium">
+        <button
+          class="group/dropdown-label hover:bg-b-2 text-c-2 flex h-8 w-full cursor-pointer items-center rounded border px-2 py-1.75"
+          type="button">
+          <ScalarIconCaretUpDown class="mr-1 size-4 text-current" />
+          <span class="text-c-1 overflow-hidden text-base text-ellipsis">
             {{ selectedOption?.label || 'Select API' }}
           </span>
-          <ScalarIcon
-            class="group-hover/dropdown-label:text-c-1 ml-auto mr-2"
-            icon="ChevronDown"
-            size="sm"
-            thickness="2" />
-        </div>
+        </button>
       </ScalarListbox>
     </div>
   </template>

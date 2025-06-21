@@ -2,16 +2,15 @@
 import {
   ScalarButton,
   ScalarIcon,
-  ScalarSearchInput,
   ScalarSearchResultItem,
   ScalarSearchResultList,
+  ScalarSidebarSearchInput,
 } from '@scalar/components'
 import { LibraryIcon } from '@scalar/icons/library'
 import type { Collection } from '@scalar/oas-utils/entities/spec'
 import { useToasts } from '@scalar/use-toasts'
 import {
   computed,
-  nextTick,
   onBeforeUnmount,
   onMounted,
   reactive,
@@ -111,6 +110,8 @@ const {
   navigateSearchResults,
   selectSearchResult,
 } = useSearch()
+
+const searchToggleRef = ref<HTMLButtonElement>()
 
 /** Handle hotkey events from the bus */
 const handleHotKey = (event?: HotKeyEvent) => {
@@ -242,20 +243,12 @@ const handleClearDrafts = () => {
   }
 }
 
-const toggleSearch = () => {
-  // Toggle the visibility
-  isSearchVisible.value = !isSearchVisible.value
-
+watch(isSearchVisible, (isVisible) => {
   // If we're hiding the search, clear the text
-  if (!isSearchVisible.value) {
+  if (!isVisible) {
     searchText.value = ''
   }
-
-  // If we're showing the search, focus it
-  if (isSearchVisible.value) {
-    nextTick(() => searchInputRef.value?.focus())
-  }
-}
+})
 
 const showGettingStarted = computed(() =>
   isGettingStarted(
@@ -272,6 +265,15 @@ const collections = computed(() => {
   }
   return activeWorkspaceCollections.value
 })
+
+/** Hide the search input if the text is empty */
+function handleBlur(e: FocusEvent) {
+  // We have to check the blur did not come from the search toggle button
+  // otherwise the search will show again form the click event
+  if (!searchText.value && e.relatedTarget !== searchToggleRef.value) {
+    isSearchVisible.value = false
+  }
+}
 </script>
 <template>
   <Sidebar
@@ -294,35 +296,37 @@ const collections = computed(() => {
         </span>
         <EnvironmentSelector v-if="layout !== 'modal'" />
         <button
+          ref="searchToggleRef"
           :aria-pressed="isSearchVisible"
           class="ml-auto"
           type="button"
-          @click="toggleSearch">
+          @click="isSearchVisible = !isSearchVisible">
           <span class="sr-only">
             {{ isSearchVisible ? 'Hide' : 'Show' }} search
           </span>
           <ScalarIcon
-            class="text-c-3 hover:bg-b-2 p-1.75 max-h-8 max-w-8 rounded-lg text-sm"
+            class="text-c-3 hover:bg-b-2 max-h-8 max-w-8 rounded-lg p-1.75 text-sm"
             icon="Search" />
         </button>
       </div>
       <div
-        v-show="isSearchVisible"
+        v-if="isSearchVisible"
         class="search-button-fade sticky top-12 z-10 px-3 py-2.5 pt-0 focus-within:z-20"
         role="search">
-        <ScalarSearchInput
+        <ScalarSidebarSearchInput
           ref="searchInputRef"
           v-model="searchText"
+          autofocus
           :aria-controls="searchResultsId"
           :label="srLabel"
-          sidebar
           @input="fuseSearch"
           @keydown.down.stop="navigateSearchResults('down')"
           @keydown.enter.stop="selectSearchResult()"
-          @keydown.up.stop="navigateSearchResults('up')" />
+          @keydown.up.stop="navigateSearchResults('up')"
+          @blur="handleBlur" />
       </div>
       <div
-        class="gap-1/2 flex flex-1 flex-col overflow-visible overflow-y-auto px-3 pb-3 pt-0"
+        class="gap-1/2 flex flex-1 flex-col overflow-visible overflow-y-auto px-3 pt-0 pb-3"
         :class="[
           {
             'pb-14': layout !== 'modal',
@@ -344,7 +348,7 @@ const collections = computed(() => {
               :id="`#search-input-${entry.item.id}`"
               :key="entry.refIndex"
               :ref="(el) => (searchResultRefs[index] = el as HTMLElement)"
-              :active="selectedSearchResult === index"
+              :selected="selectedSearchResult === index"
               class="px-2"
               :href="entry.item.link"
               @click.prevent="onSearchResultClick(entry)"
@@ -416,9 +420,9 @@ const collections = computed(() => {
               class="rabbitsit font-bold" />
             <ScalarAsciiArt
               :art="RabbitJump"
-              class="rabbitjump absolute left-0 top-0 font-bold" />
+              class="rabbitjump absolute top-0 left-0 font-bold" />
           </div>
-          <div class="mb-2 mt-2 text-balance text-center text-sm">
+          <div class="mt-2 mb-2 text-center text-sm text-balance">
             <b class="font-medium">Let's Get Started</b>
             <p class="mt-2">
               Create request, folder, collection or import from OpenAPI/Postman

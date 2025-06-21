@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { useBindCx } from '@scalar/use-hooks/useBindCx'
+import type { Component } from 'vue'
 
-import { type Icon, ScalarIcon } from '../ScalarIcon'
+import { type Icon, ScalarIconLegacyAdapter } from '../ScalarIcon'
 
 defineProps<{
-  icon?: Icon
+  icon?: Icon | Component
   selected?: boolean
 }>()
 
@@ -12,9 +13,10 @@ defineOptions({ inheritAttrs: false })
 const { cx } = useBindCx()
 </script>
 <template>
-  <li
+  <a
     :aria-selected="selected"
     role="option"
+    tabindex="-1"
     v-bind="
       cx(
         'group flex cursor-pointer gap-2.5 rounded px-3 py-1.5 no-underline hover:bg-b-2',
@@ -26,10 +28,11 @@ const { cx } = useBindCx()
       v-if="icon"
       class="flex h-fit items-center text-sm font-medium text-c-3 group-hover:text-c-1">
       <slot name="icon">
-        <ScalarIcon
+        <ScalarIconLegacyAdapter
           v-if="icon"
           :icon="icon"
-          size="sm" />
+          size="sm"
+          weight="bold" />
       </slot>
       <span>&hairsp;</span>
     </div>
@@ -52,5 +55,5 @@ const { cx } = useBindCx()
         <slot name="description" />
       </div>
     </div>
-  </li>
+  </a>
 </template>

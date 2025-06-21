@@ -11,9 +11,9 @@
     "directory": "packages/config"
   },
   "keywords": [],
-  "version": "0.1.3",
+  "version": "0.2.1",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "build": "scalar-build-rollup",
@@ -40,7 +40,7 @@
   ],
   "module": "dist/index.js",
   "dependencies": {
-    "@sinclair/typebox": "^0.33.3"
+    "@sinclair/typebox": "catalog:*"
   },
   "devDependencies": {
     "@scalar/build-tooling": "workspace:*",

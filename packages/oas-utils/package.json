@@ -16,9 +16,9 @@
     "specification",
     "yaml"
   ],
-  "version": "0.2.142",
+  "version": "0.4.8",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "build": "scalar-build-esbuild",
@@ -67,6 +67,11 @@
       "types": "./dist/helpers/index.d.ts",
       "default": "./dist/helpers/index.js"
     },
+    "./helpers/operation-to-har": {
+      "import": "./dist/helpers/operation-to-har/index.js",
+      "types": "./dist/helpers/operation-to-har/index.d.ts",
+      "default": "./dist/helpers/operation-to-har/index.js"
+    },
     "./helpers/security": {
       "import": "./dist/helpers/security/index.js",
       "types": "./dist/helpers/security/index.d.ts",
@@ -96,10 +101,12 @@
   "dependencies": {
     "@hyperjump/browser": "^1.1.0",
     "@hyperjump/json-schema": "^1.9.6",
+    "@scalar/helpers": "workspace:*",
     "@scalar/object-utils": "workspace:*",
     "@scalar/openapi-types": "workspace:*",
     "@scalar/themes": "workspace:*",
     "@scalar/types": "workspace:*",
+    "@types/har-format": "^1.2.15",
     "flatted": "^3.3.1",
     "microdiff": "^1.4.0",
     "nanoid": "catalog:*",
