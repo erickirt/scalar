@@ -1,4 +1,6 @@
-import type { BaseParameter, TransformedOperation } from '@scalar/types/legacy'
+import type { BaseParameter } from '@scalar/types/legacy'
+
+import type { OpenAPIV3_1 } from '@scalar/openapi-types'
 
 import { getExampleFromSchema } from './get-example-from-schema'
 
@@ -11,20 +13,21 @@ import { getExampleFromSchema } from './get-example-from-schema'
  * - Swagger 2.0: Possible values are "query", "header", "path", "formData" or "body".
  */
 export function getParametersFromOperation(
-  operation: Omit<TransformedOperation, 'httpVerb'>,
+  operationParameters: OpenAPIV3_1.ParameterObject[] = [],
+  pathParameters: OpenAPIV3_1.ParameterObject[] = [],
   where: 'query' | 'header' | 'path' | 'cookie' | 'formData' | 'body',
   requiredOnly: boolean = true,
 ): BaseParameter[] {
-  const parameters = [...(operation.pathParameters || []), ...(operation.information?.parameters || [])]
+  const parameters = [...(pathParameters || []), ...(operationParameters || [])]
 
   const params = parameters
     // query, path, header, cookie?
     .filter((parameter) => parameter.in === where)
-    // don’t add optional parameters
+    // don't add optional parameters
     .filter((parameter) => (requiredOnly && parameter.required) || !requiredOnly)
     // transform them
     .map((parameter) => ({
-      name: parameter.name,
+      name: parameter.name ?? 'Unknown Parameter',
       description: parameter.description ?? null,
       value: parameter.example
         ? parameter.example

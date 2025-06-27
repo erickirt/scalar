@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import { provideUseId } from '@headlessui/vue'
+import { OpenApiClientButton } from '@scalar/api-client/components'
 import { LAYOUT_SYMBOL } from '@scalar/api-client/hooks'
 import {
   ACTIVE_ENTITIES_SYMBOL,
-  createActiveEntitiesStore,
-  createWorkspaceStore,
   WORKSPACE_SYMBOL,
 } from '@scalar/api-client/store'
 import {
   addScalarClassesToHeadless,
+  ScalarColorModeToggleButton,
+  ScalarColorModeToggleIcon,
   ScalarErrorBoundary,
+  ScalarSidebarFooter,
 } from '@scalar/components'
-import { defaultStateFactory } from '@scalar/oas-utils/helpers'
+import { sleep } from '@scalar/helpers/testing/sleep'
 import {
   getThemeStyles,
   hasObtrusiveScrollbars,
@@ -21,29 +23,36 @@ import {
   apiReferenceConfigurationSchema,
   type ApiReferenceConfiguration,
 } from '@scalar/types/api-reference'
-import type { SSRState } from '@scalar/types/legacy'
+import type { Spec } from '@scalar/types/legacy'
+import { useBreakpoints } from '@scalar/use-hooks/useBreakpoints'
 import { ScalarToasts, useToasts } from '@scalar/use-toasts'
 import { useDebounceFn, useMediaQuery, useResizeObserver } from '@vueuse/core'
 import {
   computed,
   onBeforeMount,
   onMounted,
-  onServerPrefetch,
   onUnmounted,
   provide,
   ref,
+  toValue,
   useId,
-  useSSRContext,
   watch,
 } from 'vue'
 
+import ClassicHeader from '@/components/ClassicHeader.vue'
 import { Content } from '@/components/Content'
 import GettingStarted from '@/components/GettingStarted.vue'
-import { Sidebar } from '@/components/Sidebar'
-import { ApiClientModal } from '@/features/ApiClientModal'
-import { downloadSpecBus, downloadSpecFile, sleep } from '@/helpers'
-import { useNavState, useSidebar } from '@/hooks'
+import MobileHeader from '@/components/MobileHeader.vue'
+import { ApiClientModal } from '@/features/api-client-modal'
+import { useDocumentSource } from '@/features/document-source'
+import { OPENAPI_VERSION_SYMBOL } from '@/features/download-link'
+import { SearchButton } from '@/features/Search'
+import { Sidebar, useSidebar } from '@/features/sidebar'
+import { parse } from '@/helpers/parse'
 import { CONFIGURATION_SYMBOL } from '@/hooks/useConfig'
+import { useNavState } from '@/hooks/useNavState'
+import { downloadDocument, downloadEventBus } from '@/libs/download'
+import { createEmptySpecification } from '@/libs/openapi'
 import { createPluginManager, PLUGIN_MANAGER_SYMBOL } from '@/plugins'
 import { useHttpClientStore } from '@/stores/useHttpClientStore'
 import type {
@@ -52,7 +61,12 @@ import type {
   ReferenceSlotProps,
 } from '@/types'
 
-const props = defineProps<Omit<ReferenceLayoutProps, 'isDark'>>()
+const {
+  rawSpec,
+  configuration: providedConfiguration,
+  originalDocument: providedOriginalDocument,
+  dereferencedDocument: providedDereferencedDocument,
+} = defineProps<ReferenceLayoutProps>()
 
 defineEmits<{
   (e: 'changeTheme', { id, label }: { id: ThemeId; label: string }): void
@@ -63,7 +77,7 @@ defineEmits<{
 }>()
 
 const configuration = computed(() =>
-  apiReferenceConfigurationSchema.parse(props.configuration),
+  apiReferenceConfigurationSchema.parse(providedConfiguration),
 )
 
 // Configure Reference toasts to use vue-sonner
@@ -74,9 +88,27 @@ defineOptions({
   inheritAttrs: false,
 })
 
-defineSlots<{
-  [x in ReferenceLayoutSlot]: (props: ReferenceSlotProps) => any
-}>()
+const {
+  originalDocument,
+  originalOpenApiVersion,
+  dereferencedDocument,
+  workspaceStore,
+  activeEntitiesStore,
+} = useDocumentSource({
+  configuration,
+  dereferencedDocument: providedDereferencedDocument,
+  originalDocument: providedOriginalDocument,
+})
+
+provide(OPENAPI_VERSION_SYMBOL, originalOpenApiVersion)
+provide(WORKSPACE_SYMBOL, workspaceStore)
+provide(ACTIVE_ENTITIES_SYMBOL, activeEntitiesStore)
+
+defineSlots<
+  {
+    [x in ReferenceLayoutSlot]: (props: ReferenceSlotProps) => any
+  } & { 'document-selector': any }
+>()
 
 const isLargeScreen = useMediaQuery('(min-width: 1150px)')
 
@@ -90,16 +122,12 @@ useResizeObserver(documentEl, (entries) => {
 // Check for Obtrusive Scrollbars
 const obtrusiveScrollbars = computed(hasObtrusiveScrollbars)
 
-const {
-  breadcrumb,
-  collapsedSidebarItems,
-  isSidebarOpen,
-  setCollapsedSidebarItem,
-  hideModels,
-  defaultOpenAllTags,
-  setParsedSpec,
-  scrollToOperation,
-} = useSidebar()
+const navState = useNavState(configuration)
+const { isSidebarOpen, setCollapsedSidebarItem, scrollToOperation, items } =
+  useSidebar(dereferencedDocument, {
+    ...navState,
+    config: configuration,
+  })
 
 const {
   getReferenceId,
@@ -110,7 +138,7 @@ const {
   isIntersectionEnabled,
   updateHash,
   replaceUrlState,
-} = useNavState(configuration)
+} = navState
 
 // Front-end redirect
 if (configuration.value.redirect && typeof window !== 'undefined') {
@@ -123,8 +151,13 @@ if (configuration.value.redirect && typeof window !== 'undefined') {
   }
 }
 
-// Ideally this triggers absolutely first on the client so we can set hash value
-onBeforeMount(() => updateHash())
+onBeforeMount(() => {
+  // Ideally this triggers absolutely first on the client so we can set hash value
+  updateHash()
+
+  // Ensure we add our scalar wrapper class to the headless ui root, mounted is too late
+  addScalarClassesToHeadless()
+})
 
 // Disables intersection observer and scrolls to section once it has been opened
 const scrollToSection = async (id?: string) => {
@@ -143,20 +176,9 @@ const scrollToSection = async (id?: string) => {
 
 const yPosition = ref(0)
 
-/**
- * Ensure we add our scalar wrapper class to the headless ui root
- * mounted is too late
- */
-onBeforeMount(() => addScalarClassesToHeadless())
-
 onMounted(() => {
   // Prevent the browser from restoring scroll position on refresh
   history.scrollRestoration = 'manual'
-
-  // Enable the spec download event bus
-  downloadSpecBus.on(({ specTitle }) => {
-    downloadSpecFile(props.rawSpec, specTitle)
-  })
 
   // Find scalar Y offset to support users who have tried to add their own headers
   const pbcr = documentEl.value?.parentElement?.getBoundingClientRect()
@@ -174,6 +196,9 @@ onMounted(() => {
   window.onpopstate = () =>
     configuration.value.pathRouting &&
     scrollToSection(getPathRoutingId(window.location.pathname))
+
+  // Add window scroll listener
+  window.addEventListener('scroll', debouncedScroll, { passive: true })
 })
 
 const showRenderedContent = computed(
@@ -181,65 +206,74 @@ const showRenderedContent = computed(
 )
 
 // To clear hash when scrolled to the top
-const debouncedScroll = useDebounceFn((value) => {
-  const scrollDistance = value.target.scrollTop ?? 0
-  if (scrollDistance < 50) {
-    const basePath = configuration.value.pathRouting
-      ? configuration.value.pathRouting.basePath
-      : window.location.pathname
-
-    replaceUrlState('', basePath + window.location.search)
+const debouncedScroll = useDebounceFn(() => {
+  if (window.scrollY < 50) {
+    replaceUrlState('')
   }
 })
+
+const sidebarOpened = ref(false)
+
+// Open a sidebar tag
+watch(dereferencedDocument, (newDoc) => {
+  // Scroll to given hash
+  if (hash.value) {
+    const hashSectionId = getSectionId(hash.value)
+    if (hashSectionId) {
+      setCollapsedSidebarItem(hashSectionId, true)
+    }
+  }
+  // Open the first tag
+  else {
+    const firstTag = newDoc.tags?.[0]
+
+    if (firstTag) {
+      setCollapsedSidebarItem(getTagId(firstTag), true)
+    }
+  }
+
+  sidebarOpened.value = true
+})
+
+/**
+ * Temporarily moved this here so we can use the sidebar items
+ * Parsed document (legacy data structure)
+ */
+const parsedDocument = ref<Spec>(createEmptySpecification() as Spec)
+watch(
+  dereferencedDocument,
+  async (newDocument) => {
+    if (!newDocument) {
+      return
+    }
+
+    const result = await parse(newDocument, items.value.entries)
+    parsedDocument.value = result
+  },
+  { immediate: true },
+)
 
 /** This is passed into all of the slots so they have access to the references data */
 const referenceSlotProps = computed<ReferenceSlotProps>(() => ({
-  breadcrumb: breadcrumb.value,
-  spec: props.parsedSpec,
+  spec: parsedDocument.value,
+  breadcrumb: items.value?.titles.get(hash.value) ?? '',
 }))
 
+// Download documents
+onMounted(() =>
+  downloadEventBus.on(({ filename, format }) => {
+    downloadDocument(
+      toValue(originalDocument) || toValue(rawSpec) || '',
+      filename,
+      format,
+    )
+  }),
+)
+
 onUnmounted(() => {
-  downloadSpecBus.reset()
-})
-
-// Keep the parsed spec up to date
-watch(() => props.parsedSpec, setParsedSpec, { deep: true })
-
-// Initialize the server state
-onServerPrefetch(() => {
-  const ctx = useSSRContext<SSRState>()
-  if (!ctx) {
-    return
-  }
-
-  ctx.payload ||= { data: defaultStateFactory() }
-  ctx.payload.data ||= defaultStateFactory()
-
-  // Set initial hash value
-  if (configuration.value.pathRouting) {
-    const id = getPathRoutingId(ctx.url)
-    hash.value = id
-    ctx.payload.data.hash = id
-
-    // For sidebar items we need to reset the state as it persists between requests
-    // This is a temp hack, need to come up with a better solution
-    for (const key in collapsedSidebarItems) {
-      if (Object.hasOwn(collapsedSidebarItems, key)) {
-        delete collapsedSidebarItems[key]
-      }
-    }
-
-    if (id) {
-      setCollapsedSidebarItem(getSectionId(id), true)
-    } else {
-      const firstTag = props.parsedSpec.tags?.[0]
-      if (firstTag) {
-        setCollapsedSidebarItem(getTagId(firstTag), true)
-      }
-    }
-    ctx.payload.data['useSidebarContent-collapsedSidebarItems'] =
-      collapsedSidebarItems
-  }
+  // Remove window scroll listener
+  window.removeEventListener('scroll', debouncedScroll)
+  downloadEventBus.reset()
 })
 
 /**
@@ -249,32 +283,6 @@ onServerPrefetch(() => {
  * @see https://github.com/tailwindlabs/headlessui/issues/2979
  */
 provideUseId(() => useId())
-
-// Create the workspace store and provide it
-const workspaceStore = createWorkspaceStore({
-  useLocalStorage: false,
-  ...configuration.value,
-})
-// Populate the workspace store
-watch(
-  () => props.rawSpec,
-  (spec) =>
-    spec &&
-    workspaceStore.importSpecFile(spec, 'default', {
-      shouldLoad: false,
-      documentUrl: configuration.value.spec?.url ?? configuration.value.url,
-      useCollectionSecurity: true,
-      ...configuration.value,
-    }),
-  { immediate: true },
-)
-
-provide(WORKSPACE_SYMBOL, workspaceStore)
-
-// Same for the active entities store
-const activeEntitiesStore = createActiveEntitiesStore(workspaceStore)
-provide(ACTIVE_ENTITIES_SYMBOL, activeEntitiesStore)
-
 // Provide the client layout
 provide(LAYOUT_SYMBOL, 'modal')
 
@@ -284,13 +292,9 @@ provide(CONFIGURATION_SYMBOL, configuration)
 provide(
   PLUGIN_MANAGER_SYMBOL,
   createPluginManager({
-    // TODO: Get plugins from the configuration
     plugins: configuration.value.plugins,
   }),
 )
-
-// ---------------------------------------------------------------------------/
-// HANDLE MAPPING CONFIGURATION TO INTERNAL REFERENCE STATE
 
 /** Helper utility to map configuration props to the ApiReference internal state */
 function mapConfigToState<K extends keyof ApiReferenceConfiguration>(
@@ -313,15 +317,33 @@ const { setExcludedClients, setDefaultHttpClient } = useHttpClientStore()
 mapConfigToState('defaultHttpClient', setDefaultHttpClient)
 mapConfigToState('hiddenClients', setExcludedClients)
 
-hideModels.value = configuration.value.hideModels ?? false
-defaultOpenAllTags.value = configuration.value.defaultOpenAllTags ?? false
-
 const themeStyleTag = computed(
   () => `<style>
   ${getThemeStyles(configuration.value.theme, {
     fonts: configuration.value.withDefaultFonts,
   })}</style>`,
 )
+
+// ---------------------------------------------------------------------------
+// TODO: Code below is copied from ModernLayout.vue. Find a better location for this.
+
+const { mediaQueries } = useBreakpoints()
+const isDevelopment = import.meta.env.MODE === 'development'
+
+watch(mediaQueries.lg, (newValue, oldValue) => {
+  // Close the drawer when we go from desktop to mobile
+  if (oldValue && !newValue) {
+    isSidebarOpen.value = false
+  }
+})
+
+watch(hash, (newHash, oldHash) => {
+  if (newHash && newHash !== oldHash) {
+    isSidebarOpen.value = false
+  }
+})
+
+// ---------------------------------------------------------------------------
 </script>
 <template>
   <div v-html="themeStyleTag" />
@@ -330,6 +352,8 @@ const themeStyleTag = computed(
     class="scalar-app scalar-api-reference references-layout"
     :class="[
       {
+        'scalar-api-references-standalone-mobile':
+          configuration.showSidebar ?? true,
         'scalar-scrollbars-obtrusive': obtrusiveScrollbars,
         'references-editable': configuration.isEditable,
         'references-sidebar': configuration.showSidebar,
@@ -340,10 +364,15 @@ const themeStyleTag = computed(
     ]"
     :style="{
       '--scalar-y-offset': `var(--scalar-custom-header-height, ${yPosition}px)`,
-    }"
-    @scroll.passive="debouncedScroll">
+    }">
     <!-- Header -->
     <div class="references-header">
+      <MobileHeader
+        :breadcrumb="referenceSlotProps.breadcrumb"
+        v-if="
+          configuration.layout === 'modern' &&
+          (configuration.showSidebar ?? true)
+        " />
       <slot
         v-bind="referenceSlotProps"
         name="header" />
@@ -351,30 +380,60 @@ const themeStyleTag = computed(
     <!-- Navigation (sidebar) wrapper -->
     <aside
       v-if="configuration.showSidebar"
-      :aria-label="`Sidebar for ${parsedSpec.info?.title}`"
+      :aria-label="`Sidebar for ${dereferencedDocument?.info?.title}`"
       class="references-navigation t-doc__sidebar">
       <!-- Navigation tree / Table of Contents -->
       <div class="references-navigation-list">
         <ScalarErrorBoundary>
+          <!-- TODO: @brynn should this be conditional based on classic/modern layout? -->
           <Sidebar
-            :operationsSorter="configuration.operationsSorter"
-            :parsedSpec="parsedSpec"
-            :tagsSorter="configuration.tagsSorter">
+            :title="dereferencedDocument?.info?.title ?? 'The OpenAPI Schema'">
             <template #sidebar-start>
+              <!-- Wrap in a div when slot is filled -->
+              <div v-if="$slots['document-selector']">
+                <slot name="document-selector" />
+              </div>
+              <!-- Search -->
+              <div
+                v-if="!configuration.hideSearch"
+                class="scalar-api-references-standalone-search">
+                <SearchButton
+                  :searchHotKey="configuration?.searchHotKey"
+                  :hideModels="configuration?.hideModels"
+                  :spec="parsedDocument" />
+              </div>
+              <!-- Sidebar Start -->
               <slot
-                v-bind="referenceSlotProps"
-                name="sidebar-start" />
+                name="sidebar-start"
+                v-bind="referenceSlotProps" />
             </template>
             <template #sidebar-end>
               <slot
                 v-bind="referenceSlotProps"
-                name="sidebar-end" />
+                name="sidebar-end">
+                <ScalarSidebarFooter class="darklight-reference">
+                  <OpenApiClientButton
+                    v-if="!configuration.hideClientButton"
+                    buttonSource="sidebar"
+                    :integration="configuration._integration"
+                    :isDevelopment="isDevelopment"
+                    :url="configuration.url" />
+                  <!-- Override the dark mode toggle slot to hide it -->
+                  <template #toggle>
+                    <ScalarColorModeToggleButton
+                      v-if="!configuration.hideDarkModeToggle"
+                      :modelValue="isDark"
+                      @update:modelValue="$emit('toggleDarkMode')" />
+                    <span v-else />
+                  </template>
+                </ScalarSidebarFooter>
+              </slot>
             </template>
           </Sidebar>
         </ScalarErrorBoundary>
       </div>
     </aside>
-    <!-- Swagger file editing -->
+    <!-- Slot for an Editor -->
     <div
       v-show="configuration.isEditable"
       class="references-editor">
@@ -384,18 +443,42 @@ const themeStyleTag = computed(
           name="editor" />
       </div>
     </div>
-    <!-- Rendered reference -->
+    <!-- The Content -->
     <template v-if="showRenderedContent">
       <main
-        :aria-label="`Open API Documentation for ${parsedSpec.info?.title}`"
+        :aria-label="`Open API Documentation for ${dereferencedDocument?.info?.title}`"
         class="references-rendered">
         <Content
           :layout="configuration.layout"
-          :parsedSpec="parsedSpec">
+          :document="dereferencedDocument"
+          :parsedSpec="parsedDocument">
           <template #start>
             <slot
               v-bind="referenceSlotProps"
-              name="content-start" />
+              name="content-start">
+              <ClassicHeader v-if="configuration.layout === 'classic'">
+                <div
+                  v-if="$slots['document-selector']"
+                  class="w-64 *:!p-0 empty:hidden">
+                  <slot name="document-selector" />
+                </div>
+                <SearchButton
+                  v-if="!configuration.hideSearch"
+                  class="t-doc__sidebar max-w-64"
+                  :searchHotKey="configuration.searchHotKey"
+                  :hideModels="configuration?.hideModels"
+                  :spec="parsedDocument" />
+                <template #dark-mode-toggle>
+                  <ScalarColorModeToggleIcon
+                    v-if="!configuration.hideDarkModeToggle"
+                    class="text-c-2 hover:text-c-1"
+                    :mode="isDark ? 'dark' : 'light'"
+                    style="transform: scale(1.4)"
+                    variant="icon"
+                    @click="$emit('toggleDarkMode')" />
+                </template>
+              </ClassicHeader>
+            </slot>
           </template>
           <template
             v-if="configuration?.isEditable"
@@ -424,15 +507,12 @@ const themeStyleTag = computed(
     </template>
     <ApiClientModal
       :configuration="configuration"
-      :parsedSpec="parsedSpec" />
+      :dereferencedDocument="dereferencedDocument" />
   </div>
   <ScalarToasts />
 </template>
 <style>
-@import '@scalar/components/style.css';
-@import '@scalar/themes/style.css';
-@import '../assets/tailwind.css';
-@import '@scalar/api-client/style.css';
+@import '@/style.css';
 
 /** Used to check if css is loaded */
 :root {
@@ -489,7 +569,7 @@ const themeStyleTag = computed(
   grid-area: header;
   position: sticky;
   top: var(--scalar-custom-header-height, 0px);
-  z-index: 10;
+  z-index: 1000;
 
   height: var(--scalar-header-height, 0px);
 }
@@ -621,5 +701,28 @@ const themeStyleTag = computed(
     display: flex;
     flex-direction: column;
   }
+}
+</style>
+<style scoped>
+/**
+* Sidebar CSS for standalone
+* TODO: @brynn move this to the sidebar block OR the ApiReferenceStandalone component
+* when the new elements are available
+*/
+@media (max-width: 1000px) {
+  .scalar-api-references-standalone-mobile {
+    --scalar-header-height: 50px;
+  }
+}
+</style>
+<style scoped>
+.scalar-api-references-standalone-search {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 12px 6px 12px;
+}
+.darklight-reference {
+  width: 100%;
+  margin-top: auto;
 }
 </style>

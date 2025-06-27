@@ -3,12 +3,11 @@ import { useActiveEntities, useWorkspace } from '@scalar/api-client/store'
 import { RequestAuth } from '@scalar/api-client/views/Request/RequestSection/RequestAuth'
 import { ScalarErrorBoundary } from '@scalar/components'
 import { getSlugUid } from '@scalar/oas-utils/transforms'
+import type { OpenAPIV3_1 } from '@scalar/openapi-types'
 import type { Spec } from '@scalar/types/legacy'
 import { computed } from 'vue'
 
-import { BaseUrl } from '@/features/BaseUrl'
-import { getModels, hasModels } from '@/helpers'
-import { useSidebar } from '@/hooks'
+import { BaseUrl } from '@/features/base-url'
 import { useConfig } from '@/hooks/useConfig'
 
 import { ClientLibraries } from './ClientLibraries'
@@ -16,10 +15,10 @@ import { Introduction } from './Introduction'
 import { Loading } from './Lazy'
 import { Models, ModelsAccordion } from './Models'
 import { TagList } from './Tag'
-import { Webhooks } from './Webhooks'
 
 const props = withDefaults(
   defineProps<{
+    document: OpenAPIV3_1.Document
     parsedSpec: Spec
     layout?: 'modern' | 'classic'
   }>(),
@@ -29,7 +28,6 @@ const props = withDefaults(
 )
 
 const config = useConfig()
-const { hideModels } = useSidebar()
 const { collections, securitySchemes, servers } = useWorkspace()
 const {
   activeCollection: _activeCollection,
@@ -85,15 +83,15 @@ const introCardsSlot = computed(() =>
     <slot name="start" />
     <Loading
       v-if="activeCollection"
+      :document="document"
       :collection="activeCollection"
       :layout="layout"
       :parsedSpec="parsedSpec"
       :server="activeServer" />
 
     <Introduction
-      v-if="parsedSpec?.info?.title || parsedSpec?.info?.description"
-      :info="parsedSpec.info"
-      :parsedSpec="parsedSpec">
+      v-if="document?.info?.title || document?.info?.description"
+      :document="document">
       <template #[introCardsSlot]>
         <ScalarErrorBoundary>
           <div
@@ -101,7 +99,7 @@ const introCardsSlot = computed(() =>
             :class="{ 'introduction-card-row': layout === 'classic' }">
             <div
               v-if="activeCollection?.servers?.length"
-              class="scalar-reference-intro-server scalar-client introduction-card-item divide-y text-sm [--scalar-address-bar-height:0px]">
+              class="scalar-reference-intro-server scalar-client introduction-card-item text-sm leading-normal [--scalar-address-bar-height:0px]">
               <BaseUrl
                 :collection="activeCollection"
                 :server="activeServer" />
@@ -112,12 +110,13 @@ const introCardsSlot = computed(() =>
                 activeWorkspace &&
                 Object.keys(securitySchemes ?? {}).length
               "
-              class="scalar-reference-intro-auth scalar-client introduction-card-item">
+              class="scalar-reference-intro-auth scalar-client introduction-card-item leading-normal">
               <RequestAuth
                 :collection="activeCollection"
                 :envVariables="activeEnvVariables"
                 :environment="activeEnvironment"
                 layout="reference"
+                :persistAuth="config.persistAuth"
                 :selectedSecuritySchemeUids="
                   activeCollection?.selectedSecuritySchemeUids ?? []
                 "
@@ -138,6 +137,7 @@ const introCardsSlot = computed(() =>
       <template v-if="parsedSpec['x-tagGroups']">
         <TagList
           v-for="tagGroup in parsedSpec['x-tagGroups']"
+          :document="document"
           :key="tagGroup.name"
           :collection="activeCollection"
           :layout="layout"
@@ -152,34 +152,51 @@ const introCardsSlot = computed(() =>
       <TagList
         v-else
         :collection="activeCollection"
+        :document="document"
         :layout="layout"
-        :schemas="getModels(parsedSpec)"
         :server="activeServer"
         :spec="parsedSpec"
         :tags="parsedSpec.tags" />
     </template>
 
-    <template v-if="parsedSpec.webhooks">
-      <Webhooks :webhooks="parsedSpec.webhooks" />
+    <!-- Webhooks -->
+    <template v-if="parsedSpec.webhooks?.length && activeCollection">
+      <TagList
+        :document="document"
+        id="webhooks"
+        :collection="activeCollection"
+        :layout="layout"
+        :server="activeServer"
+        :spec="parsedSpec"
+        :tags="[
+          {
+            name: 'Webhooks',
+            description: '',
+            operations: parsedSpec.webhooks,
+          },
+        ]">
+      </TagList>
     </template>
 
-    <template v-if="hasModels(parsedSpec) && !hideModels">
+    <template v-if="document?.components?.schemas && !config.hideModels">
       <ModelsAccordion
         v-if="layout === 'classic'"
-        :schemas="getModels(parsedSpec)" />
+        :schemas="document?.components?.schemas" />
       <Models
         v-else
-        :schemas="getModels(parsedSpec)" />
+        :schemas="document?.components?.schemas" />
     </template>
     <slot name="end" />
   </div>
 </template>
+
 <style>
 .narrow-references-container {
   container-name: narrow-references-container;
   container-type: inline-size;
 }
 </style>
+
 <style scoped>
 .render-loading {
   height: calc(var(--full-height) - var(--refs-header-height));
@@ -190,21 +207,12 @@ const introCardsSlot = computed(() =>
 .introduction-card {
   display: flex;
   flex-direction: column;
-  background: var(--scalar-background-1);
 }
 .introduction-card-item {
   display: flex;
-  overflow: hidden;
-  border: var(--scalar-border-width) solid var(--scalar-border-color);
-  border-radius: var(--scalar-radius-lg);
   margin-bottom: 12px;
   flex-direction: column;
   justify-content: start;
-}
-@container narrow-references-container (max-width: 900px) {
-  .introduction-card-item {
-    border-bottom: var(--scalar-border-width) solid var(--scalar-border-color);
-  }
 }
 .introduction-card-item:has(.description) :deep(.server-form-container) {
   border-bottom-left-radius: 0;

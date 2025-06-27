@@ -106,7 +106,7 @@ const item = computed<SidebarItem>(() => {
             }
           : undefined,
       warning:
-        'This cannot be undone. You’re about to delete the collection and all folders and requests inside it.',
+        "This cannot be undone. You're about to delete the collection and all folders and requests inside it.",
       edit: (name: string, icon?: string) => {
         collectionMutators.edit(collection.uid, 'info.title', name)
         if (icon) {
@@ -128,7 +128,7 @@ const item = computed<SidebarItem>(() => {
       resourceTitle: 'Tag',
       children: tag.children,
       warning:
-        'This cannot be undone. You’re about to delete the tag and all requests inside it',
+        "This cannot be undone. You're about to delete the tag and all requests inside it",
       edit: (name: string) => tagMutators.edit(tag.uid, 'name', name),
       delete: () =>
         parentUids[0] &&
@@ -149,7 +149,7 @@ const item = computed<SidebarItem>(() => {
       method: request.method,
       entity: request,
       resourceTitle: 'Request',
-      warning: 'This cannot be undone. You’re about to delete the request.',
+      warning: "This cannot be undone. You're about to delete the request.",
       children: request.examples.slice(1),
       edit: (name: string) =>
         requestMutators.edit(request.uid, 'summary', name),
@@ -174,7 +174,7 @@ const item = computed<SidebarItem>(() => {
       entity: requestExample,
       resourceTitle: 'Example',
       warning:
-        'This cannot be undone. You’re about to delete the example from the request.',
+        "This cannot be undone. You're about to delete the example from the request.",
       children: [],
       edit: (name: string) =>
         requestExampleMutators.edit(requestExample.uid, 'name', name),
@@ -202,7 +202,7 @@ const isDraftCollection = computed(
     item.value.entity.type === 'collection' && item.value.title === 'Drafts',
 )
 
-const highlightClasses = 'hover:bg-sidebar-active-b indent-padding-left'
+const highlightClasses = 'hover:bg-sidebar-b-active indent-padding-left'
 
 /** Due to the nesting, we need a dynamic left offset for hover and active backgrounds */
 const leftOffset = computed(() => {
@@ -391,14 +391,14 @@ const shouldShowItem = computed(() => {
     :class="[
       (layout === 'modal' && parentUids.length > 1) ||
       (layout !== 'modal' && parentUids.length)
-        ? 'before:bg-border indent-border-line-offset before:z-1 mb-[.5px] before:pointer-events-none before:absolute before:left-[calc(.75rem_+_.5px)] before:top-0 before:h-[calc(100%_+_.5px)] before:w-[.5px] last:mb-0 last:before:h-full'
+        ? 'before:bg-border indent-border-line-offset mb-[.5px] before:pointer-events-none before:absolute before:top-0 before:left-[calc(.75rem_+_.5px)] before:z-1 before:h-[calc(100%_+_.5px)] before:w-[.5px] last:mb-0 last:before:h-full'
         : '',
     ]">
     <Draggable
       :id="item.entity.uid"
       ref="draggableRef"
       :ceiling="getDraggableOffsets.ceiling"
-      class="gap-1/2 flex flex-1 flex-col text-sm"
+      class="gap-1/2 flex flex-1 flex-col text-base"
       :floor="getDraggableOffsets.floor"
       :isDraggable="isDraggable"
       :isDroppable="isDroppable"
@@ -422,10 +422,10 @@ const shouldShowItem = computed(() => {
           :class="[
             highlightClasses,
             isExactActive || isDefaultActive
-              ? 'bg-sidebar-active-b text-sidebar-active-c transition-none'
+              ? 'bg-sidebar-b-active text-sidebar-c-active font-medium transition-none'
               : 'text-sidebar-c-2',
           ]">
-          <span class="line-clamp-1 w-full break-all pl-2 font-medium">
+          <span class="line-clamp-1 w-full pl-2 break-all">
             {{ item.title || 'Untitled' }}
           </span>
           <div class="flex flex-row items-center gap-1">
@@ -480,7 +480,7 @@ const shouldShowItem = computed(() => {
         :class="[
           highlightClasses,
           {
-            'bg-sidebar-active-b text-sidebar-active-c transition-none':
+            'bg-sidebar-b-active text-sidebar-c-active transition-none':
               typeof router.currentRoute.value.name === 'string' &&
               router.currentRoute.value.name.startsWith('collection') &&
               router.currentRoute.value.params[PathId.Collection] ===
@@ -500,7 +500,7 @@ const shouldShowItem = computed(() => {
           &hairsp;
         </span>
         <div class="flex flex-1 flex-row justify-between font-medium">
-          <span class="line-clamp-1 w-full break-all text-left">
+          <span class="line-clamp-1 w-full text-left break-all">
             {{ item.title }}
           </span>
           <div class="relative flex h-fit justify-end">
@@ -547,26 +547,19 @@ const shouldShowItem = computed(() => {
             </div>
             <ScalarTooltip
               v-if="item.watchMode"
-              side="right"
-              :sideOffset="12">
-              <template #trigger>
+              placement="right"
+              :offset="12"
+              :content="`Watching: ${item.documentUrl}`">
+              <button
+                class="flex items-center justify-center"
+                type="button">
                 <ScalarIcon
                   class="ml-0.5 text-sm"
                   :class="watchIconColor"
                   icon="Watch"
                   size="md"
                   thickness="2" />
-              </template>
-              <template #content>
-                <div
-                  class="w-content bg-b-1 z-100 text-xxs text-c-1 pointer-events-none z-10 grid max-w-10 gap-1.5 rounded p-2 leading-5 shadow-lg">
-                  <div class="text-c-2 flex items-center">
-                    <p class="text-pretty break-all">
-                      Watching: {{ item.documentUrl }}
-                    </p>
-                  </div>
-                </div>
-              </template>
+              </button>
             </ScalarTooltip>
             <span>&hairsp;</span>
           </div>
@@ -590,7 +583,7 @@ const shouldShowItem = computed(() => {
           &hairsp;
         </span>
         <div class="flex flex-1 flex-row justify-between">
-          <span class="line-clamp-1 w-full break-all text-left font-medium">
+          <span class="line-clamp-1 w-full text-left font-medium break-all">
             {{ item.title }}
           </span>
           <div class="relative flex h-fit justify-end">
@@ -637,26 +630,19 @@ const shouldShowItem = computed(() => {
             </div>
             <ScalarTooltip
               v-if="item.watchMode"
-              side="right"
-              :sideOffset="12">
-              <template #trigger>
+              content="Watching: {{ item.documentUrl }}"
+              placement="right"
+              :offset="12">
+              <button
+                class="flex items-center justify-center"
+                type="button">
                 <ScalarIcon
                   class="ml-0.5 text-sm"
                   :class="watchIconColor"
                   icon="Watch"
                   size="md"
                   thickness="2" />
-              </template>
-              <template #content>
-                <div
-                  class="w-content bg-b-1 z-100 text-xxs text-c-1 pointer-events-none z-10 grid max-w-10 gap-1.5 rounded p-2 leading-5 shadow-lg">
-                  <div class="text-c-2 flex items-center">
-                    <p class="text-pretty break-all">
-                      Watching: {{ item.documentUrl }}
-                    </p>
-                  </div>
-                </div>
-              </template>
+              </button>
             </ScalarTooltip>
             <span>&hairsp;</span>
           </div>

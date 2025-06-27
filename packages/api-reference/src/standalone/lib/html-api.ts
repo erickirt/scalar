@@ -2,8 +2,8 @@ import type { ReferenceProps } from '@/types'
 import {
   type AnyApiReferenceConfiguration,
   type ApiReferenceConfiguration,
-  apiReferenceConfigurationSchema,
   type CreateApiReference,
+  apiReferenceConfigurationSchema,
 } from '@scalar/types/api-reference'
 import { createHead } from '@unhead/vue'
 import { createApp, h, reactive } from 'vue'
@@ -37,7 +37,7 @@ export function getConfigurationFromDataAttributes(doc: Document): ApiReferenceC
   }
 
   const getUrl = () => {
-    // Let’s first check if the user passed a spec URL in the configuration.
+    // Let's first check if the user passed a spec URL in the configuration.
     if (getConfiguration().url) {
       return getConfiguration().url
     }
@@ -179,6 +179,9 @@ export const createApiReference: CreateApiReference = (
   elementOrSelectorOrConfig,
   optionalConfiguration?: AnyApiReferenceConfiguration,
 ) => {
+  // Create an id prefix for useId so we don't have collisions with other Vue apps
+  const idPrefix = 'scalar-refs'
+
   const props = reactive<ReferenceProps>({
     // Either the configuration will be the second arugment or it MUST be the first (configuration only)
     configuration: optionalConfiguration ?? (elementOrSelectorOrConfig as AnyApiReferenceConfiguration) ?? {},
@@ -189,6 +192,8 @@ export const createApiReference: CreateApiReference = (
 
   // Meta tags, etc.
   app.use(createHead())
+
+  app.config.idPrefix = idPrefix
 
   // If we have an optional config, then we must mount the element immediately (not sure why type is not narrowing)
   if (optionalConfiguration) {
@@ -238,6 +243,7 @@ export const createApiReference: CreateApiReference = (
       app.unmount()
       app = createApp(() => h(ApiReference, props))
       app.use(createHead())
+      app.config.idPrefix = idPrefix
       app.mount(currentElement)
     },
     false,

@@ -1,6 +1,6 @@
-import type { Queue, Task } from '../../../types/index'
-import { getEntrypoint } from '../../getEntrypoint'
-import { toJson as toJsonUtility } from '../../toJson'
+import { getEntrypoint } from '@/utils/get-entrypoint'
+import type { Queue, Task } from '@/types/index'
+import { toJson as toJsonUtility } from '@/utils/to-json'
 import { workThroughQueue } from '../utils/workThroughQueue'
 
 /**

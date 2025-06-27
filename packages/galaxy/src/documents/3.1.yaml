@@ -2,7 +2,7 @@ openapi: 3.1.1
 info:
   title: Scalar Galaxy
   description: |
-    The Scalar Galaxy is an example OpenAPI specification to test OpenAPI tools and libraries. It’s a fictional universe with fictional planets and fictional data. Get all the data for [all planets](#tag/planets/GET/planets).
+    The Scalar Galaxy is an example OpenAPI specification to test OpenAPI tools and libraries. It's a fictional universe with fictional planets and fictional data. Get all the data for [all planets](#tag/planets/GET/planets).
 
     ## Resources
 
@@ -12,7 +12,7 @@ info:
 
     ## Markdown Support
 
-    All descriptions *can* contain ~~tons of text~~ **Markdown**. [If GitHub supports the syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax), chances are we’re supporting it, too. You can even create [internal links to reference endpoints](#tag/authentication/POST/user/signup).
+    All descriptions *can* contain ~~tons of text~~ **Markdown**. [If GitHub supports the syntax](https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax), chances are we're supporting it, too. You can even create [internal links to reference endpoints](#tag/authentication/POST/user/signup).
 
     <details>
       <summary>Examples</summary>
@@ -38,7 +38,7 @@ info:
 
       **Images**
 
-      Yes, there’s support for images, too!
+      Yes, there's support for images, too!
 
       ![Empty placeholder image showing the width/height](https://images.placeholders.dev/?width=1280&height=720)
 
@@ -85,13 +85,15 @@ tags:
       all the required endpoints to create an account and authorize yourself.
   - name: Planets
     description: Everything about planets
+  - name: Celestial Bodies
+    description: Celestial bodies are the planets and satellites in the Scalar Galaxy.
 paths:
   '/planets':
     get:
       tags:
         - Planets
       summary: Get all planets
-      description: It’s easy to say you know them all, but do you really? Retrieve all the planets and check whether you missed one.
+      description: It's easy to say you know them all, but do you really? Retrieve all the planets and check whether you missed one.
       operationId: getAllData
       security:
         - {}
@@ -128,14 +130,39 @@ paths:
       tags:
         - Planets
       summary: Create a planet
-      description: Time to play god and create a new planet. What do you think? Ah, don’t think too much. What could go wrong anyway?
+      description: Time to play god and create a new planet. What do you think? Ah, don't think too much. What could go wrong anyway?
       operationId: createPlanet
       callbacks:
         planetCreated:
-          '{$request.body#/callbackUrl}':
+          '{$request.body#/successCallbackUrl}':
             post:
               requestBody:
                 description: Information about the newly created planet
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Planet'
+              responses:
+                '200':
+                  description: Your server returns this code if it accepts the callback
+                '204':
+                  description: Your server should return this HTTP status code if no longer interested in further updates
+          '{$request.body#/failureCallbackUrl}':
+            post:
+              requestBody:
+                description: Information about which fields failed to validate
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Planet'
+              responses:
+                '200':
+                  description: Your server returns this code if it accepts the callback
+        planetExploded:
+          '{$request.body#/successCallbackUrl}':
+            post:
+              requestBody:
+                description: Information about the newly exploded planet
                 content:
                   application/json:
                     schema:
@@ -171,7 +198,7 @@ paths:
       tags:
         - Planets
       summary: Get a planet
-      description: You’ll better learn a little bit more about the planets. It might come in handy once space travel is available for everyone.
+      description: You'll better learn a little bit more about the planets. It might come in handy once space travel is available for everyone.
       operationId: getPlanet
       security:
         - {}
@@ -271,6 +298,25 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+  '/celestial-bodies':
+    post:
+      tags:
+        - Celestial Bodies
+      summary: Create a celestial body
+      operationId: createCelestialBody
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CelestialBody'
+      responses:
+        '201':
+          description: Celestial body created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CelestialBody'
   '/user/signup':
     post:
       tags:
@@ -374,7 +420,7 @@ paths:
       tags:
         - Authentication
       summary: Get authenticated user
-      description: Find yourself they say. That’s what you can do here.
+      description: Find yourself they say. That's what you can do here.
       operationId: getMe
       security:
         - basicAuth: []
@@ -487,6 +533,16 @@ components:
         format: int64
         examples:
           - 1
+    satelliteId:
+      name: satelliteId
+      description: The ID of the satellite to get
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        examples:
+          - 1
     limit:
       name: limit
       description: The number of items to return
@@ -536,7 +592,7 @@ components:
           schema:
             $ref: '#/components/schemas/ForbiddenError'
     NotFound:
-      description: NotFound
+      description: Not Found
       content:
         application/json:
           schema:
@@ -615,6 +671,16 @@ components:
           type: string
           examples:
             - eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+    CelestialBody:
+      oneOf:
+        - $ref: '#/components/schemas/Planet'
+        - $ref: '#/components/schemas/Satellite'
+      discriminator:
+        propertyName: type
+        mapping:
+          planet: '#/components/schemas/Planet'
+          satellite: '#/components/schemas/Satellite'
+      description: A celestial body which can be either a planet or a satellite
     Planet:
       description: A planet in the Scalar Galaxy
       type: object
@@ -748,12 +814,75 @@ components:
           readOnly: true
           examples:
             - '2024-01-15T14:30:00Z'
-        callbackUrl:
+        successCallbackUrl:
           type: string
           format: uri
-          description: URL to receive notifications about this planet
+          description: URL which gets invoked upon a successful operation
           examples:
             - https://example.com/webhook
+        failureCallbackUrl:
+          type: string
+          format: uri
+          description: URL which gets invoked upon a failed operation
+          examples:
+            - https://example.com/webhook
+    Satellite:
+      description: Every satellite in the Scalar Galaxy
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+          examples:
+            - 1
+        name:
+          type: string
+          examples:
+            - Phobos
+        description:
+          type:
+            - string
+            - 'null'
+          examples:
+            - Phobos is the larger and innermost of the two moons of Mars.
+        diameter:
+          type: number
+          format: float
+          description: Diameter in kilometers
+          examples:
+            - 22.2
+        type:
+          type: string
+          enum:
+            - moon
+            - asteroid
+            - comet
+          examples:
+            - moon
+        orbit:
+          type: object
+          properties:
+            planetId:
+              type: integer
+              format: int64
+              description: The ID of the planet this satellite orbits
+              examples:
+                - 1
+            orbitalPeriod:
+              type: number
+              format: float
+              description: Orbital period in Earth days
+              examples:
+                - 0.319
+            distance:
+              type: number
+              format: float
+              description: Average distance from the planet in kilometers
+              examples:
+                - 9376
     PaginatedResource:
       description: A paginated resource
       type: object
@@ -945,19 +1074,3 @@ components:
           type: string
           examples:
             - The request was invalid.
-    Satellite:
-      description: A natural satellite (moon) orbiting a planet
-      type: object
-      required:
-        - name
-      properties:
-        name:
-          type: string
-          examples:
-            - Phobos
-        diameter:
-          type: number
-          format: float
-          description: Diameter in kilometers
-          examples:
-            - 22.2

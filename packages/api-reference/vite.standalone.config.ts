@@ -1,10 +1,11 @@
-import vue from '@vitejs/plugin-vue'
 import { URL, fileURLToPath } from 'node:url'
+import vue from '@vitejs/plugin-vue'
 import { webpackStats } from 'rollup-plugin-webpack-stats'
 import banner from 'vite-plugin-banner'
 import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js'
 import { defineConfig } from 'vitest/config'
 
+import tailwindcss from '@tailwindcss/vite'
 import licenseBannerTemplate from './license-banner-template.txt'
 import { name, version } from './package.json'
 
@@ -22,11 +23,14 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@v2': fileURLToPath(new URL('./src/v2', import.meta.url)),
+      '@test': fileURLToPath(new URL('./test', import.meta.url)),
     },
     dedupe: ['vue'],
   },
   plugins: [
     vue(),
+    tailwindcss(),
     cssInjectedByJsPlugin(),
     webpackStats(),
     banner({
@@ -46,7 +50,7 @@ export default defineConfig({
     cssCodeSplit: false,
     minify: 'terser',
     // With the default terserOptions, highlight.js breaks the build.
-    // * They’re using terser, too.
+    // * They're using terser, too.
     // * Copying their options fixes the build.
     // * `max_line_len: 80` is the one setting that makes the difference.
     //
@@ -65,12 +69,6 @@ export default defineConfig({
       output: {
         entryFileNames: '[name].js',
       },
-    },
-  },
-  test: {
-    coverage: {
-      enabled: true,
-      reporter: 'text',
     },
   },
 })

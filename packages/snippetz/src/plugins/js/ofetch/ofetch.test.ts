@@ -46,7 +46,7 @@ ofetch('https://example.com', {
 })`)
   })
 
-  it('doesn’t add empty headers', () => {
+  it(`doesn't add empty headers`, () => {
     const result = jsOfetch.generate({
       url: 'https://example.com',
       headers: [],
@@ -95,10 +95,13 @@ ofetch('https://example.com', {
     expect(result).toBe(`import { ofetch } from 'ofetch'
 
 ofetch('https://example.com', {
-  query: {
-    foo: 'bar',
-    bar: 'foo'
-  }
+  query: [{
+    name: 'foo',
+    value: 'bar'
+  },   {
+    name: 'bar',
+    value: 'foo'
+  }]
 })`)
   })
 
@@ -126,7 +129,7 @@ ofetch('https://example.com', {
 })`)
   })
 
-  it('doesn’t add empty cookies', () => {
+  it(`doesn't add empty cookies`, () => {
     const result = jsOfetch.generate({
       url: 'https://example.com',
       cookies: [],

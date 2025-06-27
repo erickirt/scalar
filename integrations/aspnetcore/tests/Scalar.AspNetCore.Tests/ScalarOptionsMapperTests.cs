@@ -15,7 +15,7 @@ public class ScalarOptionsMapperTests
         configuration.ProxyUrl.Should().BeNull();
         configuration.ShowSidebar.Should().BeTrue();
         configuration.HideModels.Should().BeFalse();
-        configuration.HideDownloadButton.Should().BeFalse();
+        configuration.DocumentDownloadType.Should().BeNull();
         configuration.HideTestRequestButton.Should().BeFalse();
         configuration.DarkMode.Should().BeTrue();
         configuration.ForceDarkModeState.Should().BeNull();
@@ -35,6 +35,7 @@ public class ScalarOptionsMapperTests
         configuration.Theme.Should().Be("purple");
         configuration.Integration.Should().Be("dotnet");
         configuration.Sources.Should().BeEmpty();
+        configuration.PersistAuth.Should().BeFalse();
     }
 
     [Fact]
@@ -46,7 +47,6 @@ public class ScalarOptionsMapperTests
             ProxyUrl = "http://localhost:8080",
             ShowSidebar = false,
             HideModels = true,
-            HideDownloadButton = true,
             HideTestRequestButton = true,
             DarkMode = false,
             ForceThemeMode = ThemeMode.Light,
@@ -59,10 +59,11 @@ public class ScalarOptionsMapperTests
             Metadata = new Dictionary<string, string> { ["key"] = "value" },
             DefaultHttpClient = new KeyValuePair<ScalarTarget, ScalarClient>(ScalarTarget.CSharp, ScalarClient.HttpClient),
             HiddenClients = true,
+#pragma warning disable CS0618 // Type or member is obsolete
+            HideDownloadButton = true,
             Authentication = new ScalarAuthenticationOptions
             {
                 PreferredSecurityScheme = "my-scheme",
-#pragma warning disable CS0618 // Type or member is obsolete
                 ApiKey = new ApiKeyOptions
                 {
                     Token = "my-token"
@@ -74,7 +75,8 @@ public class ScalarOptionsMapperTests
             TagSorter = TagSorter.Alpha,
             OperationSorter = OperationSorter.Method,
             DotNetFlag = false,
-            HideClientButton = true
+            HideClientButton = true,
+            PersistentAuthentication = true
         };
         options.AddDocument("v2");
 
@@ -85,10 +87,9 @@ public class ScalarOptionsMapperTests
         configuration.ProxyUrl.Should().Be("http://localhost:8080");
         configuration.ShowSidebar.Should().BeFalse();
         configuration.HideModels.Should().BeTrue();
-        configuration.HideDownloadButton.Should().BeTrue();
+        configuration.DocumentDownloadType.Should().Be("none");
         configuration.HideTestRequestButton.Should().BeTrue();
         configuration.DarkMode.Should().BeFalse();
-        configuration.ForceDarkModeState.Should().Be("light");
         configuration.HideDarkModeToggle.Should().BeTrue();
         configuration.CustomCss.Should().Be("*{}");
         configuration.SearchHotKey.Should().Be("o");
@@ -98,8 +99,8 @@ public class ScalarOptionsMapperTests
         configuration.DefaultHttpClient!.ClientKey.Should().Be("httpclient");
         ((bool) configuration.HiddenClients!).Should().BeTrue();
         configuration.Authentication.Should().NotBeNull();
-        configuration.Authentication!.PreferredSecurityScheme.Should().Be("my-scheme");
 #pragma warning disable CS0618 // Type or member is obsolete
+        configuration.Authentication!.PreferredSecurityScheme.Should().Be("my-scheme");
         configuration.Authentication.ApiKey.Should().NotBeNull();
         configuration.Authentication.ApiKey!.Token.Should().Be("my-token");
 #pragma warning restore CS0618 // Type or member is obsolete
@@ -112,6 +113,7 @@ public class ScalarOptionsMapperTests
         configuration.Integration.Should().BeNull();
         configuration.HideClientButton.Should().BeTrue();
         configuration.Sources.Should().ContainSingle().Which.Url.Should().Be("openapi/v2.json");
+        configuration.PersistAuth.Should().BeTrue();
     }
 
     [Fact]
@@ -203,5 +205,26 @@ public class ScalarOptionsMapperTests
                 first => first.Url.Should().Be("openapi/default.json"),
                 second => second.Url.Should().Be("external/custom.json")
             );
+    }
+
+    [Fact]
+    public void PreferredSecurityScheme_ShouldOverridePreferredSecuritySchemes_WhenSet()
+    {
+        // Arrange
+        var options = new ScalarOptions
+        {
+            // Act
+            Authentication = new ScalarAuthenticationOptions
+            {
+#pragma warning disable CS0618 // Type or member is obsolete
+                PreferredSecurityScheme = "my-scheme"
+#pragma warning restore CS0618 // Type or member is obsolete
+            }
+        };
+
+        var configuration = options.ToScalarConfiguration();
+
+        // Assert
+        configuration.Authentication!.PreferredSecuritySchemes.Should().ContainSingle().Which.Should().Be("my-scheme");
     }
 }

@@ -1,0 +1,84 @@
+{
+  "name": "@scalar/workspace-store",
+  "description": "Store interface for openapi documents",
+  "license": "MIT",
+  "author": "Scalar (https://github.com/scalar)",
+  "homepage": "https://github.com/scalar/scalar",
+  "bugs": "https://github.com/scalar/scalar/issues/new/choose",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/scalar/scalar.git",
+    "directory": "packages/workspace-store"
+  },
+  "keywords": [
+    "workspace",
+    "store",
+    "openapi",
+    "scalar"
+  ],
+  "version": "0.7.1",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "scalar-build-esbuild",
+    "dev": "vite-node ./src/index.ts",
+    "format": "scalar-format",
+    "format:check": "scalar-format-check",
+    "lint:check": "eslint .",
+    "lint:fix": "eslint .  --fix",
+    "test": "vitest",
+    "types:build": "scalar-types-build",
+    "types:check": "scalar-types-check",
+    "generate-json-schemas": "vite-node ./scripts/generate-json-schemas.ts"
+  },
+  "type": "module",
+  "exports": {
+    "./client": {
+      "import": "./dist/client.js",
+      "types": "./dist/client.d.ts",
+      "default": "./dist/client.js"
+    },
+    "./schemas": {
+      "import": "./dist/schemas.js",
+      "types": "./dist/schemas.d.ts",
+      "default": "./dist/schemas.js"
+    },
+    "./schemas/v3.1/*": {
+      "import": "./dist/schemas/v3.1/*.js",
+      "types": "./dist/schemas/v3.1/*.d.ts",
+      "default": "./dist/schemas/v3.1/*.js"
+    },
+    "./schemas/v3.1/strict/*": {
+      "import": "./dist/schemas/v3.1/strict/*.js",
+      "types": "./dist/schemas/v3.1/strict/*.d.ts",
+      "default": "./dist/schemas/v3.1/strict/*.js"
+    },
+    "./server": {
+      "import": "./dist/server.js",
+      "types": "./dist/server.d.ts",
+      "default": "./dist/server.js"
+    }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "dependencies": {
+    "@scalar/code-highlight": "workspace:*",
+    "@scalar/helpers": "workspace:*",
+    "@scalar/openapi-parser": "workspace:*",
+    "@scalar/openapi-types": "workspace:*",
+    "@scalar/types": "workspace:*",
+    "@sinclair/typebox": "catalog:*",
+    "github-slugger": "^2.0.0",
+    "vue": "catalog:*"
+  },
+  "devDependencies": {
+    "@google-cloud/storage": "catalog:*",
+    "@scalar/build-tooling": "workspace:*",
+    "fastify": "catalog:*",
+    "vite": "catalog:*",
+    "vitest": "catalog:*"
+  }
+}
