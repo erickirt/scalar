@@ -1,12 +1,7 @@
-import type { ThemeId } from '@scalar/themes'
 import type { AnyApiReferenceConfiguration, ApiReferenceConfiguration } from '@scalar/types/api-reference'
-import type { ContentType, ReferenceConfiguration, Spec } from '@scalar/types/legacy'
-import type { HarRequest } from '@scalar/types/snippetz'
-import type { Slot } from 'vue'
+import type { OpenAPIV3_1, Spec } from '@scalar/types/legacy'
 
 export type { ApiReferenceConfiguration }
-// TODO: Just here for backwards compatibility (2025-02-21)
-export type { ReferenceConfiguration }
 
 export type ReferenceProps = {
   configuration?: AnyApiReferenceConfiguration
@@ -17,19 +12,36 @@ export type ReferenceProps = {
  */
 export type ReferenceLayoutProps = {
   configuration: Partial<ApiReferenceConfiguration>
-  parsedSpec: Spec
-  rawSpec: string
+  /**
+   *
+   * The OpenAPI 3.1 document, but all $ref's are resolved already.
+   *
+   * @remark You need to add the `originalDocument`, too.
+   *
+   * @example
+   *
+   * import { upgrade, dereference } from '@scalar/openapi-parser'
+   *
+   * const { specification: upgradedDocument } = upgrade(originalDocument)
+   * const { schema: dereferencedDocument } = await dereference(upgradedDocument)
+   */
+  dereferencedDocument?: OpenAPIV3_1.Document
+  /**
+   * The raw OpenAPI document. Doesn't have to be OpenAPI 3.1.
+   */
+  originalDocument?: string
   isDark: boolean
+  /**
+   * @deprecated We can't use this anymore. Use `dereferencedDocument` instead.
+   */
+  parsedSpec?: Spec
+  /**
+   * @deprecated Use `originalDocument` instead.
+   */
+  rawSpec?: string
 }
 
 export type GettingStartedExamples = 'Petstore' | 'CoinMarketCap'
-
-export type Parameter = {
-  name: string
-  required: boolean
-  displayType: string
-  description: string
-}
 
 export type ContentProperties = {
   [key: string]: {
@@ -50,43 +62,6 @@ export type ContentSchema = {
     properties: ContentProperties
   }
 }
-
-export type Content = {
-  [key in ContentType]: ContentSchema
-}
-
-export type Contact = {
-  email: string
-}
-
-export type License = {
-  name: string
-  url: string
-}
-
-export type Info = {
-  title: string
-  description?: string
-  termsOfService?: string
-  contact?: Contact
-  license?: License
-  version?: string
-}
-
-export type HarRequestWithPath = HarRequest & {
-  path: string
-}
-
-export type ReferenceLayoutType = 'modern' | 'classic'
-
-/** Slots required for standalone reference components */
-export type ReferenceSlot = 'footer'
-
-export type ReferenceSlots = {
-  // None of our slots should have any slot props
-  [x in ReferenceSlot]: Slot<Record<string, never>>
-}
-
 /** Slots required for reference base / layout component */
 export type ReferenceLayoutSlot =
   | 'header'
@@ -108,12 +83,4 @@ export type DocumentSelectorSlot = {
 export type ReferenceSlotProps = {
   spec: Spec
   breadcrumb: string
-}
-
-export type ReferenceLayoutEvents = {
-  (e: 'changeTheme', value: ThemeId): void
-  (e: 'updateContent', value: string): void
-  (e: 'loadSwaggerFile'): void
-  (e: 'linkSwaggerFile'): void
-  (e: 'toggleDarkMode'): void
 }

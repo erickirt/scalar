@@ -63,7 +63,7 @@ const changeTheme = (themeId: ThemeId) =>
   workspaceMutators.edit(activeWorkspace.value?.uid, 'themeId', themeId)
 
 const buttonStyles = cva({
-  base: 'w-full shadow-none text-c-1 justify-start pl-2 gap-2 border-1/2',
+  base: 'w-full shadow-none text-c-1 justify-start pl-2 gap-2 border',
   variants: {
     active: {
       true: 'bg-primary text-c-1 hover:bg-inherit',
@@ -77,7 +77,7 @@ const setProxy = (newProxy: string | undefined) =>
 </script>
 <template>
   <div class="bg-b-1 h-full w-full overflow-auto">
-    <div class="ml-auto mr-auto w-full max-w-[720px] px-5 py-5">
+    <div class="mr-auto ml-auto w-full max-w-[720px] px-5 py-5">
       <div class="flex flex-col gap-8">
         <!-- Heading -->
         <div>
@@ -183,7 +183,7 @@ const setProxy = (newProxy: string | undefined) =>
         <SettingsSection>
           <template #title> Themes </template>
           <template #description>
-            We’ve got a whole rainbow of themes for you to play with:
+            We've got a whole rainbow of themes for you to play with:
           </template>
 
           <div class="flex flex-col gap-2">
@@ -241,7 +241,7 @@ const setProxy = (newProxy: string | undefined) =>
           <template #title> Framework Themes </template>
           <template #description>
             Are you a real fan? Show your support by using your favorite
-            framework’s theme!
+            framework's theme!
           </template>
 
           <div class="grid grid-cols-2 gap-2">

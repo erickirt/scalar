@@ -38,8 +38,11 @@ const genericExampleValues: Record<string, string> = {
 /**
  * We can use the `format` to generate some random values.
  */
-function guessFromFormat(schema: Record<string, any>, fallback: string = '') {
-  return genericExampleValues[schema.format] ?? fallback
+function guessFromFormat(schema: Record<string, any>, makeUpRandomData: boolean = false, fallback: string = '') {
+  if (schema.format === 'binary') {
+    return new File([''], 'filename')
+  }
+  return makeUpRandomData ? (genericExampleValues[schema.format] ?? fallback) : ''
 }
 
 /** Map of all the results */
@@ -97,7 +100,7 @@ export const getExampleFromSchema = (
     return resultCache.get(schema)
   }
 
-  // Check whether it’s a circular reference
+  // Check whether it's a circular reference
   if (level === MAX_LEVELS_DEEP + 1) {
     try {
       // Fails if it contains a circular reference
@@ -111,7 +114,7 @@ export const getExampleFromSchema = (
   // But if `emptyString` is  set, we do want to see some values.
   const makeUpRandomData = !!options?.emptyString
 
-  // If the property is deprecated anyway, we don’t want to show it.
+  // If the property is deprecated anyway, we don't want to show it.
   if (schema.deprecated) {
     return undefined
   }
@@ -125,7 +128,7 @@ export const getExampleFromSchema = (
   if (schema['x-variable']) {
     const value = options?.variables?.[schema['x-variable']]
 
-    // Return the value if it’s defined
+    // Return the value if it's defined
     if (value !== undefined) {
       // Type-casting
       if (schema.type === 'number' || schema.type === 'integer') {
@@ -136,17 +139,17 @@ export const getExampleFromSchema = (
     }
   }
 
-  // Use the first example, if there’s an array
+  // Use the first example, if there's an array
   if (Array.isArray(schema.examples) && schema.examples.length > 0) {
     return cache(schema, schema.examples[0])
   }
 
-  // Use an example, if there’s one
+  // Use an example, if there's one
   if (schema.example !== undefined) {
     return cache(schema, schema.example)
   }
 
-  // Use a default value, if there’s one
+  // Use a default value, if there's one
   if (schema.default !== undefined) {
     return cache(schema, schema.default)
   }
@@ -295,7 +298,12 @@ export const getExampleFromSchema = (
       }
     }
 
-    if (schema.items?.type) {
+    // if it has type: 'object', or properties, it's an object
+    const isObject = schema.items?.type === 'object' || schema.items?.properties !== undefined
+    // if it has type: 'array', or items, it's an array
+    const isArray = schema.items?.type === 'array' || schema.items?.items !== undefined
+
+    if (schema.items?.type || isObject || isArray) {
       const exampleFromSchema = getExampleFromSchema(schema.items, options, level + 1)
 
       return wrapItems ? [{ [itemsXmlTagName]: exampleFromSchema }] : [exampleFromSchema]
@@ -305,7 +313,7 @@ export const getExampleFromSchema = (
   }
 
   const exampleValues: Record<any, any> = {
-    string: makeUpRandomData ? guessFromFormat(schema, options?.emptyString) : '',
+    string: guessFromFormat(schema, makeUpRandomData, options?.emptyString),
     boolean: true,
     integer: schema.min ?? 1,
     number: schema.min ?? 1,

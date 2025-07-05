@@ -1,5 +1,140 @@
 # @scalar/postman-to-openapi
 
+## 0.3.13
+
+### Patch Changes
+
+- 2d7f995: refactor: use more common straight apostrophe ' instead of the real apostrophe ’
+- Updated dependencies [2d7f995]
+  - @scalar/openapi-types@0.3.5
+  - @scalar/oas-utils@0.4.10
+  - @scalar/helpers@0.0.6
+
+## 0.3.12
+
+### Patch Changes
+
+- Updated dependencies [533469b]
+- Updated dependencies [23b150b]
+  - @scalar/openapi-types@0.3.4
+  - @scalar/oas-utils@0.4.9
+  - @scalar/helpers@0.0.5
+
+## 0.3.11
+
+### Patch Changes
+
+- @scalar/oas-utils@0.4.8
+
+## 0.3.10
+
+### Patch Changes
+
+- @scalar/oas-utils@0.4.7
+
+## 0.3.9
+
+### Patch Changes
+
+- Updated dependencies [979139e]
+- Updated dependencies [aaf90bf]
+  - @scalar/oas-utils@0.4.6
+
+## 0.3.8
+
+### Patch Changes
+
+- Updated dependencies [2974dd6]
+- Updated dependencies [221e35f]
+  - @scalar/oas-utils@0.4.5
+  - @scalar/openapi-types@0.3.3
+  - @scalar/helpers@0.0.4
+
+## 0.3.7
+
+### Patch Changes
+
+- Updated dependencies [8bc9f20]
+  - @scalar/helpers@0.0.3
+  - @scalar/oas-utils@0.4.4
+
+## 0.3.6
+
+### Patch Changes
+
+- 8165b3b: feat(helpers): added new helpers package
+- Updated dependencies [8165b3b]
+- Updated dependencies [05c22c7]
+  - @scalar/oas-utils@0.4.3
+  - @scalar/helpers@0.0.2
+  - @scalar/openapi-types@0.3.2
+
+## 0.3.5
+
+### Patch Changes
+
+- Updated dependencies [7ca47ab]
+  - @scalar/oas-utils@0.4.2
+
+## 0.3.4
+
+### Patch Changes
+
+- @scalar/oas-utils@0.4.1
+
+## 0.3.3
+
+### Patch Changes
+
+- Updated dependencies [1e87feb]
+- Updated dependencies [cad6277]
+  - @scalar/oas-utils@0.4.0
+  - @scalar/openapi-types@0.3.1
+
+## 0.3.2
+
+### Patch Changes
+
+- Updated dependencies [151ef09]
+- Updated dependencies [442c0a3]
+  - @scalar/oas-utils@0.3.2
+
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [4440949]
+  - @scalar/oas-utils@0.3.1
+  - @scalar/openapi-types@0.3.1
+
+## 0.3.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- Updated dependencies [30bab1d]
+- Updated dependencies [483ca93]
+  - @scalar/oas-utils@0.3.0
+  - @scalar/openapi-types@0.3.0
+
+## 0.2.17
+
+### Patch Changes
+
+- @scalar/oas-utils@0.2.144
+
+## 0.2.16
+
+### Patch Changes
+
+- Updated dependencies [cb9428c]
+- Updated dependencies [67aa0f4]
+  - @scalar/openapi-types@0.2.3
+  - @scalar/oas-utils@0.2.143
+
 ## 0.2.15
 
 ### Patch Changes

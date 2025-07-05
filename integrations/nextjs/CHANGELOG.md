@@ -1,5 +1,91 @@
 # @scalar/nextjs-api-reference
 
+## 0.8.9
+
+### Patch Changes
+
+- 2d7f995: refactor: use more common straight apostrophe ' instead of the real apostrophe ’
+- Updated dependencies [2d7f995]
+  - @scalar/core@0.3.6
+
+## 0.8.8
+
+### Patch Changes
+
+- @scalar/core@0.3.5
+
+## 0.8.7
+
+### Patch Changes
+
+- @scalar/core@0.3.4
+
+## 0.8.6
+
+### Patch Changes
+
+- 161733e: docs: new README
+
+## 0.8.5
+
+### Patch Changes
+
+- 6ead9cd: chore: remove unused dependencies
+- 4156f1d: Expand workspace store integration
+  - @scalar/core@0.3.3
+
+## 0.8.4
+
+### Patch Changes
+
+- @scalar/core@0.3.2
+- @scalar/types@0.2.2
+
+## 0.8.3
+
+### Patch Changes
+
+- e660779: chore: bump version
+
+## 0.8.1
+
+### Patch Changes
+
+- Updated dependencies [4440949]
+  - @scalar/types@0.2.1
+  - @scalar/core@0.3.1
+
+## 0.8.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- Updated dependencies [483ca93]
+  - @scalar/types@0.2.0
+  - @scalar/core@0.3.0
+
+## 0.7.17
+
+### Patch Changes
+
+- Updated dependencies [be8a6ec]
+  - @scalar/types@0.1.16
+  - @scalar/core@0.2.16
+
+## 0.7.16
+
+### Patch Changes
+
+- Updated dependencies [f711ab5]
+- Updated dependencies [0222ad4]
+- Updated dependencies [cb9428c]
+- Updated dependencies [67aa0f4]
+  - @scalar/types@0.1.15
+  - @scalar/core@0.2.15
+
 ## 0.7.15
 
 ### Patch Changes

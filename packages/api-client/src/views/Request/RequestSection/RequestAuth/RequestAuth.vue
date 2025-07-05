@@ -7,6 +7,10 @@ import {
   type Icon,
   type ScalarButton as ScalarButtonType,
 } from '@scalar/components'
+import {
+  CLIENT_LS_KEYS,
+  safeLocalStorage,
+} from '@scalar/helpers/object/local-storage'
 import type { Environment } from '@scalar/oas-utils/entities/environment'
 import type { SelectedSecuritySchemeUids } from '@scalar/oas-utils/entities/shared'
 import type {
@@ -40,6 +44,7 @@ const {
   envVariables,
   layout,
   operation,
+  persistAuth = false,
   selectedSecuritySchemeUids,
   server,
   title,
@@ -50,6 +55,7 @@ const {
   envVariables: EnvVariable[]
   layout: 'client' | 'reference'
   operation?: Operation | undefined
+  persistAuth?: boolean
   selectedSecuritySchemeUids: SelectedSecuritySchemeUids
   server: Server | undefined
   title: string
@@ -71,6 +77,7 @@ const deleteSchemeModal = useModal()
 const selectedScheme = ref<{ id: SecurityScheme['uid']; label: string } | null>(
   null,
 )
+const isViewLayoutOpen = ref(false)
 
 /** Security requirements for the request */
 const securityRequirements = computed(() => {
@@ -101,20 +108,8 @@ const authIndicator = computed(() => {
 
   const icon: Icon = isOptional ? 'Unlock' : 'Lock'
 
-  /** Dynamic text to indicate auth requirements */
-  const requiredText = isOptional ? 'Optional' : 'Required'
-  const nameKey =
-    filteredRequirements.length === 1
-      ? (() => {
-          // Get the keys of the first requirement
-          const keys = Object.keys(filteredRequirements[0] || {})
-
-          // If there are multiple keys, join them with ' & '
-          return keys.length > 1 ? keys.join(' & ') : keys[0] || ''
-        })()
-      : ''
-
-  const text = `${nameKey} ${requiredText}`
+  /** Text to indicate auth requirements */
+  const text = isOptional ? 'Optional' : 'Required'
 
   return { icon, text }
 })
@@ -169,6 +164,25 @@ const editSelectedSchemeUids = (uids: SelectedSecuritySchemeUids) => {
   // Set as selected on the collection for the modal
   if (collection.useCollectionSecurity) {
     collectionMutators.edit(collection.uid, 'selectedSecuritySchemeUids', uids)
+
+    if (!persistAuth) {
+      return
+    }
+
+    // We must convert the uids to nameKeys first
+    const nameKeys = uids.map((uids) => {
+      // Handle complex auth
+      if (Array.isArray(uids)) {
+        return uids.map((uid) => securitySchemes[uid]?.nameKey)
+      }
+
+      return securitySchemes[uids]?.nameKey
+    })
+
+    safeLocalStorage().setItem(
+      CLIENT_LS_KEYS.SELECTED_SECURITY_SCHEMES,
+      JSON.stringify(nameKeys),
+    )
   }
   // Set as selected on request
   else if (operation?.uid) {
@@ -209,40 +223,53 @@ const schemeOptions = computed(() =>
     clientLayout === 'modal' || layout === 'reference',
   ),
 )
+
+const openAuthCombobox = (event: Event) => {
+  // If the layout is open, we don't want it to close on auth label click
+  if (isViewLayoutOpen.value) {
+    event.stopPropagation()
+  }
+
+  comboboxButtonRef.value?.$el.click()
+}
 </script>
 <template>
   <ViewLayoutCollapse
     class="group/params"
     :itemCount="selectedSchemeOptions.length"
-    :layout="layout">
+    :layout="layout"
+    @update:modelValue="isViewLayoutOpen = $event">
     <template #title>
       <div
         :id="titleId"
-        class="inline-flex items-center gap-1">
+        class="inline-flex items-center gap-0.5">
         <span>{{ title }}</span>
         <!-- Authentication indicator -->
         <span
           v-if="authIndicator"
-          class="text-c-3 text-xs leading-[normal]"
-          :class="{ 'text-c-1': authIndicator.text === 'Required' }">
+          class="text-c-3 hover:bg-b-3 hover:text-c-1 -mr-1 cursor-pointer rounded px-1 py-0.5 text-xs leading-[normal]"
+          :class="{ 'text-c-1': authIndicator.text === 'Required' }"
+          @click="openAuthCombobox">
           {{ authIndicator.text }}
         </span>
       </div>
     </template>
     <template #actions>
-      <div class="-mx-1 flex flex-1">
+      <div class="absolute right-1 flex flex-1">
         <ScalarComboboxMultiselect
           class="w-72 text-xs"
           :isDeletable="clientLayout !== 'modal' && layout !== 'reference'"
           :modelValue="selectedSchemeOptions"
+          teleport
           multiple
+          placement="bottom-end"
           :options="schemeOptions"
           @delete="handleDeleteScheme"
           @update:modelValue="updateSelectedAuth">
           <ScalarButton
             ref="comboboxButtonRef"
             :aria-describedby="titleId"
-            class="hover:bg-b-3 text-c-1 hover:text-c-1 py-0.25 h-fit px-1.5 font-normal"
+            class="hover:bg-b-3 text-c-1 hover:text-c-1 h-fit px-1.5 py-0.25 font-normal"
             fullWidth
             variant="ghost">
             <div class="text-c-1">
@@ -272,6 +299,7 @@ const schemeOptions = computed(() =>
       :envVariables="envVariables"
       :environment="environment"
       :layout="layout"
+      :persistAuth="persistAuth"
       :selectedSchemeOptions="selectedSchemeOptions"
       :server="server"
       :workspace="workspace" />

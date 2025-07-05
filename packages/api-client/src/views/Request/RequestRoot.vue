@@ -13,6 +13,7 @@ import { ERRORS } from '@/libs'
 import { createRequestOperation } from '@/libs/send-request'
 import type { SendRequestResult } from '@/libs/send-request/create-request-operation'
 import { validateParameters } from '@/libs/validate-parameters'
+import { usePluginManager } from '@/plugins'
 import { useWorkspace } from '@/store'
 import { useActiveEntities } from '@/store/active-entities'
 import { useOpenApiWatcher } from '@/views/Request/hooks/useOpenApiWatcher'
@@ -36,6 +37,8 @@ const {
 } = useActiveEntities()
 const { cookies, requestHistory, showSidebar, securitySchemes, events } =
   workspaceContext
+
+const pluginManager = usePluginManager()
 
 const element = ref<HTMLDivElement>()
 
@@ -99,6 +102,7 @@ const executeRequest = async () => {
     status: events.requestStatus,
     securitySchemes: securitySchemes,
     server,
+    pluginManager,
   })
 
   // Call the onRequestSent callback if it exists
@@ -186,12 +190,12 @@ const cloneRequestResult = (result: any) => {
     ref="element"
     class="bg-b-1 relative z-0 flex h-full flex-1 flex-col overflow-hidden pt-0"
     :class="{
-      '!mb-0 !mr-0 !border-0': layout === 'modal',
+      '!mr-0 !mb-0 !border-0': layout === 'modal',
     }">
     <SidebarToggle
       v-if="showSidebar"
       v-model="isSidebarOpen"
-      class="absolute left-3 top-2 z-50"
+      class="absolute top-2 left-3 z-50"
       :class="[
         { hidden: isSidebarOpen },
         { 'xl:!flex': !isSidebarOpen },

@@ -14,7 +14,7 @@ import {
   SectionHeader,
   SectionHeaderTag,
 } from '@/components/Section'
-import { SpecificationExtension } from '@/components/SpecificationExtension'
+import { SpecificationExtension } from '@/features/specification-extension'
 import { useConfig } from '@/hooks/useConfig'
 import { useNavState } from '@/hooks/useNavState'
 
@@ -31,15 +31,17 @@ const props = defineProps<{
 const { getTagId } = useNavState()
 const config = useConfig()
 
+const tagId = computed(() => props.id || getTagId(props.tag) || '')
+
 const title = computed(() => props.tag['x-displayName'] ?? props.tag.name)
 </script>
 <template>
   <Section
-    :id="id"
+    :id="tagId"
     :label="tag.name.toUpperCase()"
     role="none">
     <SectionHeader v-show="!config.isLoading">
-      <Anchor :id="getTagId(tag)">
+      <Anchor :id="tagId">
         <SectionHeaderTag
           :id="headerId"
           :level="2">

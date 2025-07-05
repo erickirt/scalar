@@ -9,9 +9,9 @@
     "url": "git+https://github.com/scalar/scalar.git",
     "directory": "packages/snippetz"
   },
-  "version": "0.2.20",
+  "version": "0.3.2",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "build": "scalar-build-esbuild",
@@ -164,6 +164,11 @@
       "types": "./dist/plugins/powershell/webrequest/index.d.ts",
       "default": "./dist/plugins/powershell/webrequest/index.js"
     },
+    "./plugins/python/httpx": {
+      "import": "./dist/plugins/python/httpx/index.js",
+      "types": "./dist/plugins/python/httpx/index.d.ts",
+      "default": "./dist/plugins/python/httpx/index.js"
+    },
     "./plugins/python/python3": {
       "import": "./dist/plugins/python/python3/index.js",
       "types": "./dist/plugins/python/python3/index.d.ts",
@@ -183,6 +188,11 @@
       "import": "./dist/plugins/ruby/native/index.js",
       "types": "./dist/plugins/ruby/native/index.d.ts",
       "default": "./dist/plugins/ruby/native/index.js"
+    },
+    "./plugins/rust/reqwest": {
+      "import": "./dist/plugins/rust/reqwest/index.js",
+      "types": "./dist/plugins/rust/reqwest/index.d.ts",
+      "default": "./dist/plugins/rust/reqwest/index.js"
     },
     "./plugins/shell/curl": {
       "import": "./dist/plugins/shell/curl/index.js",
@@ -216,11 +226,11 @@
   ],
   "module": "./dist/index.js",
   "dependencies": {
-    "stringify-object": "^5.0.0"
+    "stringify-object": "^5.0.0",
+    "@scalar/types": "workspace:*"
   },
   "devDependencies": {
     "@scalar/build-tooling": "workspace:*",
-    "@scalar/types": "workspace:*",
     "vite": "catalog:*"
   }
 }

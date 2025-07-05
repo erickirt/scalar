@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions are welcome. We’re using [pnpm](https://pnpm.io/).
+Contributions are welcome. We're using [pnpm](https://pnpm.io/).
 
 ## Development setup
 
@@ -17,7 +17,7 @@ This should give you a nice start page with entrypoints to the various previews 
 These scripts use [`turbo`](https://turbo.build/) to build all the dependencies and run a development server.
 
 | Command                    | Description                                                               |
-| -------------------------  | ------------------------------------------------------------------------- |
+| -------------------------- | ------------------------------------------------------------------------- |
 | `pnpm dev`                 | Runs all package `pnpm dev` commands (slow)                               |
 | `pnpm dev:client`          | Runs the API Client dev environment                                       |
 | `pnpm dev:client:desktop`  | Runs the API Client desktop app in an electron dev environment            |
@@ -38,7 +38,7 @@ These scripts use [`turbo`](https://turbo.build/) to build all the dependencies 
 
 Most packages have a bunch of tests, mostly for all the helper functions we use.
 
-It’s worth to check the tests locally before sending contributions: `$ pnpm test`
+It's worth to check the tests locally before sending contributions: `$ pnpm test`
 
 If you want to add a test and only run your test file, you can filter the test suite like this: `$ pnpm test your-test`
 
@@ -48,17 +48,9 @@ Some tests require an instance of `@scalar/proxy-server` and `@scalar/void-serve
 pnpm dev:void-server
 pnpm dev:proxy-server
 ```
-
-### Testing the CLI
-
-If you want to run the tests for the CLI, you’ll need to package first. The tests don’t use the source files, but the dist files.
-
-To just run the CLI from the source files, you can use the following alias:
-`$ pnpm @scalar/cli --version`
-
 ## PRs
 
-Don’t worry, we’ll help you to get your PR in. But here is how you can help us:
+Don't worry, we'll help you to get your PR in. But here is how you can help us:
 
 ### Semantic PR titles
 

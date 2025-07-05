@@ -1,6 +1,6 @@
 import type { Request as HarRequest } from 'har-format'
 
-export type { Request as HarRequest } from 'har-format'
+export type { Request as HarRequest, Param as FormDataParam } from 'har-format'
 
 /**
  * List of available clients
@@ -10,6 +10,7 @@ export const AVAILABLE_CLIENTS = [
   'clojure/clj_http',
   'csharp/httpclient',
   'csharp/restsharp',
+  'dart/http',
   'go/native',
   'http/http1.1',
   'java/asynchttp',
@@ -34,13 +35,15 @@ export const AVAILABLE_CLIENTS = [
   'powershell/webrequest',
   'python/python3',
   'python/requests',
+  'python/httpx_sync',
+  'python/httpx_async',
   'r/httr',
   'ruby/native',
+  'rust/reqwest',
   'shell/curl',
   'shell/httpie',
   'shell/wget',
   'swift/nsurlsession',
-  'dart/http',
 ] as const
 
 export type AvailableClients = typeof AVAILABLE_CLIENTS

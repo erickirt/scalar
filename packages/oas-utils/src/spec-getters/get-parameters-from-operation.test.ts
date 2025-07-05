@@ -1,4 +1,3 @@
-import type { TransformedOperation } from '@scalar/types/legacy'
 import { describe, expect, it } from 'vitest'
 
 import { getParametersFromOperation } from './get-parameters-from-operation'
@@ -6,18 +5,14 @@ import { getParametersFromOperation } from './get-parameters-from-operation'
 describe('getParametersFromOperation', () => {
   it('operation query parameters', () => {
     const request = getParametersFromOperation(
-      {
-        path: '/foobar',
-        information: {
-          parameters: [
-            {
-              in: 'query',
-              name: 'api_key',
-              required: true,
-            },
-          ],
+      [],
+      [
+        {
+          in: 'query',
+          name: 'api_key',
+          required: true,
         },
-      },
+      ],
       'query',
     )
 
@@ -31,16 +26,15 @@ describe('getParametersFromOperation', () => {
 
   it('path query parameters', () => {
     const request = getParametersFromOperation(
-      {
-        path: '/foobar',
-        pathParameters: [
-          {
-            in: 'query',
-            name: 'api_key',
-            required: true,
-          },
-        ],
-      },
+      [
+        {
+          in: 'query',
+          name: 'api_key',
+          required: true,
+          deprecated: false,
+        },
+      ],
+      [],
       'query',
     )
 
@@ -54,38 +48,31 @@ describe('getParametersFromOperation', () => {
 
   it('path + operation query parameters', () => {
     const request = getParametersFromOperation(
-      {
-        path: '/foobar',
-        operationId: 'foobar',
-        name: 'foobar',
-        description: '',
-        pathParameters: [
-          {
-            in: 'query',
-            name: 'foo',
-            required: true,
-          },
-        ],
-        information: {
-          parameters: [
-            {
-              in: 'query',
-              name: 'bar',
-              required: true,
-            },
-          ],
+      [
+        {
+          in: 'query',
+          name: 'foo',
+          required: true,
+          deprecated: false,
         },
-      },
+      ],
+      [
+        {
+          in: 'query',
+          name: 'bar',
+          required: true,
+        },
+      ],
       'query',
     )
 
     expect(request).toMatchObject([
       {
-        name: 'foo',
+        name: 'bar',
         value: '',
       },
       {
-        name: 'bar',
+        name: 'foo',
         value: '',
       },
     ])
@@ -93,26 +80,22 @@ describe('getParametersFromOperation', () => {
 
   it('parameters with `required` and `description`', () => {
     const request = getParametersFromOperation(
-      {
-        path: '/foobar',
-        pathParameters: [
-          {
-            name: 'api_token',
-            in: 'query',
-            description: 'Your API token',
-            required: true,
-          },
-        ],
-        information: {
-          parameters: [
-            {
-              name: 'id',
-              in: 'query',
-              description: 'A Query Parameter',
-            },
-          ],
+      [
+        {
+          name: 'api_token',
+          in: 'query',
+          description: 'Your API token',
+          required: true,
+          deprecated: false,
         },
-      } as TransformedOperation,
+      ],
+      [
+        {
+          name: 'id',
+          in: 'query',
+          description: 'A Query Parameter',
+        },
+      ],
       'query',
     )
 
@@ -129,19 +112,15 @@ describe('getParametersFromOperation', () => {
 
   it('parameters use example', () => {
     const request = getParametersFromOperation(
-      {
-        path: '/foobar',
-        information: {
-          parameters: [
-            {
-              name: 'id',
-              in: 'query',
-              example: 123,
-              required: true,
-            },
-          ],
+      [],
+      [
+        {
+          name: 'id',
+          in: 'query',
+          example: 123,
+          required: true,
         },
-      } as TransformedOperation,
+      ],
       'query',
     )
 
@@ -158,23 +137,19 @@ describe('getParametersFromOperation', () => {
 
   it('path parameters', () => {
     const request = getParametersFromOperation(
-      {
-        path: '/pet/{petId}',
-        information: {
-          parameters: [
-            {
-              name: 'petId',
-              in: 'path',
-              description: 'Pet id to delete',
-              required: true,
-              schema: {
-                type: 'integer',
-                format: 'int64',
-              },
-            },
-          ],
+      [],
+      [
+        {
+          name: 'petId',
+          in: 'path',
+          description: 'Pet id to delete',
+          required: true,
+          schema: {
+            type: 'integer',
+            format: 'int64',
+          },
         },
-      } as TransformedOperation,
+      ],
       'path',
     )
 

@@ -15,11 +15,12 @@ import RequestSection from '@/views/Request/RequestSection/RequestSection.vue'
 import RequestSubpageHeader from '@/views/Request/RequestSubpageHeader.vue'
 import ResponseSection from '@/views/Request/ResponseSection/ResponseSection.vue'
 
-const { invalidParams, selectedSecuritySchemeUids } = defineProps<{
-  invalidParams: Set<string>
-  selectedSecuritySchemeUids: SelectedSecuritySchemeUids
-  requestResult?: SendRequestResult | null
-}>()
+const { invalidParams, selectedSecuritySchemeUids, requestResult } =
+  defineProps<{
+    invalidParams: Set<string>
+    selectedSecuritySchemeUids: SelectedSecuritySchemeUids
+    requestResult?: SendRequestResult | null
+  }>()
 defineEmits<(e: 'newTab', item: { name: string; uid: string }) => void>()
 
 const { events } = useWorkspace()
@@ -59,7 +60,7 @@ function handleCurlImport(curl: string) {
     v-if="activeCollection && activeWorkspace"
     class="bg-b-1 relative z-0 flex h-full flex-1 flex-col overflow-hidden pt-0"
     :class="{
-      '!mb-0 !mr-0 !border-0': layout === 'modal',
+      '!mr-0 !mb-0 !border-0': layout === 'modal',
     }">
     <div class="flex h-full">
       <!-- Ensure we have a request for this view -->

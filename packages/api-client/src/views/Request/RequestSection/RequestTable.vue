@@ -94,40 +94,30 @@ const showDeleteButton = (item: RequestExampleParameter) => {
       }">
       <template v-if="isGlobal">
         <RouterLink
-          class="!border-r-1/2 border-t-1/2 text-c-2 flex items-center justify-center"
+          class="text-c-2 flex items-center justify-center border-t !border-r"
           :to="item.route ?? {}">
           <span class="sr-only">Global</span>
           <ScalarTooltip
-            as="div"
-            side="top">
-            <template #trigger>
-              <ScalarIcon
-                class="text-c-1"
-                icon="Globe"
-                size="xs" />
-            </template>
-            <template #content>
-              <div
-                class="w-content bg-b-1 text-xxs text-c-1 z-100 pointer-events-none z-10 grid max-w-[320px] gap-1.5 rounded p-2 leading-5 shadow-lg">
-                <div class="text-c-1 flex items-center">
-                  <span class="text-pretty">
-                    Global cookies are shared across the whole workspace.
-                  </span>
-                </div>
-              </div>
-            </template>
+            content="Global cookies are shared across the whole workspace."
+            placement="top">
+            <ScalarIcon
+              tabindex="0"
+              class="text-c-1"
+              icon="Globe"
+              size="xs" />
           </ScalarTooltip>
         </RouterLink>
       </template>
       <template v-else>
         <DataTableCheckbox
-          class="!border-r-1/2"
+          class="!border-r"
           :disabled="props.hasCheckboxDisabled"
           :modelValue="item.enabled"
           @update:modelValue="(v) => emit('toggleRow', idx, v)" />
       </template>
       <DataTableCell>
         <CodeInput
+          :aria-label="`${label} Key`"
           disableCloseBrackets
           :disabled="props.isReadOnly"
           disableEnter
@@ -148,6 +138,7 @@ const showDeleteButton = (item: RequestExampleParameter) => {
       </DataTableCell>
       <DataTableCell>
         <CodeInput
+          :aria-label="`${label} Value`"
           :class="
             hasItemProperties(item)
               ? 'pr-6 group-hover:pr-10 group-has-[.cm-focused]:pr-10'
@@ -238,7 +229,7 @@ const showDeleteButton = (item: RequestExampleParameter) => {
   background-color: transparent;
   display: flex;
   font-family: var(--scalar-font);
-  font-size: var(--scalar-mini);
+  font-size: var(--scalar-small);
   padding: 6px 8px;
   width: 100%;
 }

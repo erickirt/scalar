@@ -16,6 +16,7 @@ import SectionFilter from '@/components/SectionFilter.vue'
 import ViewLayoutSection from '@/components/ViewLayout/ViewLayoutSection.vue'
 import { useLayout } from '@/hooks'
 import { matchesDomain } from '@/libs/send-request/set-request-cookies'
+import { usePluginManager } from '@/plugins'
 import { useWorkspace } from '@/store'
 import type { EnvVariable } from '@/store/active-entities'
 import RequestBody from '@/views/Request/RequestSection/RequestBody.vue'
@@ -53,6 +54,7 @@ const requestSections = [
   'Headers',
   'Query',
   'Body',
+  // 'Scripts',
 ] as const
 
 type Filter = 'All' | (typeof requestSections)[number]
@@ -86,7 +88,10 @@ const filterIds = computed(
 
 // If security = [] or [{}] just hide it on readOnly mode
 const isAuthHidden = computed(
-  () => layout === 'modal' && operation.security?.length === 0,
+  () =>
+    layout === 'modal' &&
+    !operation.security &&
+    !Object.keys(securitySchemes ?? {}).length,
 )
 
 const selectedFilter = ref<Filter>('All')
@@ -143,6 +148,24 @@ const handleRequestNamePlaceholder = () => {
 }
 
 const labelRequestNameId = useId()
+
+// Plugins
+const pluginManager = usePluginManager()
+
+const requestSectionViews = pluginManager.getViewComponents('request.section')
+
+const updateOperationHandler = (key: keyof Operation, value: string) =>
+  requestMutators.edit(operation.uid, key, value)
+
+// Sets to all when auth filter is hidden but was previously selected to prevent empty section
+watch(
+  () => isAuthHidden.value,
+  (authHidden) => {
+    if (authHidden && selectedFilter.value === 'Auth') {
+      selectedFilter.value = 'All'
+    }
+  },
+)
 </script>
 <template>
   <ViewLayoutSection :aria-label="`Request: ${operation.summary}`">
@@ -151,12 +174,12 @@ const labelRequestNameId = useId()
         class="group pointer-events-none flex flex-1 items-center gap-1 lg:pr-24">
         <label
           v-if="layout !== 'modal'"
-          class="pointer-events-auto absolute left-0 top-0 h-full w-full cursor-text opacity-0"
+          class="pointer-events-auto absolute top-0 left-0 h-full w-full cursor-text opacity-0"
           :for="labelRequestNameId" />
         <input
           v-if="layout !== 'modal'"
           :id="labelRequestNameId"
-          class="text-c-1 group-hover-input pl-1.25 md:-ml-1.25 pointer-events-auto relative z-10 -ml-0.5 h-8 w-full rounded has-[:focus-visible]:outline"
+          class="text-c-1 group-hover-input pointer-events-auto relative z-10 -ml-0.5 h-8 w-full rounded pl-1.25 has-[:focus-visible]:outline md:-ml-1.25"
           :placeholder="handleRequestNamePlaceholder()"
           :value="operation.summary"
           @input="updateRequestNameHandler" />
@@ -173,7 +196,7 @@ const labelRequestNameId = useId()
     </template>
     <div
       :id="filterIds.All"
-      class="request-section-content custom-scroll relative flex flex-1 flex-col divide-y"
+      class="request-section-content custom-scroll relative flex flex-1 flex-col"
       :role="selectedFilter === 'All' ? 'tabpanel' : 'none'">
       <RequestAuth
         v-if="
@@ -186,7 +209,7 @@ const labelRequestNameId = useId()
           (selectedFilter === 'All' || selectedFilter === 'Auth')
         "
         :id="filterIds.Auth"
-        class="request-section-content-auth border-b-0"
+        class="request-section-content-auth"
         :collection="collection"
         :envVariables="envVariables"
         :environment="environment"
@@ -272,13 +295,25 @@ const labelRequestNameId = useId()
         title="Body"
         :workspace="workspace" />
 
+      <template
+        v-for="view in requestSectionViews"
+        :key="view.component">
+        <ScalarErrorBoundary>
+          <component
+            :is="view.component"
+            v-show="selectedFilter === 'All' || selectedFilter === view.title"
+            @update:operation="updateOperationHandler"
+            :operation="operation" />
+        </ScalarErrorBoundary>
+      </template>
+
       <!-- Spacer -->
-      <div class="-my-0.25 flex flex-grow" />
+      <div class="flex flex-grow" />
 
       <!-- Code Snippet -->
       <ScalarErrorBoundary>
         <RequestCodeExample
-          class="request-section-content-code-example"
+          class="request-section-content-code-example -mt-1/2 border-t"
           :collection="collection"
           :example="example"
           :operation="operation"

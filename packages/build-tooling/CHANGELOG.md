@@ -1,5 +1,35 @@
 # @scalar/build-tooling
 
+## 0.2.4
+
+### Patch Changes
+
+- 2d7f995: refactor: use more common straight apostrophe ' instead of the real apostrophe ’
+
+## 0.2.3
+
+### Patch Changes
+
+- 4156f1d: Expand workspace store integration
+
+## 0.2.2
+
+### Patch Changes
+
+- 8165b3b: feat(helpers): added new helpers package
+
+## 0.2.1
+
+### Patch Changes
+
+- 84719d0: fix: exclude test files from esbuild entry points
+
+## 0.2.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
 ## 0.1.19
 
 ### Patch Changes

@@ -1,5 +1,47 @@
 # @scalar/openapi-types
 
+## 0.3.5
+
+### Patch Changes
+
+- 2d7f995: refactor: use more common straight apostrophe ' instead of the real apostrophe ’
+
+## 0.3.4
+
+### Patch Changes
+
+- 533469b: refactor: decouple request code block from the state (not in use yet)
+
+## 0.3.3
+
+### Patch Changes
+
+- 221e35f: feat: added webhooks
+
+## 0.3.2
+
+### Patch Changes
+
+- 05c22c7: chore: removed enum from http methods
+
+## 0.3.1
+
+### Patch Changes
+
+- 4440949: chore: bumping packages
+
+## 0.3.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+## 0.2.3
+
+### Patch Changes
+
+- cb9428c: Support additional query parameters for the OAuth authorization request (prompt, audience, anything), and handle OAuth authorization denials
+
 ## 0.2.2
 
 ### Patch Changes

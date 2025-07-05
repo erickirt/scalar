@@ -1,7 +1,7 @@
 import { useConfig } from '@/hooks/useConfig'
-import { combineUrlAndPath } from '@scalar/oas-utils/helpers'
+import { combineUrlAndPath } from '@scalar/helpers/url/merge-urls'
 import type { ApiReferenceConfiguration } from '@scalar/types/api-reference'
-import type { Heading, Tag, TransformedOperation } from '@scalar/types/legacy'
+import type { Heading, OpenAPIV3_1 } from '@scalar/types/legacy'
 import { slug } from 'github-slugger'
 import { type InjectionKey, type Ref, inject, ref } from 'vue'
 
@@ -90,7 +90,15 @@ export const useNavState = (_config?: Ref<ApiReferenceConfiguration>) => {
 
   const getHashedUrl = (replacementHash: string, url = window.location.href, search = window.location.search) => {
     const newUrl = new URL(url)
-    newUrl.hash = hashPrefix.value + replacementHash
+
+    // Path routing
+    if (config.value.pathRouting) {
+      newUrl.pathname = combineUrlAndPath(config.value.pathRouting.basePath, replacementHash)
+    }
+    // Hash routing
+    else {
+      newUrl.hash = hashPrefix.value + replacementHash
+    }
     newUrl.search = search
     return newUrl.toString()
   }
@@ -113,45 +121,58 @@ export const useNavState = (_config?: Ref<ApiReferenceConfiguration>) => {
     return ''
   }
 
-  const getModelId = (model?: { name: string }) => {
+  const getModelId = (model?: { name: string }, parentTag?: OpenAPIV3_1.TagObject) => {
     if (!model?.name) {
       return 'models'
     }
 
+    /** Prefix with the tag if we have one */
+    const prefixTag = parentTag ? `${getTagId(parentTag)}/` : ''
+
     if (typeof config.value.generateModelSlug === 'function') {
-      return `model/${config.value.generateModelSlug(model)}`
+      return `${prefixTag}model/${config.value.generateModelSlug(model)}`
     }
-    return `model/${slug(model.name)}`
+    return `${prefixTag}model/${slug(model.name)}`
   }
 
-  const getTagId = (tag: Tag) => {
+  const getTagId = (tag: OpenAPIV3_1.TagObject) => {
     if (typeof config.value.generateTagSlug === 'function') {
       return `tag/${config.value.generateTagSlug(tag)}`
     }
-    return `tag/${slug(tag.name)}`
+    return `tag/${slug(tag.name ?? '')}`
   }
 
-  const getOperationId = (operation: TransformedOperation, parentTag: Tag) => {
+  const getOperationId = (
+    operation: {
+      path: string
+      method: OpenAPIV3_1.HttpMethods
+    } & OpenAPIV3_1.OperationObject,
+    parentTag: OpenAPIV3_1.TagObject,
+  ) => {
     if (typeof config.value.generateOperationSlug === 'function') {
       return `${getTagId(parentTag)}/${config.value.generateOperationSlug({
         path: operation.path,
         operationId: operation.operationId,
-        method: operation.httpVerb,
-        summary: operation.information?.summary,
+        method: operation.method,
+        summary: operation.summary,
       })}`
     }
-    return `${getTagId(parentTag)}/${operation.httpVerb}${operation.path}`
+
+    return `${getTagId(parentTag)}/${operation.method}${operation.path}`
   }
 
-  const getWebhookId = (webhook?: { name: string; method?: string }) => {
+  const getWebhookId = (webhook?: { name: string; method?: string }, parentTag?: OpenAPIV3_1.TagObject) => {
     if (!webhook?.name) {
       return 'webhooks'
     }
 
+    /** Prefix with the tag if we have one */
+    const prefixTag = parentTag ? `${getTagId(parentTag)}/` : ''
+
     if (typeof config.value.generateWebhookSlug === 'function') {
-      return `webhook/${config.value.generateWebhookSlug(webhook)}`
+      return `${prefixTag}webhook/${config.value.generateWebhookSlug(webhook)}`
     }
-    return `webhook/${webhook.method}/${slug(webhook.name)}`
+    return `${prefixTag}webhook/${webhook.method}/${slug(webhook.name)}`
   }
 
   return {
@@ -190,3 +211,6 @@ export const useNavState = (_config?: Ref<ApiReferenceConfiguration>) => {
     updateHash,
   }
 }
+
+/** Whats returned from the hook */
+export type UseNavState = ReturnType<typeof useNavState>

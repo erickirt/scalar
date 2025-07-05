@@ -7,31 +7,13 @@
 
 A SvelteKit integration for the Scalar API Reference
 
-## Installation
+## Documentation
 
-```bash
-npm install @scalar/sveltekit
-```
-
-## Usage
-
-```ts
-// routes/+server.ts
-import { ScalarApiReference } from '@scalar/sveltekit'
-import type { RequestHandler } from './$types'
-
-const render = ScalarApiReference({
-  url: 'https://cdn.jsdelivr.net/npm/@scalar/galaxy/dist/latest.json',
-})
-
-export const GET: RequestHandler = () => {
-  return render()
-}
-```
+[Read the documentation here](https://guides.scalar.com/scalar/scalar-api-references/integrations/sveltekit)
 
 ## Community
 
-We are API nerds. You too? Let’s chat on Discord: <https://discord.gg/scalar>
+We are API nerds. You too? Let's chat on Discord: <https://discord.gg/scalar>
 
 ## License
 

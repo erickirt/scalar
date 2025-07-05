@@ -1,18 +1,18 @@
 # OpenAPI Specification
 
-We’re expecting the passed OpenAPI document to adhere to [the Swagger 2.0, OpenAPI 3.0 or OpenAPI 3.1 specification](https://github.com/OAI/OpenAPI-Specification).
+We're expecting the passed OpenAPI document to adhere to [the Swagger 2.0, OpenAPI 3.0 or OpenAPI 3.1 specification](https://github.com/OAI/OpenAPI-Specification).
 
-On top of that, we’ve added a few things for your convenience:
+On top of that, we've added a few things for your convenience:
 
 ## Custom Specification Extensions
 
-You an add custom specification extensions (starting with a `x-`) through [our plugin API](configuration.md).
+You can add custom specification extensions (starting with a `x-`) through [our plugin API](configuration.md).
 
 ## x-scalar-environments
 
 You can specify predefined environment variables for the API Client/References to consume and use:
 
-```
+```yaml
 x-scalar-environments:
   production:
     description: "Production environment"
@@ -36,7 +36,7 @@ x-scalar-environments:
 
 ## x-scalar-active-environment
 
-You can also specify the default active environment a user will have :) if theres none set here we pick the first from the `x-scalar-environments` to be the default
+You can also specify the default active environment a user will have :) if there's none set here we pick the first from the `x-scalar-environments` to be the default
 
 ```
 x-scalar-active-environment: staging
@@ -44,7 +44,7 @@ x-scalar-active-environment: staging
 
 ## x-codeSamples
 
-We provide examples for a lot of popular HTTP clients and frameworks. For something completly custom, for example to show the use of your own SDK, you can use `x-codeSamples`:
+We provide examples for a lot of popular HTTP clients and frameworks. For something completely custom, for example to show the use of your own SDK, you can use `x-codeSamples`:
 
 ```diff
 openapi: 3.1.0
@@ -196,9 +196,9 @@ paths:
 +      x-scalar-stability: 'experimental'
 ```
 
-## x-enumDescriptions
+## x-enum-descriptions
 
-You can add a descriptions to `enum` values with `x-enumDescriptions`:
+You can add a descriptions to `enum` values with `x-enum-descriptions`:
 
 ```diff
 openapi: 3.1.0
@@ -214,12 +214,45 @@ components:
       - too_expensive
       - unused
       - other
-+      x-enumDescriptions:
++      x-enum-descriptions:
 +        missing_features: Missing features
 +        too_expensive: Too expensive
 +        unused: Unused
 +        other: Other
 ```
+
+Aliases: `x-enumDescriptions`
+
+## x-enum-varnames
+
+You can provide variable names for `enum` values with `x-enum-varnames`. These names will be displayed alongside the enum values in the format `value = varname`:
+
+```diff
+openapi: 3.1.0
+info:
+  title: Example
+  version: 1.0
+components:
+  schemas:
+    HttpStatusCode:
+      type: integer
+      enum:
+      - 100
+      - 200
+      - 300
+      - 400
+      - 500
++      x-enum-varnames:
++      - Continue
++      - OK
++      - MultipleChoices
++      - BadRequest
++      - InternalServerError
+```
+
+This will display as: `100 = Continue`, `200 = OK`, `300 = MultipleChoices`, etc.
+
+Aliases: `x-enumNames`
 
 ## x-scalar-sdk-installation
 

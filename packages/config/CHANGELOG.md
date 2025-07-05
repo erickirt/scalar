@@ -1,5 +1,23 @@
 # @scalar/config
 
+## 0.2.2
+
+### Patch Changes
+
+- 2d7f995: refactor: use more common straight apostrophe ' instead of the real apostrophe ’
+
+## 0.2.1
+
+### Patch Changes
+
+- b6a1624: feat(workspace-store): improve workspace store validation
+
+## 0.2.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
 ## 0.1.3
 
 ### Patch Changes
