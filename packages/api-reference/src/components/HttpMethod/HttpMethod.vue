@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { OpenAPI } from '@scalar/openapi-types'
+import { getHttpMethodInfo } from '@scalar/helpers/http/http-info'
+import type { HttpMethod } from '@scalar/helpers/http/http-methods'
+import { normalizeHttpMethod } from '@scalar/helpers/http/normalize-http-method'
 import { computed, type Component } from 'vue'
-
-import { requestMethodAbbreviations, requestMethodColors } from './constants'
-import { isRequestMethod } from './utils/isRequestMethod'
 
 const props = defineProps<{
   /** The type of element to render as, defaults to `span` */
@@ -13,44 +12,22 @@ const props = defineProps<{
   /** Whether or not to abbreviated the slot content */
   short?: boolean
   /** The HTTP method to show */
-  method: OpenAPI.HttpMethod | string
+  method: HttpMethod | string
 }>()
 
-/** A trimmed and uppercase version of the method */
-const normalized = computed(() => props.method.trim().toUpperCase())
+/** Grabs the method info object which contains abbreviation, color, and background color etc */
+const httpMethodInfo = computed(() => getHttpMethodInfo(props.method))
 
-/**
- * The abbreviated version of the method
- *
- * @example
- * ```
- * GET -> GET
- * DELETE -> DEL
- * PATCH -> PATCH
- * ```
- */
-const abbreviated = computed<string>(() => {
-  if (isRequestMethod(normalized.value)) {
-    return requestMethodAbbreviations[normalized.value]
-  }
-
-  return normalized.value.slice(0, 4)
-})
-
-const color = computed<string>(() => {
-  if (isRequestMethod(normalized.value)) {
-    return requestMethodColors[normalized.value]
-  }
-
-  return 'var(--scalar-color-ghost)'
-})
+/** Full method name */
+const normalized = computed(() => normalizeHttpMethod(props.method))
 </script>
+
 <template>
   <component
     :is="as ?? 'span'"
-    :style="{ [property || 'color']: color }">
-    <slot v-bind="{ normalized, abbreviated, color }">
-      {{ short ? abbreviated : normalized }}
-    </slot>
+    class="uppercase"
+    :style="{ [property || 'color']: httpMethodInfo.colorVar }">
+    <slot />
+    {{ short ? httpMethodInfo.short : normalized }}
   </component>
 </template>

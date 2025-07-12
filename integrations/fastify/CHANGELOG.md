@@ -1,5 +1,214 @@
 # @scalar/fastify-api-reference
 
+## 1.32.6
+
+### Patch Changes
+
+- @scalar/core@0.3.8
+- @scalar/openapi-parser@0.18.1
+
+## 1.32.5
+
+## 1.32.4
+
+### Patch Changes
+
+- Updated dependencies [66347d4]
+  - @scalar/core@0.3.7
+  - @scalar/openapi-parser@0.18.1
+
+## 1.32.3
+
+## 1.32.2
+
+### Patch Changes
+
+- 2d7f995: refactor: use more common straight apostrophe ' instead of the real apostrophe ’
+- Updated dependencies [2d7f995]
+  - @scalar/openapi-parser@0.18.1
+  - @scalar/openapi-types@0.3.5
+  - @scalar/core@0.3.6
+
+## 1.32.1
+
+## 1.32.0
+
+### Patch Changes
+
+- Updated dependencies [533469b]
+  - @scalar/openapi-types@0.3.4
+  - @scalar/openapi-parser@0.18.0
+  - @scalar/core@0.3.5
+
+## 1.31.18
+
+### Patch Changes
+
+- @scalar/core@0.3.4
+- @scalar/openapi-parser@0.18.0
+
+## 1.31.17
+
+## 1.31.16
+
+## 1.31.15
+
+### Patch Changes
+
+- 161733e: docs: new README
+
+## 1.31.14
+
+## 1.31.13
+
+### Patch Changes
+
+- Updated dependencies [291f09d]
+  - @scalar/openapi-parser@0.18.0
+
+## 1.31.12
+
+## 1.31.11
+
+## 1.31.10
+
+## 1.31.9
+
+### Patch Changes
+
+- 6ead9cd: chore: remove unused dependencies
+- 4156f1d: Expand workspace store integration
+- Updated dependencies [221e35f]
+- Updated dependencies [166e298]
+- Updated dependencies [4156f1d]
+- Updated dependencies [f823d45]
+- Updated dependencies [37c90b8]
+  - @scalar/openapi-types@0.3.3
+  - @scalar/openapi-parser@0.17.0
+  - @scalar/core@0.3.3
+
+## 1.31.8
+
+### Patch Changes
+
+- Updated dependencies [11fabae]
+  - @scalar/openapi-parser@0.16.0
+
+## 1.31.7
+
+## 1.31.6
+
+### Patch Changes
+
+- c584dcd: Fix classic layout mobile header
+
+## 1.31.5
+
+## 1.31.4
+
+### Patch Changes
+
+- Updated dependencies [17bc0d8]
+- Updated dependencies [b9dacba]
+- Updated dependencies [a73e9be]
+- Updated dependencies [49c04cf]
+- Updated dependencies [f4332eb]
+- Updated dependencies [05c22c7]
+  - @scalar/openapi-parser@0.15.0
+  - @scalar/openapi-types@0.3.2
+  - @scalar/core@0.3.2
+  - @scalar/types@0.2.2
+
+## 1.31.3
+
+### Patch Changes
+
+- a90046a: chore: move to esbuild for integration packages
+- Updated dependencies [ee3eb77]
+  - @scalar/openapi-parser@0.14.0
+
+## 1.31.2
+
+## 1.31.1
+
+## 1.31.0
+
+### Patch Changes
+
+- Updated dependencies [1e87feb]
+  - @scalar/openapi-parser@0.13.0
+  - @scalar/core@0.3.1
+  - @scalar/openapi-types@0.3.1
+  - @scalar/types@0.2.1
+
+## 1.30.0
+
+### Minor Changes
+
+- edf694b: refactor!: use openapi-parser utils, remove the deprecated pipeline syntax
+
+### Patch Changes
+
+- Updated dependencies [edf694b]
+  - @scalar/openapi-parser@0.12.0
+
+## 1.29.3
+
+## 1.29.2
+
+### Patch Changes
+
+- Updated dependencies [ea20eb4]
+  - @scalar/openapi-parser@0.11.1
+
+## 1.29.1
+
+### Patch Changes
+
+- Updated dependencies [4440949]
+  - @scalar/openapi-types@0.3.1
+  - @scalar/types@0.2.1
+  - @scalar/openapi-parser@0.11.0
+  - @scalar/core@0.3.1
+
+## 1.29.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- Updated dependencies [bd602d3]
+- Updated dependencies [483ca93]
+- Updated dependencies [1d1470c]
+  - @scalar/openapi-parser@0.11.0
+  - @scalar/openapi-types@0.3.0
+  - @scalar/types@0.2.0
+  - @scalar/core@0.3.0
+
+## 1.28.34
+
+### Patch Changes
+
+- Updated dependencies [be8a6ec]
+  - @scalar/types@0.1.16
+  - @scalar/core@0.2.16
+  - @scalar/openapi-parser@0.10.17
+
+## 1.28.33
+
+### Patch Changes
+
+- Updated dependencies [f711ab5]
+- Updated dependencies [0222ad4]
+- Updated dependencies [cb9428c]
+- Updated dependencies [67aa0f4]
+  - @scalar/types@0.1.15
+  - @scalar/openapi-types@0.2.3
+  - @scalar/core@0.2.15
+  - @scalar/openapi-parser@0.10.17
+
 ## 1.28.32
 
 ## 1.28.31

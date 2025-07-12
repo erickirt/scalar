@@ -1,5 +1,280 @@
 # scalar-app
 
+## 0.1.214
+
+### Patch Changes
+
+- Updated dependencies [c10e191]
+- Updated dependencies [661c7e9]
+- Updated dependencies [cd1c367]
+- Updated dependencies [244edda]
+- Updated dependencies [4d89219]
+- Updated dependencies [244edda]
+- Updated dependencies [244edda]
+- Updated dependencies [1db9130]
+- Updated dependencies [9e81b17]
+  - @scalar/api-client@2.5.16
+  - @scalar/themes@0.13.9
+  - @scalar/components@0.14.17
+
+## 0.1.213
+
+### Patch Changes
+
+- Updated dependencies [a696604]
+- Updated dependencies [b2862d9]
+- Updated dependencies [ad2e3e6]
+- Updated dependencies [b2862d9]
+- Updated dependencies [74fdc0e]
+- Updated dependencies [ca77d70]
+- Updated dependencies [a696604]
+- Updated dependencies [3fdc2f2]
+- Updated dependencies [972602f]
+  - @scalar/api-client@2.5.15
+  - @scalar/components@0.14.16
+  - @scalar/themes@0.13.8
+
+## 0.1.212
+
+### Patch Changes
+
+- 2d7f995: refactor: use more common straight apostrophe ' instead of the real apostrophe ’
+- Updated dependencies [2d7f995]
+  - @scalar/api-client@2.5.14
+  - @scalar/import@0.4.13
+  - @scalar/themes@0.13.7
+  - @scalar/components@0.14.15
+
+## 0.1.211
+
+### Patch Changes
+
+- Updated dependencies [533469b]
+- Updated dependencies [3393c83]
+- Updated dependencies [4f47b3c]
+- Updated dependencies [8e85856]
+  - @scalar/api-client@2.5.13
+  - @scalar/components@0.14.14
+  - @scalar/import@0.4.12
+  - @scalar/themes@0.13.6
+
+## 0.1.210
+
+### Patch Changes
+
+- Updated dependencies [c907685]
+- Updated dependencies [4bbbb32]
+  - @scalar/components@0.14.13
+  - @scalar/themes@0.13.5
+  - @scalar/api-client@2.5.12
+
+## 0.1.209
+
+### Patch Changes
+
+- Updated dependencies [ca18c0b]
+  - @scalar/themes@0.13.4
+  - @scalar/api-client@2.5.11
+  - @scalar/components@0.14.12
+
+## 0.1.208
+
+### Patch Changes
+
+- Updated dependencies [699df60]
+  - @scalar/api-client@2.5.10
+  - @scalar/components@0.14.11
+
+## 0.1.207
+
+### Patch Changes
+
+- @scalar/api-client@2.5.9
+- @scalar/components@0.14.10
+
+## 0.1.206
+
+### Patch Changes
+
+- @scalar/api-client@2.5.8
+- @scalar/import@0.4.11
+
+## 0.1.205
+
+### Patch Changes
+
+- Updated dependencies [a5d010c]
+- Updated dependencies [b12cd8e]
+  - @scalar/api-client@2.5.7
+  - @scalar/components@0.14.9
+
+## 0.1.204
+
+### Patch Changes
+
+- 4156f1d: Expand workspace store integration
+- Updated dependencies [282129b]
+- Updated dependencies [a5b399d]
+- Updated dependencies [4156f1d]
+- Updated dependencies [711b435]
+- Updated dependencies [177438d]
+  - @scalar/api-client@2.5.6
+  - @scalar/components@0.14.8
+  - @scalar/import@0.4.10
+  - @scalar/themes@0.13.3
+
+## 0.1.203
+
+### Patch Changes
+
+- @scalar/api-client@2.5.5
+- @scalar/import@0.4.9
+
+## 0.1.202
+
+### Patch Changes
+
+- @scalar/api-client@2.5.4
+- @scalar/import@0.4.8
+- @scalar/components@0.14.7
+
+## 0.1.201
+
+### Patch Changes
+
+- Updated dependencies [79975dd]
+- Updated dependencies [ba84a3c]
+- Updated dependencies [8165b3b]
+- Updated dependencies [ba84a3c]
+- Updated dependencies [358eb63]
+  - @scalar/api-client@2.5.3
+  - @scalar/themes@0.13.2
+  - @scalar/import@0.4.7
+  - @scalar/components@0.14.6
+
+## 0.1.200
+
+### Patch Changes
+
+- a47fa60: fix: override Electron default User-Agent header
+- Updated dependencies [c06aa6a]
+- Updated dependencies [3ad9393]
+- Updated dependencies [f1c0c01]
+- Updated dependencies [b461b62]
+- Updated dependencies [a47fa60]
+- Updated dependencies [df7efac]
+  - @scalar/api-client@2.5.2
+  - @scalar/components@0.14.5
+  - @scalar/import@0.4.6
+
+## 0.1.199
+
+### Patch Changes
+
+- Updated dependencies [85877aa]
+  - @scalar/themes@0.13.1
+  - @scalar/api-client@2.5.1
+  - @scalar/components@0.14.4
+  - @scalar/import@0.4.5
+
+## 0.1.198
+
+### Patch Changes
+
+- Updated dependencies [785939b]
+- Updated dependencies [1e87feb]
+- Updated dependencies [0113b84]
+- Updated dependencies [cad6277]
+- Updated dependencies [ffa93fa]
+- Updated dependencies [cedca9b]
+  - @scalar/components@0.14.3
+  - @scalar/api-client@2.5.0
+  - @scalar/themes@0.13.0
+  - @scalar/import@0.4.4
+
+## 0.1.197
+
+### Patch Changes
+
+- Updated dependencies [151ef09]
+  - @scalar/api-client@2.4.4
+  - @scalar/components@0.14.2
+  - @scalar/import@0.4.3
+
+## 0.1.196
+
+### Patch Changes
+
+- Updated dependencies [fbcce50]
+  - @scalar/api-client@2.4.3
+
+## 0.1.195
+
+### Patch Changes
+
+- Updated dependencies [2efdf8e]
+  - @scalar/api-client@2.4.2
+  - @scalar/import@0.4.2
+
+## 0.1.194
+
+### Patch Changes
+
+- Updated dependencies [4440949]
+  - @scalar/components@0.14.1
+  - @scalar/api-client@2.4.1
+  - @scalar/import@0.4.1
+  - @scalar/themes@0.12.1
+
+## 0.1.193
+
+### Patch Changes
+
+- 26476ed: feat: send cross-origin cookies in scalar app
+- Updated dependencies [26476ed]
+- Updated dependencies [30bab1d]
+- Updated dependencies [5613e40]
+- Updated dependencies [483ca93]
+- Updated dependencies [fe696ab]
+- Updated dependencies [0efcab4]
+- Updated dependencies [20cf550]
+  - @scalar/api-client@2.4.0
+  - @scalar/components@0.14.0
+  - @scalar/themes@0.12.0
+  - @scalar/import@0.4.0
+
+## 0.1.192
+
+### Patch Changes
+
+- Updated dependencies [6b4a3c3]
+- Updated dependencies [1843cfe]
+- Updated dependencies [cd0722d]
+  - @scalar/api-client@2.3.34
+  - @scalar/components@0.13.59
+  - @scalar/themes@0.11.3
+  - @scalar/import@0.3.27
+
+## 0.1.191
+
+### Patch Changes
+
+- Updated dependencies [f711ab5]
+- Updated dependencies [ec30edd]
+- Updated dependencies [90b773e]
+- Updated dependencies [e7f61ce]
+- Updated dependencies [52dd8a1]
+- Updated dependencies [cb9428c]
+- Updated dependencies [af38fa6]
+- Updated dependencies [67aa0f4]
+- Updated dependencies [ac16fca]
+- Updated dependencies [1966c5a]
+- Updated dependencies [ac16fca]
+  - @scalar/api-client@2.3.33
+  - @scalar/themes@0.11.2
+  - @scalar/components@0.13.58
+  - @scalar/import@0.3.26
+
 ## 0.1.190
 
 ### Patch Changes

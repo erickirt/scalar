@@ -17,28 +17,25 @@
 export default {}
 </script>
 <script setup lang="ts">
+import type { ScalarSidebarItemProps } from '@/components/ScalarSidebar/types'
 import { useBindCx } from '@scalar/use-hooks/useBindCx'
-import type { Component } from 'vue'
 
 import ScalarSidebarButton from './ScalarSidebarButton.vue'
 import ScalarSidebarGroupToggle from './ScalarSidebarGroupToggle.vue'
 import ScalarSidebarIndent from './ScalarSidebarIndent.vue'
 import { type SidebarGroupLevel, useSidebarGroups } from './useSidebarGroups'
 
-const { is = 'ul' } = defineProps<{
-  /** Override the element tag */
-  is?: Component | string
-}>()
+const { is = 'ul' } = defineProps<ScalarSidebarItemProps>()
 
-const open = defineModel<boolean>()
+const open = defineModel<boolean>({ default: false })
 
 defineSlots<{
   /** The text content of the toggle */
-  default?: (props: { open: boolean }) => any
+  default?(props: { open: boolean }): unknown
   /** Override the entire toggle button */
-  button?: (props: { open: boolean; level: SidebarGroupLevel }) => any
+  button?(props: { open: boolean; level: SidebarGroupLevel }): unknown
   /** The list of sidebar subitems */
-  items?: (props: { open: boolean }) => any
+  items?(props: { open: boolean }): unknown
 }>()
 
 const { level } = useSidebarGroups({ increment: true })
@@ -54,9 +51,13 @@ const { cx } = useBindCx()
       :open="!!open">
       <ScalarSidebarButton
         is="button"
+        class="group/group-button"
         :aria-expanded="open"
-        class="text-c-1 bg-b-1"
         :indent="level"
+        :active
+        :selected
+        :disabled
+        :icon
         @click="open = !open">
         <template #indent>
           <ScalarSidebarIndent
@@ -74,7 +75,7 @@ const { cx } = useBindCx()
     <component
       :is="is"
       v-if="open"
-      v-bind="cx('flex flex-col gap-px')">
+      v-bind="cx('group/items flex flex-col gap-px')">
       <slot
         name="items"
         :open="!!open" />

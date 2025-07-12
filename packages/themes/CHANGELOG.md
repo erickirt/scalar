@@ -1,5 +1,117 @@
 # @scalar/themes
 
+## 0.13.9
+
+### Patch Changes
+
+- 661c7e9: feat(themes): updates dark/light mode accent on default theme
+- Updated dependencies [c10e191]
+  - @scalar/types@0.2.8
+
+## 0.13.8
+
+### Patch Changes
+
+- 3fdc2f2: feat(api-reference): unify inconsistent font styles across scalar client and ref, and improve consistency"
+- Updated dependencies [ad2e3e6]
+  - @scalar/types@0.2.7
+
+## 0.13.7
+
+### Patch Changes
+
+- 2d7f995: refactor: use more common straight apostrophe ' instead of the real apostrophe ’
+- Updated dependencies [2d7f995]
+  - @scalar/types@0.2.6
+
+## 0.13.6
+
+### Patch Changes
+
+- @scalar/types@0.2.5
+
+## 0.13.5
+
+### Patch Changes
+
+- 4bbbb32: feat(components): add sidebar sections
+- Updated dependencies [1468280]
+  - @scalar/types@0.2.4
+
+## 0.13.4
+
+### Patch Changes
+
+- ca18c0b: feat(api-reference): update and modernize sidebar design
+
+## 0.13.3
+
+### Patch Changes
+
+- Updated dependencies [221e35f]
+  - @scalar/types@0.2.3
+
+## 0.13.2
+
+### Patch Changes
+
+- ba84a3c: fix(themes): add alert color
+- 358eb63: fix(api-reference): fix markdown styles pt2
+  - @scalar/types@0.2.2
+
+## 0.13.1
+
+### Patch Changes
+
+- 85877aa: fix: handle none theme
+
+## 0.13.0
+
+### Minor Changes
+
+- cad6277: feat(themes)!: migrate to tailwind v4
+
+### Patch Changes
+
+- @scalar/types@0.2.1
+
+## 0.12.1
+
+### Patch Changes
+
+- Updated dependencies [4440949]
+  - @scalar/types@0.2.1
+
+## 0.12.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- 5613e40: feat(components): scalar tooltip overhaul
+- Updated dependencies [483ca93]
+  - @scalar/types@0.2.0
+
+## 0.11.3
+
+### Patch Changes
+
+- Updated dependencies [be8a6ec]
+  - @scalar/types@0.1.16
+
+## 0.11.2
+
+### Patch Changes
+
+- 90b773e: feat: updates heading variables
+- Updated dependencies [f711ab5]
+- Updated dependencies [0222ad4]
+- Updated dependencies [cb9428c]
+- Updated dependencies [67aa0f4]
+  - @scalar/types@0.1.15
+
 ## 0.11.1
 
 ### Patch Changes

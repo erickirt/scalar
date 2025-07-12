@@ -1,5 +1,5 @@
 name: 🐛 Bug report
-description: If you’ve already asked for help with a problem and confirmed something is broken, create a bug report.
+description: If you've already asked for help with a problem and confirmed something is broken, create a bug report.
 labels: ['bug']
 
 body:
@@ -19,5 +19,5 @@ body:
     id: env-link
     attributes:
       label: OpenAPI Document
-      description: You can use https://sandbox.scalar.com or `npx @scalar/cli share openapi.json` to quickly upload an example.
+      description: You can use https://sandbox.scalar.com or `npx @scalar/cli document share openapi.json` to quickly upload an example.
       placeholder: https://sandbox.scalar.com/…

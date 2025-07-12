@@ -1,5 +1,47 @@
 # @scalar/galaxy
 
+## 0.5.3
+
+### Patch Changes
+
+- 80a3560: feat: add additonalProperties
+- 80a3560: feat: add exclusiveMinimum and exclusiveMaximum
+- 80a3560: feat: add x-enum-varnames and x-enum-descriptions
+
+## 0.5.2
+
+### Patch Changes
+
+- 2d7f995: refactor: use more common straight apostrophe ' instead of the real apostrophe ’
+
+## 0.5.1
+
+### Patch Changes
+
+- b1ea8f0: feat: adds celestial bodies post operation to galaxy
+
+## 0.5.0
+
+### Minor Changes
+
+- edf694b: refactor!: use openapi-parser utils, remove the deprecated pipeline syntax
+
+### Patch Changes
+
+- 442c0a3: feat: added support for callbacks
+
+## 0.4.1
+
+### Patch Changes
+
+- 4440949: chore: bumping packages
+
+## 0.4.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
 ## 0.3.2
 
 ### Patch Changes

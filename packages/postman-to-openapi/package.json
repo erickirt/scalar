@@ -19,9 +19,9 @@
     "export",
     "scalar"
   ],
-  "version": "0.2.15",
+  "version": "0.3.15",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "scripts": {
     "build": "scalar-build-esbuild",
@@ -48,6 +48,7 @@
   ],
   "module": "dist/index.js",
   "dependencies": {
+    "@scalar/helpers": "workspace:*",
     "@scalar/oas-utils": "workspace:*",
     "@scalar/openapi-types": "workspace:*"
   },

@@ -140,6 +140,7 @@ describe('importSpecToWorkspace', () => {
         'updatePlanet',
         'deletePlanet',
         'uploadImage',
+        'createCelestialBody',
         'createUser',
         'getToken',
         'getMe',
@@ -828,6 +829,30 @@ describe('importSpecToWorkspace', () => {
       expect(res.collection.selectedSecuritySchemeUids).toEqual(selectedSecuritySchemeUids)
     })
 
+    it('handles complex security on the operation level', async () => {
+      const specWithComplexSecurity = {
+        ...galaxy,
+        security: [{ apiKeyHeader: [], basicAuth: [] }],
+        paths: {
+          '/test': {
+            get: {
+              security: [{ apiKeyHeader: [], basicAuth: [] }],
+            },
+          },
+        },
+      }
+
+      const res = await importSpecToWorkspace(specWithComplexSecurity)
+      if (res.error) {
+        throw res.error
+      }
+
+      expect(res.requests[0]!.security).toEqual([{ apiKeyHeader: [], basicAuth: [] }])
+      expect(res.requests[0]!.selectedSecuritySchemeUids).toEqual([
+        [findSchemeUidByKey('apiKeyHeader', res.securitySchemes), findSchemeUidByKey('basicAuth', res.securitySchemes)],
+      ])
+    })
+
     it('selects the first required scheme as selected', async () => {
       const specWithOrSecurity = {
         ...galaxy,
@@ -1056,7 +1081,7 @@ describe('parseSchema', () => {
   it('handles invalid JSON', async () => {
     const { errors } = await parseSchema('"invalid')
 
-    expect(errors).toMatchObject([{ code: 'MISSING_CHAR' }])
+    expect(errors).toMatchObject([{ code: 'NO_CONTENT' }])
     expect(errors).toHaveLength(1)
   })
 
@@ -1083,6 +1108,37 @@ describe('getServersFromOpenApiDocument', () => {
     }
 
     expect(result.servers).toMatchObject([{ url: 'https://example.com' }])
+  })
+
+  it('does not use a relative document URL as a server', async () => {
+    const originalLocation = typeof window !== 'undefined' ? window.location : { origin: undefined }
+    vi.stubGlobal('window', {
+      location: {
+        origin: 'http://localhost:1234',
+      },
+    })
+
+    const result = await importSpecToWorkspace(
+      {
+        // no servers defined
+      },
+      {
+        documentUrl: '/docs/openapi.json',
+      },
+    )
+
+    if (result.error) {
+      throw result.error
+    }
+
+    expect(result.servers).toMatchObject([
+      {
+        url: 'http://localhost:1234',
+      },
+    ])
+
+    // Restore the original window.location
+    vi.stubGlobal('location', originalLocation)
   })
 
   it('prefixes relative servers with window.location.origin', async () => {
@@ -1289,6 +1345,106 @@ describe('getServersFromOpenApiDocument', () => {
     })
 
     const result = await importSpecToWorkspace({})
+
+    if (result.error) {
+      throw result.error
+    }
+
+    expect(result.servers).toMatchObject([{ url: 'http://localhost:3000' }])
+
+    // Restore the original window.location
+    vi.stubGlobal('location', originalLocation)
+  })
+
+  it('uses document URL as server when no servers are defined in document', async () => {
+    const result = await importSpecToWorkspace(
+      {
+        // No servers defined in the document
+      },
+      {
+        documentUrl: 'https://example.com/openapi.json',
+      },
+    )
+
+    if (result.error) {
+      throw result.error
+    }
+
+    expect(result.servers).toMatchObject([{ url: 'https://example.com' }])
+  })
+
+  it('uses document URL without path as server when no servers are defined', async () => {
+    const result = await importSpecToWorkspace(
+      {
+        // No servers defined in the document
+      },
+      {
+        documentUrl: 'https://api.example.com/v2/openapi.yaml',
+      },
+    )
+
+    if (result.error) {
+      throw result.error
+    }
+
+    expect(result.servers).toMatchObject([{ url: 'https://api.example.com' }])
+  })
+
+  it('combines the documentUrl and the relative server URL', async () => {
+    const result = await importSpecToWorkspace(
+      {
+        servers: [{ url: '/api/v1' }],
+      },
+      {
+        documentUrl: 'https://example.com/openapi.json',
+      },
+    )
+
+    if (result.error) {
+      throw result.error
+    }
+
+    expect(result.servers).toMatchObject([{ url: 'https://example.com/api/v1' }])
+  })
+
+  it('prioritizes document URL over window.location when no servers are defined', async () => {
+    const originalLocation = typeof window !== 'undefined' ? window.location : { origin: undefined }
+    vi.stubGlobal('window', {
+      location: {
+        origin: 'http://localhost:3000',
+      },
+    })
+
+    const result = await importSpecToWorkspace(
+      {
+        // No servers defined in the document
+      },
+      {
+        documentUrl: 'https://example.com/openapi.json',
+      },
+    )
+
+    if (result.error) {
+      throw result.error
+    }
+
+    expect(result.servers).toMatchObject([{ url: 'https://example.com' }])
+
+    // Restore the original window.location
+    vi.stubGlobal('location', originalLocation)
+  })
+
+  it('falls back to window.location when no document URL and no servers are defined', async () => {
+    const originalLocation = typeof window !== 'undefined' ? window.location : { origin: undefined }
+    vi.stubGlobal('window', {
+      location: {
+        origin: 'http://localhost:3000',
+      },
+    })
+
+    const result = await importSpecToWorkspace({
+      // No servers defined in the document
+    })
 
     if (result.error) {
       throw result.error

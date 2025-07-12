@@ -4,13 +4,18 @@ import {
   ScalarIconButton,
   ScalarMarkdown,
 } from '@scalar/components'
+import { ScalarIconWebhooksLogo } from '@scalar/icons'
 import type {
   Collection,
-  Operation,
+  Request,
   Server,
 } from '@scalar/oas-utils/entities/spec'
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types'
-import type { TransformedOperation } from '@scalar/types/legacy'
+import {
+  getOperationStability,
+  getOperationStabilityColor,
+  isOperationDeprecated,
+} from '@scalar/oas-utils/helpers'
+import type { OpenAPIV3_1, XScalarStability } from '@scalar/types/legacy'
 import { useClipboard } from '@scalar/use-hooks/useClipboard'
 import { computed } from 'vue'
 
@@ -19,38 +24,44 @@ import { Badge } from '@/components/Badge'
 import { HttpMethod } from '@/components/HttpMethod'
 import OperationPath from '@/components/OperationPath.vue'
 import { SectionAccordion } from '@/components/Section'
-import { ExampleRequest } from '@/features/ExampleRequest'
-import { ExampleResponses } from '@/features/ExampleResponses'
-import { TestRequestButton } from '@/features/TestRequestButton'
+import { ExampleRequest } from '@/features/example-request'
+import { ExampleResponses } from '@/features/example-responses'
+import type { Schemas } from '@/features/Operation/types/schemas'
+import { TestRequestButton } from '@/features/test-request-button'
 import { useConfig } from '@/hooks/useConfig'
-import {
-  getOperationStability,
-  getOperationStabilityColor,
-  isOperationDeprecated,
-} from '@/libs/operation'
 
 import OperationParameters from '../components/OperationParameters.vue'
 import OperationResponses from '../components/OperationResponses.vue'
 
-const { operation } = defineProps<{
-  id?: string
+const { request, operation, path, isWebhook } = defineProps<{
+  id: string
+  path: string
+  method: OpenAPIV3_1.HttpMethods
+  operation: OpenAPIV3_1.OperationObject<{
+    'x-scalar-stability': XScalarStability
+  }>
+  isWebhook: boolean
+  /**
+   * @deprecated Use `document` instead
+   */
   collection: Collection
   server: Server | undefined
-  operation: Operation
-  /** @deprecated Use `operation` instead */
-  transformedOperation: TransformedOperation
-  schemas?:
-    | OpenAPIV2.DefinitionsObject
-    | Record<string, OpenAPIV3.SchemaObject>
-    | Record<string, OpenAPIV3_1.SchemaObject>
-    | unknown
+  request: Request | undefined
+  schemas?: Schemas
 }>()
+
+const operationTitle = computed(() => operation?.summary || path || '')
 
 const { copyToClipboard } = useClipboard()
 const config = useConfig()
 
-/** The title of the operation (summary or path) */
-const title = computed(() => operation.summary || operation.path)
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void
+}>()
+
+const handleDiscriminatorChange = (type: string) => {
+  emit('update:modelValue', type)
+}
 </script>
 <template>
   <SectionAccordion
@@ -62,24 +73,30 @@ const title = computed(() => operation.summary || operation.path)
         <div class="operation-details">
           <HttpMethod
             class="endpoint-type"
-            :method="operation.method"
+            :method="method"
             short />
           <Anchor
-            :id="id ?? ''"
+            :id="id"
             class="endpoint-anchor">
             <h3 class="endpoint-label">
               <div class="endpoint-label-path">
                 <OperationPath
                   :deprecated="isOperationDeprecated(operation)"
-                  :path="operation.path" />
+                  :path="path" />
               </div>
               <div class="endpoint-label-name">
-                {{ title }}
+                {{ operationTitle }}
               </div>
               <Badge
                 v-if="getOperationStability(operation)"
                 :class="getOperationStabilityColor(operation)">
                 {{ getOperationStability(operation) }}
+              </Badge>
+
+              <Badge
+                v-if="isWebhook"
+                class="font-code text-green flex w-fit items-center justify-center gap-1">
+                <ScalarIconWebhooksLogo weight="bold" />Webhook
               </Badge>
             </h3>
           </Anchor>
@@ -88,53 +105,62 @@ const title = computed(() => operation.summary || operation.path)
     </template>
     <template #actions="{ active }">
       <TestRequestButton
-        v-if="active"
-        :operation="operation" />
+        v-if="active && request"
+        :operation="request" />
       <ScalarIcon
         v-else-if="!config?.hideTestRequestButton"
-        class="endpoint-try-hint"
+        class="endpoint-try-hint size-6"
         icon="Play"
         thickness="1.75px" />
       <ScalarIconButton
-        class="endpoint-copy"
+        class="endpoint-copy p-0.5"
         icon="Clipboard"
         label="Copy endpoint URL"
         size="xs"
         variant="ghost"
-        @click.stop="copyToClipboard(operation.path)" />
+        @click.stop="copyToClipboard(path)" />
     </template>
     <template
       v-if="operation?.description"
       #description>
       <ScalarMarkdown
         :value="operation?.description"
-        withImages />
+        withImages
+        withAnchors
+        transformType="heading"
+        :anchorPrefix="id" />
     </template>
     <div class="endpoint-content">
       <div class="operation-details-card">
         <div class="operation-details-card-item">
           <OperationParameters
-            :operation="operation"
-            :schemas="schemas" />
+            :parameters="operation?.parameters"
+            :requestBody="operation?.requestBody"
+            :schemas="schemas"
+            @update:modelValue="handleDiscriminatorChange" />
         </div>
         <div class="operation-details-card-item">
           <OperationResponses
             :collapsableItems="false"
-            :operation="transformedOperation"
+            :responses="operation.responses"
             :schemas="schemas" />
         </div>
       </div>
       <ExampleResponses :responses="operation.responses" />
       <ExampleRequest
+        :request="request"
+        :method="method"
         :collection="collection"
         :operation="operation"
         :server="server"
-        :transformedOperation="transformedOperation" />
+        @update:modelValue="handleDiscriminatorChange" />
     </div>
   </SectionAccordion>
 </template>
 
 <style scoped>
+@reference "@/style.css";
+
 .operation-title {
   display: flex;
   justify-content: space-between;
@@ -226,13 +252,10 @@ const title = computed(() => operation.summary || operation.path)
 
 .endpoint-try-hint {
   padding: 2px;
-  height: 24px;
-  width: 24px;
   flex-shrink: 0;
 }
 .endpoint-copy {
   color: currentColor;
-  padding: 2px;
 }
 .endpoint-copy :deep(svg) {
   stroke-width: 2px;
@@ -246,7 +269,7 @@ const title = computed(() => operation.summary || operation.path)
   padding: 9px;
 }
 
-@screen lg {
+@variant lg {
   .endpoint-content {
     grid-auto-flow: column;
   }
@@ -306,9 +329,39 @@ const title = computed(() => operation.summary || operation.path)
   padding: 9px;
   margin: 0;
 }
-.operation-details-card :deep(.request-body-title-select) {
-  text-transform: initial;
-  font-weight: initial;
-  margin-left: auto;
+
+.operation-details-card :deep(.request-body-description) {
+  margin-top: 0;
+  padding: 9px 9px 0 9px;
+  border-top: 1px solid var(--scalar-border-color);
+}
+
+.operation-details-card :deep(.request-body) {
+  margin-top: 0;
+  border-radius: var(--scalar-radius-lg);
+  border: 1px solid var(--scalar-border-color);
+}
+
+.operation-details-card :deep(.request-body-header) {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.operation-details-card :deep(.contents button) {
+  margin-right: 9px;
+}
+
+.operation-details-card :deep(.request-body-schema > .schema-card) {
+  border-radius: var(--scalar-radius-lg);
+  border: 1px solid var(--scalar-border-color);
+  margin: 9px;
+}
+
+.operation-details-card :deep(.request-body-schema .property--level-0) {
+  padding: 0;
+}
+
+.operation-details-card :deep(.selected-content-type) {
+  margin-right: 9px;
 }
 </style>

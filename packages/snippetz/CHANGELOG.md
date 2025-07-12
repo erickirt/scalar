@@ -1,5 +1,47 @@
 # @scalar/snippetz
 
+## 0.4.1
+
+### Patch Changes
+
+- Updated dependencies [c10e191]
+  - @scalar/types@0.2.8
+
+## 0.4.0
+
+### Minor Changes
+
+- 85a81eb: add Rust reqwest async/sync
+
+### Patch Changes
+
+- d93f60c: chore(snippetz): move @scalar/types to dependencies
+- Updated dependencies [ad2e3e6]
+  - @scalar/types@0.2.7
+
+## 0.3.2
+
+### Patch Changes
+
+- 2d7f995: refactor: use more common straight apostrophe ' instead of the real apostrophe ’
+
+## 0.3.1
+
+### Patch Changes
+
+- b6ed440: feat(snippetz): add python/httpx plugin
+
+## 0.3.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- b77f67a: feat(snippetz): add multipart/form-data support for several converters
+- 20cf550: fix: array query params showing on code snippet
+
 ## 0.2.20
 
 ### Patch Changes

@@ -1,75 +1,89 @@
 <script lang="ts" setup>
-import type {
-  OpenAPI,
-  OpenAPIV2,
-  OpenAPIV3,
-  OpenAPIV3_1,
-} from '@scalar/openapi-types'
-import { stringify } from 'flatted'
+import { isDefined } from '@scalar/helpers/array/is-defined'
+import { computed } from 'vue'
 
-import { discriminators } from '@/components/Content/Schema/helpers/optimizeValueForDisplay'
-import SchemaPropertyExamples from '@/components/Content/Schema/SchemaPropertyExamples.vue'
+import { Badge } from '@/components/Badge'
 import ScreenReader from '@/components/ScreenReader.vue'
+import type { Schemas } from '@/features/Operation/types/schemas'
+import { getDiscriminatorSchemaName } from '@/hooks/useDiscriminator'
 
-import { Badge } from '../../Badge'
+import { getSchemaType } from './helpers/get-schema-type'
+import { getModelName } from './helpers/schema-name'
+import RenderString from './RenderString.vue'
 import SchemaPropertyDetail from './SchemaPropertyDetail.vue'
+import SchemaPropertyExamples from './SchemaPropertyExamples.vue'
 
 const {
   value,
   schemas,
   required = false,
   withExamples = true,
+  hideModelNames = false,
 } = defineProps<{
   value?: Record<string, any>
   enum?: boolean
   required?: boolean
   additional?: boolean
-  pattern?: boolean
   withExamples?: boolean
-  schemas?:
-    | OpenAPIV2.DefinitionsObject
-    | Record<string, OpenAPIV3.SchemaObject>
-    | Record<string, OpenAPIV3_1.SchemaObject>
-    | unknown
+  hideModelNames?: boolean
+  schemas?: Schemas
 }>()
 
-const discriminatorType = discriminators.find((r) => {
-  if (!value || typeof value !== 'object') {
-    return false
+const flattenDefaultValue = (value: Record<string, any>) => {
+  if (value?.default === null) {
+    return 'null'
   }
 
-  return (
-    r in value ||
-    (value.items && typeof value.items === 'object' && r in value.items)
-  )
-})
+  if (Array.isArray(value?.default) && value.default.length === 1) {
+    return value.default[0]
+  }
 
-const flattenDefaultValue = (value: Record<string, any>) => {
-  return Array.isArray(value?.default) && value.default.length === 1
-    ? value.default[0]
-    : value?.default
+  if (typeof value?.default === 'string') {
+    return JSON.stringify(value.default)
+  }
+
+  if (Array.isArray(value?.default)) {
+    return JSON.stringify(value.default)
+  }
+
+  return value?.default
 }
 
-// Get model name from schema
-const getModelNameFromSchema = (schema: OpenAPI.Document): string | null => {
-  if (!schema) {
-    return null
+const constValue = computed(() => {
+  if (value?.const !== undefined) {
+    return value?.const
   }
 
-  if (schema.name) {
-    return schema.name
+  if (value?.enum?.length === 1) {
+    return value.enum[0]
   }
 
-  if (schemas && typeof schemas === 'object') {
-    for (const [schemaName, schemaValue] of Object.entries(schemas)) {
-      if (stringify(schemaValue) === stringify(schema)) {
-        return schemaName
-      }
+  if (value?.items) {
+    if (isDefined(value.items.const)) {
+      return value.items.const
+    }
+
+    if (value.items.enum?.length === 1) {
+      return value.items.enum[0]
     }
   }
 
-  return null
-}
+  return undefined
+})
+
+/** Gets the model name */
+const modelName = computed(() => {
+  if (!value) {
+    return null
+  }
+
+  return getModelName(
+    value,
+    schemas,
+    hideModelNames,
+    getDiscriminatorSchemaName,
+  )
+})
 </script>
 <template>
   <div class="property-heading">
@@ -77,58 +91,30 @@ const getModelNameFromSchema = (schema: OpenAPI.Document): string | null => {
       v-if="$slots.name"
       class="property-name"
       :class="{ deprecated: value?.deprecated }">
-      <slot
-        v-if="!pattern"
-        name="name" />
-      <template v-else>&sol;<slot name="name" />&sol;</template>
+      <slot name="name" />
     </div>
     <div
-      v-if="additional"
-      class="property-additional">
-      <template v-if="value?.['x-additionalPropertiesName']">
-        {{ value['x-additionalPropertiesName'] }}
-      </template>
-      <template v-else>additional properties</template>
+      v-if="value?.isDiscriminator"
+      class="property-discriminator">
+      Discriminator
     </div>
-    <div
-      v-if="pattern"
-      class="property-pattern">
-      <Badge>pattern</Badge>
-    </div>
-    <div
-      v-if="value?.deprecated"
-      class="property-deprecated">
-      <Badge>deprecated</Badge>
-    </div>
-    <div
-      v-if="value?.const || (value?.enum && value.enum.length === 1)"
-      class="property-const">
-      <SchemaPropertyDetail truncate>
-        <template #prefix>const:</template>
-        {{ value.const ?? value.enum[0] }}
-      </SchemaPropertyDetail>
-    </div>
-    <template v-else-if="value?.type">
-      <SchemaPropertyDetail>
-        <ScreenReader>Type:</ScreenReader>
-        <template v-if="value?.items?.type">
-          {{ value.type }}
-          {{ getModelNameFromSchema(value.items) || value.items.type }}[]
-        </template>
+    <template v-if="value">
+      <SchemaPropertyDetail v-if="value?.type">
+        <ScreenReader>Type: </ScreenReader>
+        <template v-if="modelName">{{ modelName }}</template>
         <template v-else>
-          {{ Array.isArray(value.type) ? value.type.join(' | ') : value.type }}
-          {{ value?.nullable ? ' | nullable' : '' }}
+          {{ getSchemaType(value) }}
         </template>
-        <template v-if="value.minItems || value.maxItems">
-          {{ value.minItems }}&hellip;{{ value.maxItems }}
-        </template>
+      </SchemaPropertyDetail>
+      <SchemaPropertyDetail v-if="value.minItems || value.maxItems">
+        {{ value.minItems }}&hellip;{{ value.maxItems }}
       </SchemaPropertyDetail>
       <SchemaPropertyDetail v-if="value.minLength">
-        <template #prefix>min:</template>
+        <template #prefix>min: </template>
         {{ value.minLength }}
       </SchemaPropertyDetail>
       <SchemaPropertyDetail v-if="value.maxLength">
-        <template #prefix>max:</template>
+        <template #prefix>max: </template>
         {{ value.maxLength }}
       </SchemaPropertyDetail>
       <SchemaPropertyDetail v-if="value.uniqueItems">
@@ -138,25 +124,25 @@ const getModelNameFromSchema = (schema: OpenAPI.Document): string | null => {
         <ScreenReader>Format:</ScreenReader>
         {{ value.format }}
       </SchemaPropertyDetail>
-      <SchemaPropertyDetail
-        v-if="value.minimum !== undefined && value.exclusiveMinimum">
-        <template #prefix>greater than:</template>
+      <SchemaPropertyDetail v-if="isDefined(value.exclusiveMinimum)">
+        <template #prefix>greater than: </template>
+        {{ value.exclusiveMinimum }}
+      </SchemaPropertyDetail>
+      <SchemaPropertyDetail v-if="isDefined(value.minimum)">
+        <template #prefix>min: </template>
         {{ value.minimum }}
       </SchemaPropertyDetail>
-      <SchemaPropertyDetail
-        v-if="value.minimum !== undefined && !value.exclusiveMinimum">
-        <template #prefix>min:</template>
-        {{ value.minimum }}
+      <SchemaPropertyDetail v-if="isDefined(value.exclusiveMaximum)">
+        <template #prefix>less than: </template>
+        {{ value.exclusiveMaximum }}
       </SchemaPropertyDetail>
-      <SchemaPropertyDetail
-        v-if="value.maximum !== undefined && value.exclusiveMaximum">
-        <template #prefix>less than:</template>
+      <SchemaPropertyDetail v-if="isDefined(value.maximum)">
+        <template #prefix>max: </template>
         {{ value.maximum }}
       </SchemaPropertyDetail>
-      <SchemaPropertyDetail
-        v-if="value.maximum !== undefined && !value.exclusiveMaximum">
-        <template #prefix>max:</template>
-        {{ value.maximum }}
+      <SchemaPropertyDetail v-if="isDefined(value.multipleOf)">
+        <template #prefix>multiple of: </template>
+        {{ value.multipleOf }}
       </SchemaPropertyDetail>
       <SchemaPropertyDetail
         v-if="value.pattern"
@@ -169,12 +155,34 @@ const getModelNameFromSchema = (schema: OpenAPI.Document): string | null => {
       <SchemaPropertyDetail
         v-if="value.default !== undefined"
         truncate>
-        <template #prefix>default:</template>
+        <template #prefix>default: </template>
         {{ flattenDefaultValue(value) }}
       </SchemaPropertyDetail>
     </template>
+    <div
+      v-if="additional"
+      class="property-additional">
+      <template v-if="value?.['x-additionalPropertiesName']">
+        {{ value['x-additionalPropertiesName'] }}
+      </template>
+      <template v-else>additional properties</template>
+    </div>
+    <div
+      v-if="value?.deprecated"
+      class="property-deprecated">
+      <Badge>deprecated</Badge>
+    </div>
+    <!-- Don't use `isDefined` here, we want to show `const` when the value is `null` -->
+    <div
+      v-if="constValue !== undefined"
+      class="property-const">
+      <SchemaPropertyDetail truncate>
+        <template #prefix>const: </template>
+        <RenderString :value="constValue" />
+      </SchemaPropertyDetail>
+    </div>
     <template v-else>
-      <!-- Shows only when a discriminator is used (so value?.type is undefined) -->
+      <!-- Shows only when a composition is used (so value?.type is undefined) -->
       <SchemaPropertyDetail v-if="value?.nullable === true">
         nullable
       </SchemaPropertyDetail>
@@ -198,8 +206,7 @@ const getModelNameFromSchema = (schema: OpenAPI.Document): string | null => {
     <SchemaPropertyExamples
       v-if="withExamples"
       :examples="value?.examples"
-      :example="value?.example || value?.items?.example"
-      :discriminator-type="discriminatorType" />
+      :example="value?.example || value?.items?.example" />
   </div>
 </template>
 <style scoped>
@@ -232,7 +239,9 @@ const getModelNameFromSchema = (schema: OpenAPI.Document): string | null => {
   font-family: var(--scalar-font-code);
   font-weight: var(--scalar-semibold);
   font-size: var(--scalar-font-size-3);
-  display: flex;
+  overflow: hidden;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .property-additional {
@@ -245,21 +254,27 @@ const getModelNameFromSchema = (schema: OpenAPI.Document): string | null => {
 }
 
 .property-required {
-  font-size: var(--scalar-micro);
+  font-size: var(--scalar-mini);
   color: var(--scalar-color-orange);
 }
 
 .property-read-only {
-  font-size: var(--scalar-micro);
+  font-size: var(--scalar-mini);
   color: var(--scalar-color-blue);
 }
 
 .property-write-only {
-  font-size: var(--scalar-micro);
+  font-size: var(--scalar-mini);
   color: var(--scalar-color-green);
 }
+
+.property-discriminator {
+  font-size: var(--scalar-mini);
+  color: var(--scalar-color-purple);
+}
+
 .property-detail {
-  font-size: var(--scalar-micro);
+  font-size: var(--scalar-mini);
   color: var(--scalar-color-2);
   display: flex;
   align-items: center;

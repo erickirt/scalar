@@ -40,14 +40,11 @@ const {
 }>()
 
 const { requestExampleMutators } = useWorkspace()
-const isTooltipReady = ref(false)
 
 const params = computed(() => example.parameters[paramKey] ?? [])
 
 onMounted(() => {
   nextTick(() => {
-    // TODO: currently waiting for the tooltip to be ready otherwise error is thrown on mount
-    isTooltipReady.value = true
     defaultRow()
   })
 })
@@ -171,9 +168,7 @@ const itemCount = computed(
   () => params.value.filter((param) => param.key || param.value).length,
 )
 
-const showTooltip = computed(
-  () => isTooltipReady.value && params.value.length > 1,
-)
+const showTooltip = computed(() => params.value.length > 1)
 
 watch(
   () => example,
@@ -197,26 +192,16 @@ const hasReadOnlyEntries = computed(() => (readOnlyEntries ?? []).length > 0)
         class="text-c-2 request-meta-buttons flex whitespace-nowrap opacity-0 group-hover/params:opacity-100 has-[:focus-visible]:opacity-100">
         <ScalarTooltip
           v-if="showTooltip"
-          side="left"
-          :sideOffset="6">
-          <template #trigger>
-            <ScalarButton
-              class="pr-0.75 pl-1 transition-none"
-              size="sm"
-              variant="ghost"
-              @click.stop="deleteAllRows">
-              Clear
-              <span class="sr-only">All {{ title }}</span>
-            </ScalarButton>
-          </template>
-          <template #content>
-            <div
-              class="w-content bg-b-1 text-xxs text-c-1 pointer-events-none z-10 grid min-w-48 gap-1.5 rounded p-2 leading-5 shadow-lg">
-              <div class="text-c-2 flex items-center">
-                <span>Clear optional parameters</span>
-              </div>
-            </div>
-          </template>
+          content="Clear optional parameters"
+          placement="left">
+          <ScalarButton
+            class="pr-0.75 pl-1 transition-none"
+            size="sm"
+            variant="ghost"
+            @click.stop="deleteAllRows">
+            Clear
+            <span class="sr-only">All {{ title }}</span>
+          </ScalarButton>
         </ScalarTooltip>
       </div>
     </template>
@@ -225,9 +210,7 @@ const hasReadOnlyEntries = computed(() => (readOnlyEntries ?? []).length > 0)
       <RequestTable
         v-if="hasReadOnlyEntries"
         class="flex-1"
-        :class="{
-          'bg-mix-transparent bg-mix-amount-95 bg-c-3': hasReadOnlyEntries,
-        }"
+        :class="{ 'bg-c-3/5': hasReadOnlyEntries }"
         :columns="['32px', '', '']"
         :envVariables="envVariables"
         :environment="environment"

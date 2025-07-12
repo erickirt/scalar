@@ -1,15 +1,7 @@
 import type { Context } from 'hono'
 
-/** File polyfill for Node 18  */
-type File = {
-  name: string
-  size: number
-  type: string
-  lastModified: number
-}
-
 /**
- * Get the body of a request, no matter if it’s JSON or text
+ * Get the body of a request, no matter if it's JSON or text
  */
 export async function getBody(c: Context) {
   const contentType = c.req.header('Content-Type')
@@ -100,14 +92,8 @@ function transformFormData(formData: Record<string, any>) {
 }
 
 /**
- * Check if the data is a file, just a polyfill for Node 18
+ * Check if the data is a File instance
  */
-function isFile(data: any) {
-  return (
-    typeof data === 'object' &&
-    data.name !== undefined &&
-    data.size !== undefined &&
-    data.type !== undefined &&
-    data.lastModified !== undefined
-  )
+function isFile(data: unknown): data is File {
+  return data instanceof File
 }

@@ -1,8 +1,51 @@
 # Scalar API Reference for Django Ninja
 
+The easiest way to render a modern and beautiful API reference based on your Django Ninja OpenAPI document.
+
+![django-ninja](ninja.png)
+
+## Installation
+
+```bash
+pip install git+https://github.com/scalar/scalar.git#subdirectory=integrations/django-ninja
+```
+
+## Usage
+
+Integrating Scalar with Django Ninja is simple.
+Just pass the `ScalarViewer` instance to the `docs` parameter of the NinjaAPI instance.
+
+```python
+from ninja import NinjaAPI
+from scalar_django_ninja import ScalarViewer
+
+api = NinjaAPI(
+    version="1.0.0",
+    title="API Reference",
+    description="API Reference for the Scalar Django Ninja Plugin",
+    docs=ScalarViewer(),
+    docs_url="/docs/",
+)
+
+@api.get("/add")
+def add(request, a: int, b: int):
+    return {"result": a + b}
+
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("api/", api.urls),
+]
+
+```
+
+This renders a beautiful API reference at `/api/docs` based on your API.
+
+## Guide
+
 Django Ninja is a simple way to create an API for Django and Scalar provides an easy way to generate a reference document and client for that API.
 
-## Creating a Django Ninja API
+### Creating a Django Ninja API
 
 Start by creating a virtual environment and activating it:
 
@@ -48,9 +91,9 @@ urlpatterns = [
 
 ```
 
-We’ll save running it for after we install Scalar in the next section.
+We'll save running it for after we install Scalar in the next section.
 
-## Installing the Scalar API Reference
+### Installing the Scalar API Reference
 
 Next, we need to install Scalar API Reference:
 
@@ -95,7 +138,7 @@ cd apidemo
 ./manage.py runserver
 ```
 
-Once its running, we can then go to `http://127.0.0.1:8000/api/docs/` to view our API Reference.
+Once it's running, we can then go to `http://127.0.0.1:8000/api/docs/` to view our API Reference.
 
 ![Django Ninja API reference](https://github.com/user-attachments/assets/10a1778a-efa0-4903-b0cb-974ea4135982)
 

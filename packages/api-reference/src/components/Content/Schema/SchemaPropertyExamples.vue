@@ -2,12 +2,11 @@
 import { ScalarIcon } from '@scalar/components'
 import { useClipboard } from '@scalar/use-hooks/useClipboard'
 
-import { formatExample } from '@/components/Content/Schema/helpers/formatExample'
+import { formatExample } from '@/components/Content/Schema/helpers/format-example'
 
 defineProps<{
   examples?: Record<string, unknown>
   example?: unknown
-  discriminatorType?: string
 }>()
 
 const { copyToClipboard } = useClipboard()
@@ -75,7 +74,7 @@ const { copyToClipboard } = useClipboard()
 .property-example {
   display: flex;
   flex-direction: column;
-  font-size: var(--scalar-micro);
+  font-size: var(--scalar-mini);
   position: relative;
 }
 .property-example:hover:before {

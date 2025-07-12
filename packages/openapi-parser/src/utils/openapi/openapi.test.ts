@@ -2,7 +2,7 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { stringify } from 'yaml'
 
-import { readFiles } from '../../plugins/read-files/readFiles'
+import { readFiles } from '@/plugins/read-files/read-files'
 import { openapi } from './openapi'
 
 const example = {
@@ -284,7 +284,7 @@ describe('pipeline', () => {
         })
         .dereference()
         .get()
-    }).rejects.toThrowError('Can’t resolve reference: #/components/requestBodies/DoesNotExist')
+    }).rejects.toThrowError("Can't resolve reference: #/components/requestBodies/DoesNotExist")
   })
 
   it('throws an error when dereference fails (only dereference)', async () => {
@@ -307,7 +307,7 @@ describe('pipeline', () => {
           throwOnError: true,
         })
         .get()
-    }).rejects.toThrowError('Can’t resolve reference: #/components/requestBodies/DoesNotExist')
+    }).rejects.toThrowError("Can't resolve reference: #/components/requestBodies/DoesNotExist")
   })
 
   it('throws an error when validate fails (global)', async () => {
@@ -332,7 +332,7 @@ describe('pipeline', () => {
         })
         .validate()
         .get()
-    }).rejects.toThrowError('Can’t resolve reference: #/components/requestBodies/DoesNotExist')
+    }).rejects.toThrowError("Can't resolve reference: #/components/requestBodies/DoesNotExist")
   })
 
   it('throws an error when validate fails (only validate)', async () => {
@@ -357,7 +357,7 @@ describe('pipeline', () => {
           throwOnError: true,
         })
         .get()
-    }).rejects.toThrowError('Can’t resolve reference: #/components/requestBodies/DoesNotExist')
+    }).rejects.toThrowError("Can't resolve reference: #/components/requestBodies/DoesNotExist")
   })
 
   it('works with then & catch', async () => {
@@ -386,7 +386,7 @@ describe('pipeline', () => {
           reject()
         })
         .catch((error) => {
-          expect(error.message).toBe('Can’t resolve reference: #/components/requestBodies/DoesNotExist')
+          expect(error.message).toBe("Can't resolve reference: #/components/requestBodies/DoesNotExist")
 
           resolve(null)
         })

@@ -43,7 +43,7 @@ defineSlots<{
   default(props: {
     /** Whether or not the listbox is open */
     open: boolean
-  }): any
+  }): unknown
 }>()
 
 defineOptions({ inheritAttrs: false })
@@ -65,8 +65,7 @@ const { cx } = useBindCx()
       :placement="placement ?? 'bottom-start'">
       <ListboxButton
         :id="id"
-        as="template"
-        class="justify-start focus:outline-none focus-visible:ring-1 focus-visible:ring-c-accent">
+        as="template">
         <slot :open="open" />
       </ListboxButton>
       <template #floating="{ width }">

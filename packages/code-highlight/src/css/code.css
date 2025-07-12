@@ -28,7 +28,7 @@
     display: inline-block;
     counter-increment: linenumber;
     content: counter(linenumber);
-    margin-right: 0.7em;
+    margin-right: 0.875rem;
     /* Variable is set on the code element by the plugin when line numbers are used */
     min-width: calc(var(--line-digits) * 1ch);
     text-align: right;
@@ -165,20 +165,12 @@
   color: var(--scalar-color-2);
 }
 
-.hljs.language-curl .hljs-keyword {
-  color: var(--scalar-color-orange);
-}
-
 .hljs.language-curl .hljs-string {
+  color: var(--scalar-color-blue);
+}
+
+.hljs.language-curl .hljs-literal {
   color: var(--scalar-color-1);
-}
-
-.hljs.language-curl .hljs-literal {
-  color: var(--scalar-color-blue);
-}
-
-.hljs.language-curl .hljs-literal {
-  color: var(--scalar-color-blue);
 }
 
 /** Compromise here */

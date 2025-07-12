@@ -1,4 +1,8 @@
 /* basic theme */
+:root {
+  --scalar-text-decoration: underline;
+  --scalar-text-decoration-hover: underline;
+}
 .light-mode {
   --scalar-background-1: #fff;
   --scalar-background-2: #f6f6f6;
@@ -21,7 +25,7 @@
   --scalar-color-2: #a4a4a4;
   --scalar-color-3: #797979;
 
-  --scalar-color-accent: #3ea6ff;
+  --scalar-color-accent: #00aeff;
   --scalar-background-accent: #3ea6ff1f;
 
   --scalar-border-color: #2d2d2d;
@@ -57,10 +61,17 @@
   --scalar-color-orange: #fb892c;
   --scalar-color-purple: #5203d1;
 
+  --scalar-link-color: var(--scalar-color-1);
+  --scalar-link-color-hover: var(--scalar-link-color);
+
   --scalar-button-1: rgba(0, 0, 0, 1);
   --scalar-button-1-hover: rgba(0, 0, 0, 0.8);
   --scalar-button-1-color: rgba(255, 255, 255, 0.9);
 
+  --scalar-tooltip-background: color-mix(in srgb, #1a1a1a, transparent 10%);
+  --scalar-tooltip-color: color-mix(in srgb, #fff, transparent 15%);
+
+  --scalar-color-alert: color-mix(in srgb, var(--scalar-color-orange), var(--scalar-color-1) 20%);
   --scalar-color-danger: color-mix(in srgb, var(--scalar-color-red), var(--scalar-color-1) 20%);
 
   --scalar-background-alert: color-mix(in srgb, var(--scalar-color-orange), var(--scalar-background-1) 95%);
@@ -74,9 +85,15 @@
   --scalar-color-orange: #ff8d4d;
   --scalar-color-purple: #b191f9;
 
+  --scalar-link-color: var(--scalar-color-1);
+  --scalar-link-color-hover: var(--scalar-link-color);
+
   --scalar-button-1: rgba(255, 255, 255, 1);
   --scalar-button-1-hover: rgba(255, 255, 255, 0.9);
   --scalar-button-1-color: black;
+
+  --scalar-tooltip-background: color-mix(in srgb, var(--scalar-background-1), #fff 10%);
+  --scalar-tooltip-color: color-mix(in srgb, #fff, transparent 5%);
 
   --scalar-color-danger: color-mix(in srgb, var(--scalar-color-red), var(--scalar-background-1) 20%);
 
@@ -94,7 +111,7 @@
     --scalar-color-purple: color(display-p3 0.321569 0.011765 0.819608 / 1.0);
   }
   .dark-mode {
-    --scalar-color-accent: color(display-p3 0.243137 0.65098 1.0 / 1.0);
+    --scalar-color-accent: color(display-p3 0.07 0.67 1);
     --scalar-color-green: color(display-p3 0.0 0.713725 0.282353 / 1.0);
     --scalar-color-red: color(display-p3 0.862745 0.105882 0.098039 / 1.0);
     --scalar-color-yellow: color(display-p3 1.0 0.788235 0.05098 / 1.0);

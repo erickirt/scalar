@@ -1,5 +1,3 @@
-import { openapi } from '@scalar/openapi-parser'
-import { fetchUrls } from '@scalar/openapi-parser/plugins/fetch-urls'
 import type { OpenAPI } from '@scalar/openapi-types'
 import type { FastifyBaseLogger, FastifyTypeProviderDefault, RawServerDefault } from 'fastify'
 import fp from 'fastify-plugin'
@@ -8,7 +6,8 @@ import { slug } from 'github-slugger'
 import type { FastifyApiReferenceHooksOptions, FastifyApiReferenceOptions } from './types'
 import { getJavaScriptFile } from './utils/getJavaScriptFile'
 
-import { getHtmlDocument } from '../../../packages/core/dist/libs/html-rendering/index.js'
+import { getHtmlDocument } from '@scalar/core/libs/html-rendering'
+import { normalize, toJson, toYaml } from '@scalar/openapi-parser'
 import type { ApiReferenceConfiguration } from './types'
 
 /**
@@ -174,10 +173,10 @@ const fastifyApiReference = fp<
       return void 0
     })()
 
-    // If no OpenAPI specification is passed and @fastify/swagger isn’t loaded, show a warning.
+    // If no OpenAPI specification is passed and @fastify/swagger isn't loaded, show a warning.
     if (!specSource) {
       fastify.log.warn(
-        '[@scalar/fastify-api-reference] You didn’t provide a spec.content or spec.url, and @fastify/swagger could not be found. Please provide one of these options.',
+        "[@scalar/fastify-api-reference] You didn't provide a `content` or `url`, and @fastify/swagger could not be found. Please provide one of these options.",
       )
 
       return
@@ -197,11 +196,7 @@ const fastifyApiReference = fp<
       }
     }
 
-    const getLoadedSpecIfAvailable = () => {
-      return openapi().load(specSource.get(), { plugins: [fetchUrls()] })
-    }
-    const getSpecFilenameSlug = async (loadedSpec: ReturnType<typeof getLoadedSpecIfAvailable>) => {
-      const spec = await loadedSpec?.get()
+    const getSpecFilenameSlug = async (spec: OpenAPI.Document) => {
       // Same GitHub Slugger and default file name as in `@scalar/api-reference`, when generating the download
       return slug(spec?.specification?.info?.title ?? 'spec')
     }
@@ -210,14 +205,14 @@ const fastifyApiReference = fp<
     fastify.route({
       method: 'GET',
       url: openApiSpecUrlJson,
-      // @ts-ignore We don’t know whether @fastify/swagger is loaded.
+      // @ts-ignore We don't know whether @fastify/swagger is loaded.
       schema: schemaToHideRoute,
       ...hooks,
       ...(options.logLevel && { logLevel: options.logLevel }),
       async handler(_, reply) {
-        const spec = getLoadedSpecIfAvailable()
+        const spec = normalize(specSource.get())
         const filename: string = await getSpecFilenameSlug(spec)
-        const json = JSON.parse(await spec.toJson()) // parsing minifies the JSON
+        const json = JSON.parse(toJson(spec)) // parsing minifies the JSON
 
         return reply
           .header('Content-Type', 'application/json')
@@ -232,14 +227,14 @@ const fastifyApiReference = fp<
     fastify.route({
       method: 'GET',
       url: openApiSpecUrlYaml,
-      // @ts-ignore We don’t know whether @fastify/swagger is loaded.
+      // @ts-ignore We don't know whether @fastify/swagger is loaded.
       schema: schemaToHideRoute,
       ...hooks,
       ...(options.logLevel && { logLevel: options.logLevel }),
       async handler(_, reply) {
-        const spec = getLoadedSpecIfAvailable()
+        const spec = normalize(specSource.get())
         const filename: string = await getSpecFilenameSlug(spec)
-        const yaml = await spec.toYaml()
+        const yaml = toYaml(spec)
         return reply
           .header('Content-Type', 'application/yaml')
           .header('Content-Disposition', `filename=${filename}.yaml`)
@@ -273,13 +268,13 @@ const fastifyApiReference = fp<
     fastify.route({
       method: 'GET',
       url: `${getRoutePrefix(options.routePrefix)}/`,
-      // We don’t know whether @fastify/swagger is registered, but it doesn’t hurt to add a schema anyway.
-      // @ts-ignore We don’t know whether @fastify/swagger is loaded.
+      // We don't know whether @fastify/swagger is registered, but it doesn't hurt to add a schema anyway.
+      // @ts-ignore We don't know whether @fastify/swagger is loaded.
       schema: schemaToHideRoute,
       ...hooks,
       ...(options.logLevel && { logLevel: options.logLevel }),
       handler(_, reply) {
-        // Redirect if it’s the route without a slash
+        // Redirect if it's the route without a slash
         const currentUrl = new URL(_.url, `${_.protocol}://${_.hostname}`)
 
         if (!currentUrl.pathname.endsWith('/')) {
@@ -303,7 +298,7 @@ const fastifyApiReference = fp<
         return reply.header('Content-Type', 'text/html; charset=utf-8').send(
           getHtmlDocument(
             {
-              // We’re using the bundled JS here by default, but the user can pass a CDN URL.
+              // We're using the bundled JS here by default, but the user can pass a CDN URL.
               cdn: RELATIVE_JAVASCRIPT_PATH,
               ...configuration,
             },
@@ -316,8 +311,8 @@ const fastifyApiReference = fp<
     fastify.route({
       method: 'GET',
       url: getJavaScriptUrl(options.routePrefix),
-      // We don’t know whether @fastify/swagger is registered, but it doesn’t hurt to add a schema anyway.
-      // @ts-ignore We don’t know whether @fastify/swagger is loaded.
+      // We don't know whether @fastify/swagger is registered, but it doesn't hurt to add a schema anyway.
+      // @ts-ignore We don't know whether @fastify/swagger is loaded.
       schema: schemaToHideRoute,
       ...hooks,
       ...(options.logLevel && { logLevel: options.logLevel }),

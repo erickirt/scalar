@@ -20,9 +20,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout code
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Ensure all Actions are pinned to a Commit SHA
-        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@4830be28ce81da52ec70d65c552a7403821d98d4
+        uses: zgosalvez/github-actions-ensure-sha-pinned-actions@fc87bb5b5a97953d987372e74478de634726b3e5
 
   # Initial build.
   # We only build the packages and integrations as everything else depends on them
@@ -36,7 +36,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Build
         uses: ./.github/actions/build-blacksmith
         with:
@@ -49,54 +49,62 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
 
       - name: Check whether the Dockerfile or any of its contents were modified
         id: changed-files
-        uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1
+        uses: step-security/changed-files@95b56dadb92a30ca9036f16423fd3c088a71ee94
         with:
           files_yaml: |
             api_reference_docker:
-              - packages/api-reference/docker/**
+              - integrations/docker/**
             api_reference_docker_version:
-              - packages/api-reference/docker/package.json
-
-      - if: steps.changed-files.outputs.api_reference_docker_any_changed == 'true'
-        name: Set up Docker
-        uses: docker/setup-buildx-action@f7ce87c1d6bead3e36075b2ce75da1f6cc28aaca
+              - integrations/docker/package.json
 
       - if: steps.changed-files.outputs.api_reference_docker_any_changed == 'true'
         name: Get version from package.json
         id: package-version
-        run: echo "VERSION=$(node -p "require('./packages/api-reference/docker/package.json').version")" >> "$GITHUB_OUTPUT"
+        working-directory: integrations/docker
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
 
       - if: steps.changed-files.outputs.api_reference_docker_any_changed == 'true'
-        name: Build and tag Docker image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        name: Build @scalar/api-reference
+        uses: ./.github/actions/build-blacksmith
         with:
-          context: packages/api-reference/docker/src
-          file: packages/api-reference/docker/src/Dockerfile
-          push: false
+          node-version: 22
+          packages: '@scalar/api-reference...'
+
+      - if: steps.changed-files.outputs.api_reference_docker_any_changed == 'true'
+        name: Copy JavaScript asset from @scalar/api-reference
+        working-directory: integrations/docker
+        run: pnpm copy:standalone
+
+      - if: steps.changed-files.outputs.api_reference_docker_any_changed == 'true'
+        name: Compress static assets
+        working-directory: integrations/docker
+        run: pnpm compress
+
+      - if: steps.changed-files.outputs.api_reference_docker_any_changed == 'true'
+        name: Build Docker image
+        uses: useblacksmith/build-push-action@574eb0ee0b59c6a687ace24192f0727dfb65d6d7
+        with:
+          context: integrations/docker
+          file: integrations/docker/Dockerfile
           load: true
-          # Linux-only at first
-          platforms: linux/amd64
           tags: |
             scalarapi/api-reference:latest
             scalarapi/api-reference:${{ steps.package-version.outputs.VERSION }}
 
       - if: steps.changed-files.outputs.api_reference_docker_any_changed == 'true'
         name: Scan for vulnerabilities
-        uses: aquasecurity/trivy-action@18f2510ee396bbf400402947b394f2dd8c87dbb0
+        uses: aquasecurity/trivy-action@76071ef0d7ec797419534a183b498b4d6366cf37
         with:
-          scan-type: 'config'
-          scan-ref: 'packages/api-reference/docker/src/Dockerfile'
+          scan-type: 'image'
+          image-ref: 'scalarapi/api-reference:latest'
           format: 'table'
-          exit-code: '1'
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
-          retry-count: 3
-          retry-delay: 30s
 
       - if: startsWith(github.event.head_commit.message, 'RELEASING:') && steps.changed-files.outputs.api_reference_docker_version_any_changed == 'true'
         name: Log in to DockerHub
@@ -108,16 +116,16 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - if: startsWith(github.event.head_commit.message, 'RELEASING:') && steps.changed-files.outputs.api_reference_docker_version_any_changed == 'true'
-        name: Push Docker image
-        uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1
+        name: Build and Push Docker image
+        uses: useblacksmith/build-push-action@574eb0ee0b59c6a687ace24192f0727dfb65d6d7
         with:
-          context: packages/api-reference/docker/src
-          file: packages/api-reference/docker/src/Dockerfile
+          context: integrations/docker
+          file: integrations/docker/Dockerfile
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
           # With ARM
-          platforms: linux/amd64,linux/arm64
+          platforms: |
+            linux/amd64
+            linux/arm64
           tags: |
             scalarapi/api-reference:latest
             scalarapi/api-reference:${{ steps.package-version.outputs.VERSION }}
@@ -130,7 +138,7 @@ jobs:
         node-version: [22]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
       - name: Use Node.js ${{ matrix.node-version }}
         uses: useblacksmith/setup-node@65c6ca86fdeb0ab3d85e78f57e4f6a7e4780b391
@@ -140,9 +148,9 @@ jobs:
       - name: Install dev dependencies
         run: pnpm install --dev
       # You might ask why we need a GitHub Action to install Biome.
-      # Well, it’s because GHA throws an error when it’s run through pnpm.# > Error: Cannot find module '@biomejs/cli-linux-x64/biome'
+      # Well, it's because GHA throws an error when it's run through pnpm.# > Error: Cannot find module '@biomejs/cli-linux-x64/biome'
       - name: Setup Biome
-        uses: biomejs/setup-biome@f382a98e582959e6aaac8e5f8b17b31749018780
+        uses: biomejs/setup-biome@454fa0d884737805f48d7dc236c1761a0ac3cc13
         with:
           version: 1.9.4
       - name: Lint code
@@ -159,7 +167,7 @@ jobs:
         node-version: [22]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Build
         uses: ./.github/actions/build-blacksmith
         with:
@@ -175,7 +183,7 @@ jobs:
         node-version: [22]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Build
         uses: ./.github/actions/build-blacksmith
         with:
@@ -193,7 +201,7 @@ jobs:
         node-version: [20, 22]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Build packages
         uses: ./.github/actions/build-blacksmith
         with:
@@ -215,7 +223,7 @@ jobs:
         node-version: [20, 22]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Build packages
         uses: ./.github/actions/build-blacksmith
         with:
@@ -234,9 +242,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Setup Go
-        uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b
+        uses: actions/setup-go@fa96338abe5531f6e34c5cc0bbe28c1a533d5505
         with:
           go-version: ${{ matrix.go-version }}
       - name: Run tests for the proxy server (Go)
@@ -251,7 +259,7 @@ jobs:
         node-version: [22]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Build @scalar/api-reference
         uses: ./.github/actions/build-blacksmith
         with:
@@ -267,10 +275,10 @@ jobs:
   npm-publish:
     if: github.ref == 'refs/heads/main'
     runs-on: beefcake
-    timeout-minutes: 10
+    timeout-minutes: 15
     # Avoid running this job in parallel:
-    # `changesets/action` creates/updates the release branch, which shouldn’t happen in parallel.
-    # npm publish also shouldn’t happen in parallel.
+    # `changesets/action` creates/updates the release branch, which shouldn't happen in parallel.
+    # npm publish also shouldn't happen in parallel.
     concurrency:
       group: npm-publish
       cancel-in-progress: false
@@ -285,7 +293,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Build
         uses: ./.github/actions/build
         with:
@@ -329,7 +337,7 @@ jobs:
           method: 'GET'
 
   todesktop-build:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'RELEASING:')
     runs-on: blacksmith-4vcpu-ubuntu-2204
     timeout-minutes: 10
     needs: [build, test-packages]
@@ -339,7 +347,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Build
         uses: ./.github/actions/build-blacksmith
         with:
@@ -352,9 +360,9 @@ jobs:
       - name: Check whether appFiles are there
         run: ls -R ./projects/scalar-app/dist
       - if: startsWith(github.event.head_commit.message, 'RELEASING:')
-        name: Check whether there’s a new version of the app
+        name: Check whether there's a new version of the app
         id: changed-files
-        uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1
+        uses: step-security/changed-files@95b56dadb92a30ca9036f16423fd3c088a71ee94
         with:
           files_yaml: |
             api_client_app:
@@ -380,10 +388,10 @@ jobs:
         node-version: [22]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Check which files were touched
         id: changed-files
-        uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1
+        uses: step-security/changed-files@95b56dadb92a30ca9036f16423fd3c088a71ee94
         with:
           files_yaml: |
             api_client:
@@ -422,7 +430,7 @@ jobs:
       - if: github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'RELEASING:')
         name: Check for new @scalar/api-client version
         id: client-version
-        uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1
+        uses: step-security/changed-files@95b56dadb92a30ca9036f16423fd3c088a71ee94
         with:
           files_yaml: |
             api_client:
@@ -459,7 +467,7 @@ jobs:
         node-version: [22]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Generate new DEPLOY_ID
         run: echo "DEPLOY_ID=$(uuidgen)" >> "$GITHUB_ENV" && echo $DEPLOY_ID
       - name: Build
@@ -500,10 +508,10 @@ jobs:
         node-version: [22]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
       - name: Check which files were touched
         id: changed-files
-        uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1
+        uses: step-security/changed-files@95b56dadb92a30ca9036f16423fd3c088a71ee94
         with:
           files_yaml: |
             components:
@@ -548,7 +556,7 @@ jobs:
             **Preview Storybook**
 
             https://${{env.DEPLOY_ID}}--scalar-components.netlify.app
-          comment_tag: 'netlify-preview'
+          comment_tag: 'storybook-preview'
 
   aspnetcore-build-test:
     runs-on: blacksmith-2vcpu-ubuntu-2204
@@ -556,14 +564,7 @@ jobs:
     needs: [build]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab
-        with:
-          dotnet-version: |
-            9.x
-            8.x
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
 
       - name: Build @scalar/api-reference
         uses: ./.github/actions/build-blacksmith
@@ -574,6 +575,17 @@ jobs:
       - name: Copy JavaScript asset from @scalar/api-reference
         working-directory: integrations/aspnetcore
         run: pnpm copy:standalone
+
+      - name: Compress static assets
+        working-directory: integrations/aspnetcore
+        run: pnpm compress
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@0f55b457d2a9ef0a7d0c7a2dd7cac6b1647730a4
+        with:
+          dotnet-version: |
+            9.x
+            8.x
 
       - name: Restore dependencies
         working-directory: integrations/aspnetcore
@@ -587,11 +599,48 @@ jobs:
         working-directory: integrations/aspnetcore
         run: dotnet test -c Release --no-build
 
-  aspnetcore-publish:
-    if: github.ref == 'refs/heads/main'
+  aspire-build-test:
     runs-on: blacksmith-2vcpu-ubuntu-2204
     timeout-minutes: 10
-    # We don’t want to run `nuget push` (publishing to NuGet) in parallel.
+    needs: [build]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
+
+      - name: Build @scalar/api-reference
+        uses: ./.github/actions/build-blacksmith
+        with:
+          node-version: 22
+          packages: '@scalar/api-reference...'
+
+      - name: Copy JavaScript asset from @scalar/api-reference
+        working-directory: integrations/aspire
+        run: pnpm copy:standalone
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@0f55b457d2a9ef0a7d0c7a2dd7cac6b1647730a4
+        with:
+          dotnet-version: |
+            9.x
+            8.x
+
+      - name: Restore dependencies
+        working-directory: integrations/aspire
+        run: dotnet restore
+
+      - name: Build solution
+        working-directory: integrations/aspire
+        run: dotnet build -c Release --no-restore
+
+      - name: Test solution
+        working-directory: integrations/aspire
+        run: dotnet test -c Release --no-build
+
+  aspnetcore-publish:
+    if: github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'RELEASING:')
+    runs-on: blacksmith-2vcpu-ubuntu-2204
+    timeout-minutes: 10
+    # We don't want to run `nuget push` (publishing to NuGet) in parallel.
     concurrency:
       group: aspnetcore-publish
       cancel-in-progress: false
@@ -608,7 +657,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
 
       - name: Git Status
         run: git status
@@ -616,22 +665,13 @@ jobs:
       - name: Stash changes
         run: git stash
 
-      - if: startsWith(github.event.head_commit.message, 'RELEASING:')
-        name: Check for new NuGet package version
+      - name: Check for new NuGet package version
         id: changed-files
-        uses: step-security/changed-files@3dbe17c78367e7d60f00d78ae6781a35be47b4a1
+        uses: step-security/changed-files@95b56dadb92a30ca9036f16423fd3c088a71ee94
         with:
           files_yaml: |
             aspnetcore_package:
               - integrations/aspnetcore/package.json
-
-      - if: steps.changed-files.outputs.aspnetcore_package_any_changed == 'true'
-        name: Setup .NET
-        uses: actions/setup-dotnet@3951f0dfe7a07e2313ec93c75700083e2005cbab
-        with:
-          dotnet-version: |
-            9.x
-            8.x
 
       - if: steps.changed-files.outputs.aspnetcore_package_any_changed == 'true'
         name: Extract version from package.json
@@ -653,6 +693,19 @@ jobs:
         run: pnpm copy:standalone
 
       - if: steps.changed-files.outputs.aspnetcore_package_any_changed == 'true'
+        name: Compress static assets
+        working-directory: integrations/aspnetcore
+        run: pnpm compress
+
+      - if: steps.changed-files.outputs.aspnetcore_package_any_changed == 'true'
+        name: Setup .NET
+        uses: actions/setup-dotnet@0f55b457d2a9ef0a7d0c7a2dd7cac6b1647730a4
+        with:
+          dotnet-version: |
+            9.x
+            8.x
+
+      - if: steps.changed-files.outputs.aspnetcore_package_any_changed == 'true'
         name: Restore dependencies
         working-directory: integrations/aspnetcore
         run: dotnet restore
@@ -669,3 +722,195 @@ jobs:
         name: Publish packages
         working-directory: integrations/aspnetcore
         run: dotnet nuget push nupkgs/*.nupkg -k ${{ secrets.NUGET_TOKEN }} -s https://api.nuget.org/v3/index.json
+
+  aspire-publish:
+    if: github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'RELEASING:')
+    runs-on: blacksmith-2vcpu-ubuntu-2204
+    timeout-minutes: 10
+    concurrency:
+      group: aspire-publish
+      cancel-in-progress: false
+    needs:
+      [
+        harden_security,
+        build,
+        format,
+        types,
+        test-packages,
+        test-integrations,
+        aspire-build-test,
+      ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
+
+      - name: Git Status
+        run: git status
+
+      - name: Stash changes
+        run: git stash
+
+      - name: Check for Aspire package.json changes
+        id: changed-files
+        uses: step-security/changed-files@95b56dadb92a30ca9036f16423fd3c088a71ee94
+        with:
+          files_yaml: |
+            aspire_package:
+              - integrations/aspire/package.json
+
+      - if: steps.changed-files.outputs.aspire_package_any_changed == 'true'
+        name: Extract version from package.json
+        working-directory: integrations/aspire
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - if: steps.changed-files.outputs.aspire_package_any_changed == 'true'
+        name: Build @scalar/api-reference
+        uses: ./.github/actions/build-blacksmith
+        with:
+          node-version: 22
+          packages: '@scalar/api-reference...'
+
+      - if: steps.changed-files.outputs.aspire_package_any_changed == 'true'
+        name: Copy JavaScript asset from @scalar/api-reference
+        working-directory: integrations/aspire
+        run: pnpm copy:standalone
+
+      - if: steps.changed-files.outputs.aspire_package_any_changed == 'true'
+        name: Log in to DockerHub
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - if: steps.changed-files.outputs.aspire_package_any_changed == 'true'
+        name: Setup Buildx
+        uses: docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435
+
+      - if: steps.changed-files.outputs.aspire_package_any_changed == 'true'
+        name: Build and push Aspire Docker image
+        uses: useblacksmith/build-push-action@574eb0ee0b59c6a687ace24192f0727dfb65d6d7
+        with:
+          context: integrations/aspire
+          file: integrations/aspire/src/Scalar.Aspire.Service/Dockerfile
+          push: true
+          # With ARM
+          platforms: |
+            linux/amd64
+            linux/arm64
+          tags: |
+            scalarapi/aspire-api-reference:latest
+            scalarapi/aspire-api-reference:${{ env.VERSION }}
+
+      - if: steps.changed-files.outputs.aspire_package_any_changed == 'true'
+        name: Set version in Constants.cs
+        working-directory: integrations/aspire
+        run: |
+          sed -i 's/ImageTag = "latest"/ImageTag = "'$VERSION'"/' src/Scalar.Aspire/Constants.cs
+          cat src/Scalar.Aspire/Constants.cs
+
+      - if: steps.changed-files.outputs.aspire_package_any_changed == 'true'
+        name: Setup .NET
+        uses: actions/setup-dotnet@0f55b457d2a9ef0a7d0c7a2dd7cac6b1647730a4
+        with:
+          dotnet-version: |
+            9.x
+            8.x
+
+      - if: steps.changed-files.outputs.aspire_package_any_changed == 'true'
+        name: Restore dependencies
+        working-directory: integrations/aspire/src/Scalar.Aspire
+        run: dotnet restore
+
+      - if: steps.changed-files.outputs.aspire_package_any_changed == 'true'
+        name: Pack Scalar.Aspire NuGet package
+        working-directory: integrations/aspire/src/Scalar.Aspire
+        run: dotnet pack -c Release --no-restore --output nupkgs /p:Version=$VERSION
+
+      - if: steps.changed-files.outputs.aspire_package_any_changed == 'true'
+        name: Publish Scalar.Aspire NuGet package
+        working-directory: integrations/aspire/src/Scalar.Aspire
+        run: dotnet nuget push nupkgs/*.nupkg -k ${{ secrets.NUGET_TOKEN }} -s https://api.nuget.org/v3/index.json
+
+  fastapi-build-test:
+    runs-on: blacksmith-2vcpu-ubuntu-2204
+    timeout-minutes: 10
+    needs: [build]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
+
+      - name: Setup Python
+        uses: actions/setup-python@532b046aaf352bab5717122cc0ea52b7f12266a3
+        with:
+          python-version: '3.11'
+
+      - name: Install build dependencies
+        working-directory: integrations/fastapi
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+
+      - name: Build Python package
+        working-directory: integrations/fastapi
+        run: python -m build
+
+      - name: Run tests
+        working-directory: integrations/fastapi
+        run: python run_tests.py
+
+  fastapi-publish:
+    if: github.ref == 'refs/heads/main' && startsWith(github.event.head_commit.message, 'RELEASING:')
+    runs-on: blacksmith-2vcpu-ubuntu-2204
+    timeout-minutes: 10
+    concurrency:
+      group: fastapi-publish
+      cancel-in-progress: false
+    needs:
+      [
+        harden_security,
+        build,
+        format,
+        types,
+        test-packages,
+        test-integrations,
+        fastapi-build-test,
+      ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f
+
+      - name: Check for FastAPI integration changes
+        id: changed-files
+        uses: step-security/changed-files@95b56dadb92a30ca9036f16423fd3c088a71ee94
+        with:
+          files_yaml: |
+            fastapi_integration:
+              - integrations/fastapi/package.json
+
+      - if: steps.changed-files.outputs.fastapi_integration_any_changed == 'true'
+        name: Setup Python
+        uses: actions/setup-python@532b046aaf352bab5717122cc0ea52b7f12266a3
+        with:
+          python-version: '3.11'
+
+      - if: steps.changed-files.outputs.fastapi_integration_any_changed == 'true'
+        name: Install build dependencies
+        working-directory: integrations/fastapi
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - if: steps.changed-files.outputs.fastapi_integration_any_changed == 'true'
+        name: Build Python package
+        working-directory: integrations/fastapi
+        run: python -m build
+
+      - if: steps.changed-files.outputs.fastapi_integration_any_changed == 'true'
+        name: Publish to PyPI
+        working-directory: integrations/fastapi
+        run: |
+          twine upload --username __token__ --password ${{ secrets.PYPI_TOKEN }} dist/*

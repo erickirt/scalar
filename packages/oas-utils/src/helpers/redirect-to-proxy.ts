@@ -1,17 +1,16 @@
-import { isLocalUrl } from './is-local-url'
-import { REGEX } from './regex-helpers'
+import { isLocalUrl } from '@scalar/helpers/url/is-local-url'
+import { isRelativePath } from '@scalar/helpers/url/is-relative-path'
 
 /**
  * Redirects the request to a proxy server with a given URL. But not for:
  *
  * - Relative URLs
  * - URLs that seem to point to a local IP (except the proxy is on the same domain)
- * - URLs that don’t look like a domain
+ * - URLs that don't look like a domain
  **/
 export function redirectToProxy(proxyUrl?: string, url?: string): string {
   try {
     if (!shouldUseProxy(proxyUrl, url)) {
-      console.log('should not use proxy', proxyUrl, url)
       return url ?? ''
     }
 
@@ -20,7 +19,7 @@ export function redirectToProxy(proxyUrl?: string, url?: string): string {
 
     // Add temporary domain for relative proxy URLs
     //
-    // Q: Why isn’t proxyUrl type guarded?
+    // Q: Why isn't proxyUrl type guarded?
     // A: Type guarding works for one parameter only (as of now).
     //
     // Q: Why do we need to add http://localhost to relative proxy URLs?
@@ -46,40 +45,22 @@ export function redirectToProxy(proxyUrl?: string, url?: string): string {
 }
 
 /**
- * Check if the URL is relative or if it's a domain without protocol
- **/
-export const isRelativePath = (url: string) => {
-  // Allow http:// https:// and other protocols such as file://
-  if (REGEX.PROTOCOL.test(url)) {
-    return false
-  }
-
-  // Check if it looks like a domain (contains dots and no spaces)
-  // This catches cases like "galaxy.scalar.com/planets"
-  if (/^[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+(\/|$)/.test(url)) {
-    return false
-  }
-
-  return true
-}
-
-/**
  * Returns false for requests to localhost, relative URLs, if no proxy is defined …
  **/
 export function shouldUseProxy(proxyUrl?: string, url?: string): url is string {
   try {
-    // ❌ We don’t have a proxy URL or the URL
+    // ❌ We don't have a proxy URL or the URL
     if (!proxyUrl || !url) {
       return false
     }
 
-    // ❌ Request to relative URLs (won’t be blocked by CORS anyway)
+    // ❌ Request to relative URLs (won't be blocked by CORS anyway)
     if (isRelativePath(url)) {
       return false
     }
 
     // ✅ Proxy URL is on the same domain (e.g. /proxy)
-    // It’s more likely (not guaranteed, though) that the proxy has access to local domains.
+    // It's more likely (not guaranteed, though) that the proxy has access to local domains.
     if (isRelativePath(proxyUrl)) {
       return true
     }
@@ -90,7 +71,7 @@ export function shouldUseProxy(proxyUrl?: string, url?: string): url is string {
     }
 
     // ❌ Requests to localhost
-    // We won’t reach them from a (likely remote) proxy.
+    // We won't reach them from a (likely remote) proxy.
     if (isLocalUrl(url)) {
       return false
     }

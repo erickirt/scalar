@@ -11,6 +11,7 @@ import { beforeAll, describe, expect, it, vi } from 'vitest'
 import type { z } from 'zod'
 
 import type { SelectedSecuritySchemeUids } from '@scalar/oas-utils/entities/shared'
+import * as electron from '../electron'
 import { createRequestOperation } from './create-request-operation'
 
 const PROXY_PORT = 5051
@@ -65,7 +66,7 @@ beforeAll(async () => {
   } catch (_error) {
     throw new Error(`
 
-[sendRequest.test.ts] Looks like you’re not running @scalar/proxy-server on <http://127.0.0.1:${PROXY_PORT}>, but it’s required for this test file.
+[sendRequest.test.ts] Looks like you're not running @scalar/proxy-server on <http://127.0.0.1:${PROXY_PORT}>, but it's required for this test file.
 
 Try to run it like this:
 
@@ -83,7 +84,7 @@ $ pnpm dev:proxy-server
   } catch (_error) {
     throw new Error(`
 
-[sendRequest.test.ts] Looks like you’re not running @scalar/void-server on <http://127.0.0.1:${VOID_PORT}>, but it’s required for this test file.
+[sendRequest.test.ts] Looks like you're not running @scalar/void-server on <http://127.0.0.1:${VOID_PORT}>, but it's required for this test file.
 
 Try to run it like this:
 
@@ -207,30 +208,6 @@ describe('create-request-operation', () => {
     }
     expect(result?.response.data).not.toContain('ECONNREFUSED')
     expect(requestError).toBe(null)
-    expect(JSON.parse(result?.response.data as string)).toMatchObject({
-      method: 'GET',
-      path: '/',
-    })
-  })
-
-  // TODO: this doesn't actually hit the proxy due to 127.0.0.1
-  it('reaches the echo server *with* the proxy', async () => {
-    const [error, requestOperation] = createRequestOperation(
-      createRequestPayload({
-        serverPayload: { url: VOID_URL },
-        proxyUrl: PROXY_URL,
-      }),
-    )
-    if (error) {
-      throw error
-    }
-
-    const [requestError, result] = await requestOperation.sendRequest()
-
-    expect(requestError).toBe(null)
-    if (!result || !('data' in result.response)) {
-      throw new Error('No data')
-    }
     expect(JSON.parse(result?.response.data as string)).toMatchObject({
       method: 'GET',
       path: '/',
@@ -397,6 +374,41 @@ describe('create-request-operation', () => {
     })
   })
 
+  it('builds a request with User-Agent header', async () => {
+    const spy = vi.spyOn(electron, 'isElectron').mockReturnValue(true)
+
+    const [error, requestOperation] = createRequestOperation({
+      ...createRequestPayload({
+        serverPayload: { url: VOID_URL },
+        requestExamplePayload: {
+          parameters: {
+            headers: [
+              {
+                key: 'User-Agent',
+                value: 'custom-user-agent',
+                enabled: true,
+              },
+            ],
+          },
+        },
+      }),
+    })
+    if (error) {
+      throw error
+    }
+
+    const [requestError, result] = await requestOperation.sendRequest()
+
+    expect(requestError).toBe(null)
+    if (!result || !('data' in result.response)) {
+      throw new Error('No data')
+    }
+    const responseHeaders = JSON.parse(result?.response.data as string).headers
+    expect(responseHeaders['x-scalar-user-agent']).toBe('custom-user-agent')
+
+    spy.mockRestore()
+  })
+
   describe('merges query parameters', () => {
     it('with server url', async () => {
       const [error, requestOperation] = createRequestOperation(
@@ -476,7 +488,7 @@ describe('create-request-operation', () => {
     })
   })
 
-  it('doesn’t have any query parameters', async () => {
+  it(`doesn't have any query parameters`, async () => {
     const [error, requestOperation] = createRequestOperation(
       createRequestPayload({
         serverPayload: {
@@ -672,9 +684,9 @@ describe('create-request-operation', () => {
    * the void-server doesn't receive the body properly.
    * It does work on other echo servers such as https://echo.free.beeceptor.com
    *
-   * It’s not clear to me, whether we need to make the void-server handle that, or
+   * It's not clear to me, whether we need to make the void-server handle that, or
    * if we should disable the streaming, or
-   * if there’s another way to test this properly.
+   * if there's another way to test this properly.
    *
    * - @hanspagel
    */
@@ -812,6 +824,52 @@ describe('create-request-operation', () => {
       'auth-cookie': 'super-secret-token',
       'cookie-header': 'example-value',
     })
+  })
+
+  it('should safely create a new response when body is empty', async () => {
+    const originalFetch = global.fetch
+    try {
+      const mockEmptyStream = new ReadableStream({
+        start(controller) {
+          controller.close()
+        },
+      })
+
+      const mockResponse = {
+        status: 204,
+        headers: new Headers(),
+        body: mockEmptyStream,
+        ok: true,
+        statusText: 'No Content',
+        // Add the methods your code uses
+        clone: () => mockResponse,
+        text: async () => '',
+        json: async () => ({}),
+        arrayBuffer: async () => new ArrayBuffer(0),
+      } as unknown as Response
+
+      global.fetch = vi.fn().mockResolvedValue(mockResponse)
+
+      const [error, requestOperation] = createRequestOperation({
+        ...createRequestPayload({
+          serverPayload: { url: VOID_URL },
+        }),
+      })
+
+      if (error) {
+        throw error
+      }
+
+      const [requestError, result] = await requestOperation.sendRequest()
+
+      expect(requestError).toBe(null)
+      if (!result || !('data' in result.response)) {
+        throw new Error('No data')
+      }
+      expect(result?.response.data).toBe('')
+    } finally {
+      global.fetch = originalFetch
+    }
   })
 
   describe('authentication', () => {
@@ -1114,5 +1172,166 @@ describe('create-request-operation', () => {
         global.fetch = originalFetch
       }
     })
+  })
+
+  it('executes onBeforeRequest hook when plugin manager is provided', async () => {
+    const mockPluginManager = {
+      executeHook: vi.fn().mockResolvedValue(undefined),
+      getViewComponents: vi.fn().mockReturnValue([]),
+    }
+
+    const [error, requestOperation] = createRequestOperation({
+      ...createRequestPayload({
+        serverPayload: { url: 'https://api.example.com' },
+        requestPayload: {
+          path: '/test',
+        },
+      }),
+      pluginManager: mockPluginManager,
+    })
+
+    if (error) {
+      throw error
+    }
+
+    await requestOperation.sendRequest()
+
+    expect(mockPluginManager.executeHook).toHaveBeenCalledWith('onBeforeRequest', {
+      request: expect.any(Request),
+    })
+    expect(mockPluginManager.executeHook).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not execute onBeforeRequest hook when plugin manager is not provided', async () => {
+    // Store original fetch
+    const originalFetch = global.fetch
+    try {
+      // Mock fetch to return a successful response
+      const mockResponse = new Response('{"test": "data"}', {
+        status: 200,
+        headers: new Headers({
+          'content-type': 'application/json',
+        }),
+      })
+
+      global.fetch = vi.fn().mockResolvedValue(mockResponse)
+
+      const [error, requestOperation] = createRequestOperation(
+        createRequestPayload({
+          serverPayload: { url: 'https://api.example.com' },
+          requestPayload: {
+            path: '/test',
+          },
+        }),
+      )
+
+      if (error) {
+        throw error
+      }
+
+      const [requestError] = await requestOperation.sendRequest()
+
+      // Should not throw any errors related to plugin manager
+      expect(requestError).toBe(null)
+    } finally {
+      // Restore original fetch
+      global.fetch = originalFetch
+    }
+  })
+
+  it('executes onBeforeRequest hook before making the request', async () => {
+    let hookExecuted = false
+
+    const mockPluginManager = {
+      executeHook: vi.fn().mockImplementation(async () => {
+        hookExecuted = true
+        return Promise.resolve()
+      }),
+      getViewComponents: vi.fn().mockReturnValue([]),
+    }
+
+    // Store original fetch
+    const originalFetch = global.fetch
+    try {
+      // Mock fetch to return a successful response
+      const mockResponse = new Response('{"test": "data"}', {
+        status: 200,
+        headers: new Headers({
+          'content-type': 'application/json',
+        }),
+      })
+
+      global.fetch = vi.fn().mockResolvedValue(mockResponse)
+
+      const [error, requestOperation] = createRequestOperation({
+        ...createRequestPayload({
+          serverPayload: { url: 'https://api.example.com' },
+          requestPayload: {
+            path: '/test',
+          },
+        }),
+        pluginManager: mockPluginManager,
+      })
+
+      if (error) {
+        throw error
+      }
+
+      await requestOperation.sendRequest()
+
+      expect(hookExecuted).toBe(true)
+      expect(mockPluginManager.executeHook).toHaveBeenCalledWith('onBeforeRequest', {
+        request: expect.any(Request),
+      })
+    } finally {
+      // Restore original fetch
+      global.fetch = originalFetch
+    }
+  })
+
+  it('executes onResponseReceived hook when plugin manager is provided', async () => {
+    const mockPluginManager = {
+      executeHook: vi.fn().mockResolvedValue(undefined),
+      getViewComponents: vi.fn().mockReturnValue([]),
+    }
+
+    // Store original fetch
+    const originalFetch = global.fetch
+    try {
+      // Mock fetch to return a successful response
+      const mockResponse = new Response('{"test": "data"}', {
+        status: 200,
+        headers: new Headers({
+          'content-type': 'application/json',
+        }),
+      })
+
+      global.fetch = vi.fn().mockResolvedValue(mockResponse)
+
+      const [error, requestOperation] = createRequestOperation({
+        ...createRequestPayload({
+          serverPayload: { url: 'https://api.example.com' },
+          requestPayload: {
+            path: '/test',
+          },
+        }),
+        pluginManager: mockPluginManager,
+      })
+
+      if (error) {
+        throw error
+      }
+
+      await requestOperation.sendRequest()
+
+      expect(mockPluginManager.executeHook).toHaveBeenCalledWith('onResponseReceived', {
+        response: expect.any(Response),
+        operation: expect.any(Object),
+      })
+      expect(mockPluginManager.executeHook).toHaveBeenCalledTimes(2) // onBeforeRequest + onResponseReceived
+    } finally {
+      // Restore original fetch
+      global.fetch = originalFetch
+    }
   })
 })

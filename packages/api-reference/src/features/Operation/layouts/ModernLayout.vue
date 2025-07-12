@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import { ScalarErrorBoundary, ScalarMarkdown } from '@scalar/components'
+import { ScalarIconWebhooksLogo } from '@scalar/icons'
 import type {
   Collection,
-  Operation,
+  Request,
   Server,
 } from '@scalar/oas-utils/entities/spec'
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types'
-import type { TransformedOperation } from '@scalar/types/legacy'
+import {
+  getOperationStability,
+  getOperationStabilityColor,
+  isOperationDeprecated,
+} from '@scalar/oas-utils/helpers'
+import type { OpenAPIV3_1, XScalarStability } from '@scalar/types/legacy'
 import { computed, useId } from 'vue'
 
 import { Anchor } from '@/components/Anchor'
@@ -20,59 +25,73 @@ import {
   SectionHeader,
   SectionHeaderTag,
 } from '@/components/Section'
-import { ExampleRequest } from '@/features/ExampleRequest'
-import { ExampleResponses } from '@/features/ExampleResponses'
-import { TestRequestButton } from '@/features/TestRequestButton'
+import { ExampleRequest } from '@/features/example-request'
+import { ExampleResponses } from '@/features/example-responses'
+import { TestRequestButton } from '@/features/test-request-button'
 import { useConfig } from '@/hooks/useConfig'
-import {
-  getOperationStability,
-  getOperationStabilityColor,
-  isOperationDeprecated,
-} from '@/libs/operation'
 
+import Callbacks from '../components/callbacks/Callbacks.vue'
 import OperationParameters from '../components/OperationParameters.vue'
 import OperationResponses from '../components/OperationResponses.vue'
+import type { Schemas } from '../types/schemas'
 
-const { operation } = defineProps<{
-  id?: string
+const { request, operation, path, isWebhook } = defineProps<{
+  id: string
+  path: string
+  method: OpenAPIV3_1.HttpMethods
+  operation: OpenAPIV3_1.OperationObject<{
+    'x-scalar-stability': XScalarStability
+  }>
+  isWebhook: boolean
+  /**
+   * @deprecated Use `document` instead
+   */
   collection: Collection
   server: Server | undefined
-  operation: Operation
-  /** @deprecated Use `operation` instead */
-  transformedOperation: TransformedOperation
-  schemas?:
-    | OpenAPIV2.DefinitionsObject
-    | Record<string, OpenAPIV3.SchemaObject>
-    | Record<string, OpenAPIV3_1.SchemaObject>
-    | unknown
+  request: Request | undefined
+  schemas?: Schemas
+}>()
+
+const operationTitle = computed(() => operation?.summary || path || '')
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void
 }>()
 
 const labelId = useId()
 const config = useConfig()
 
-/** The title of the operation (summary or path) */
-const title = computed(() => operation.summary || operation.path)
+const handleDiscriminatorChange = (type: string) => {
+  emit('update:modelValue', type)
+}
 </script>
 
 <template>
   <Section
     :id="id"
     :aria-labelledby="labelId"
-    :label="title"
+    :label="operationTitle"
     tabindex="-1">
     <SectionContent :loading="config.isLoading">
       <Badge
+        class="capitalize"
         v-if="getOperationStability(operation)"
         :class="getOperationStabilityColor(operation)">
         {{ getOperationStability(operation) }}
       </Badge>
+
+      <Badge
+        v-if="isWebhook"
+        class="font-code text-green flex w-fit items-center justify-center gap-1">
+        <ScalarIconWebhooksLogo weight="bold" />Webhook
+      </Badge>
       <div :class="isOperationDeprecated(operation) ? 'deprecated' : ''">
         <SectionHeader>
-          <Anchor :id="id ?? ''">
+          <Anchor :id="id">
             <SectionHeaderTag
               :id="labelId"
               :level="3">
-              {{ title }}
+              {{ operationTitle }}
             </SectionHeaderTag>
           </Anchor>
         </SectionHeader>
@@ -81,39 +100,59 @@ const title = computed(() => operation.summary || operation.path)
         <SectionColumn>
           <div class="operation-details">
             <ScalarMarkdown
-              :value="operation.description"
-              withImages />
+              :value="operation?.description"
+              withImages
+              withAnchors
+              transformType="heading"
+              :anchorPrefix="id" />
             <OperationParameters
-              :operation="operation"
-              :schemas="schemas" />
+              :parameters="operation?.parameters"
+              :requestBody="operation?.requestBody"
+              :schemas="schemas"
+              @update:modelValue="handleDiscriminatorChange">
+            </OperationParameters>
             <OperationResponses
-              :operation="transformedOperation"
+              :responses="operation?.responses"
               :schemas="schemas" />
+
+            <!-- Callbacks -->
+            <ScalarErrorBoundary>
+              <Callbacks
+                v-if="operation?.callbacks"
+                :callbacks="operation?.callbacks"
+                :collection="collection"
+                :schemas="schemas" />
+            </ScalarErrorBoundary>
           </div>
         </SectionColumn>
         <SectionColumn>
           <div class="examples">
             <ScalarErrorBoundary>
               <ExampleRequest
+                :request="request"
+                :method="method"
                 :collection="collection"
                 fallback
                 :operation="operation"
                 :server="server"
-                :transformedOperation="transformedOperation">
+                :schemas="schemas"
+                @update:modelValue="handleDiscriminatorChange">
                 <template #header>
                   <OperationPath
-                    class="example-path"
-                    :deprecated="transformedOperation.information?.deprecated"
-                    :path="transformedOperation.path" />
+                    class="font-code text-c-2 [&_em]:text-c-1 [&_em]:not-italic"
+                    :deprecated="operation?.deprecated"
+                    :path="path" />
                 </template>
-                <template #footer>
-                  <TestRequestButton :operation="operation" />
+                <template
+                  #footer
+                  v-if="request">
+                  <TestRequestButton :operation="request" />
                 </template>
               </ExampleRequest>
             </ScalarErrorBoundary>
             <ScalarErrorBoundary>
               <ExampleResponses
-                :responses="operation.responses"
+                :responses="operation?.responses"
                 style="margin-top: 12px" />
             </ScalarErrorBoundary>
           </div>
@@ -130,13 +169,5 @@ const title = computed(() => operation.summary || operation.path)
 }
 .deprecated * {
   text-decoration: line-through;
-}
-.example-path {
-  color: var(--scalar-color-2);
-  font-family: var(--scalar-font-code);
-}
-.example-path :deep(em) {
-  color: var(--scalar-color-1);
-  font-style: normal;
 }
 </style>

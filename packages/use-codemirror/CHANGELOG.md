@@ -1,5 +1,165 @@
 # @scalar/use-codemirror
 
+## 0.12.18
+
+### Patch Changes
+
+- Updated dependencies [cd1c367]
+- Updated dependencies [4d89219]
+- Updated dependencies [244edda]
+- Updated dependencies [1db9130]
+  - @scalar/components@0.14.17
+
+## 0.12.17
+
+### Patch Changes
+
+- Updated dependencies [ca77d70]
+- Updated dependencies [a696604]
+- Updated dependencies [3fdc2f2]
+  - @scalar/components@0.14.16
+
+## 0.12.16
+
+### Patch Changes
+
+- 2d7f995: refactor: use more common straight apostrophe ' instead of the real apostrophe ’
+  - @scalar/components@0.14.15
+
+## 0.12.15
+
+### Patch Changes
+
+- Updated dependencies [533469b]
+- Updated dependencies [3393c83]
+- Updated dependencies [4f47b3c]
+- Updated dependencies [8e85856]
+  - @scalar/components@0.14.14
+
+## 0.12.14
+
+### Patch Changes
+
+- Updated dependencies [c907685]
+- Updated dependencies [4bbbb32]
+  - @scalar/components@0.14.13
+
+## 0.12.13
+
+### Patch Changes
+
+- @scalar/components@0.14.12
+
+## 0.12.12
+
+### Patch Changes
+
+- Updated dependencies [699df60]
+  - @scalar/components@0.14.11
+
+## 0.12.11
+
+### Patch Changes
+
+- @scalar/components@0.14.10
+
+## 0.12.10
+
+### Patch Changes
+
+- @scalar/components@0.14.9
+
+## 0.12.9
+
+### Patch Changes
+
+- Updated dependencies [4156f1d]
+- Updated dependencies [177438d]
+  - @scalar/components@0.14.8
+
+## 0.12.8
+
+### Patch Changes
+
+- @scalar/components@0.14.7
+
+## 0.12.7
+
+### Patch Changes
+
+- Updated dependencies [ba84a3c]
+  - @scalar/components@0.14.6
+
+## 0.12.6
+
+### Patch Changes
+
+- Updated dependencies [f1c0c01]
+- Updated dependencies [df7efac]
+  - @scalar/components@0.14.5
+
+## 0.12.5
+
+### Patch Changes
+
+- @scalar/components@0.14.4
+
+## 0.12.4
+
+### Patch Changes
+
+- Updated dependencies [785939b]
+- Updated dependencies [cad6277]
+- Updated dependencies [ffa93fa]
+- Updated dependencies [cedca9b]
+  - @scalar/components@0.14.3
+
+## 0.12.3
+
+### Patch Changes
+
+- @scalar/components@0.14.2
+
+## 0.12.2
+
+### Patch Changes
+
+- ca8d9bc: chore: remove unused dependencies
+
+## 0.12.1
+
+### Patch Changes
+
+- Updated dependencies [4440949]
+  - @scalar/components@0.14.1
+
+## 0.12.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- Updated dependencies [5613e40]
+- Updated dependencies [483ca93]
+- Updated dependencies [0efcab4]
+  - @scalar/components@0.14.0
+
+## 0.11.104
+
+### Patch Changes
+
+- Updated dependencies [1843cfe]
+  - @scalar/components@0.13.59
+
+## 0.11.103
+
+### Patch Changes
+
+- Updated dependencies [af38fa6]
+  - @scalar/components@0.13.58
+
 ## 0.11.102
 
 ### Patch Changes

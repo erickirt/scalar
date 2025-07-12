@@ -2,7 +2,9 @@ import SwaggerParser from '@apidevtools/swagger-parser'
 import { diff } from 'just-diff'
 import { expect, test } from 'vitest'
 
-import { type AnyObject, normalize, openapi } from '../src/index'
+import { load, normalize } from '../src/index'
+import type { AnyObject } from '../src/types'
+import { dereference } from '../src/utils/dereference'
 
 const expectedErrors = {
   'oas/files/opensuseorgobs.yaml': [
@@ -17,12 +19,12 @@ const expectedErrors = {
   ],
   'oas/files/spotifycom.yaml': [
     {
-      message: 'Can’t resolve URI: ../policies.yaml',
+      message: "Can't resolve URI: ../policies.yaml",
     },
   ],
 }
 
-// We can’t make a diff for files with circular references. :(
+// We can't make a diff for files with circular references. :(
 const circularReferences = [
   'oas/files/xerocomxero_accounting.yaml',
   'oas/files/xtrfeu.yaml',
@@ -36,7 +38,7 @@ const circularReferences = [
   'oas/files/googleapiscomfirebaserules.yaml',
 ]
 
-// Just skip some files. If it’s not empty, we’ve got some work to do. :)
+// Just skip some files. If it's not empty, we've got some work to do. :)
 const ignoreFiles = [
   // Very slow files
   'oas/files/amazonawscomdynamodb.yaml',
@@ -86,7 +88,7 @@ test.concurrent.each(fetched)('diff $file', async ({ file, content }) => {
       }
 
       if (result === undefined) {
-        reject('Couldn’t parse the Swagger file.')
+        reject("Couldn't parse the Swagger file.")
 
         return
       }
@@ -96,7 +98,8 @@ test.concurrent.each(fetched)('diff $file', async ({ file, content }) => {
     console.error('[@apidevtools/swagger-parser]', error.message)
   })) as any
 
-  const { schema: newSchema, errors } = await openapi().load(structuredClone(specification)).dereference().get()
+  const { filesystem } = await load(structuredClone(specification))
+  const { schema: newSchema, errors } = await dereference(filesystem)
 
   // Errors expected
   if (expectedErrors[file]) {

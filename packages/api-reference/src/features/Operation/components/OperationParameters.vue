@@ -1,22 +1,31 @@
 <script setup lang="ts">
-import type { Request as RequestEntity } from '@scalar/oas-utils/entities/spec'
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types'
+import type { OpenAPIV3_1 } from '@scalar/openapi-types'
+
+import type { Schemas } from '@/features/Operation/types/schemas'
 
 import ParameterList from './ParameterList.vue'
 import RequestBody from './RequestBody.vue'
 
-const props = defineProps<{
-  operation?: Pick<RequestEntity, 'parameters' | 'requestBody'>
-  schemas?:
-    | OpenAPIV2.DefinitionsObject
-    | Record<string, OpenAPIV3.SchemaObject>
-    | Record<string, OpenAPIV3_1.SchemaObject>
-    | unknown
+const {
+  parameters = [],
+  requestBody,
+  schemas,
+} = defineProps<{
+  parameters?: OpenAPIV3_1.ParameterObject[]
+  requestBody?: OpenAPIV3_1.RequestBodyObject | undefined
+  schemas?: Schemas
 }>()
 
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void
+}>()
+
+const handleDiscriminatorChange = (type: string) => {
+  emit('update:modelValue', type)
+}
+
 const filterParameters = (where: 'path' | 'query' | 'header' | 'cookie') =>
-  props.operation?.parameters?.filter((parameter) => parameter.in === where) ??
-  []
+  parameters?.filter((parameter) => parameter.in === where) ?? []
 </script>
 <template>
   <!-- Path parameters-->
@@ -49,9 +58,10 @@ const filterParameters = (where: 'path' | 'query' | 'header' | 'cookie') =>
 
   <!-- Request body -->
   <RequestBody
-    v-if="operation?.requestBody"
-    :requestBody="operation.requestBody"
-    :schemas="schemas">
+    v-if="requestBody"
+    :requestBody="requestBody"
+    :schemas="schemas"
+    @update:modelValue="handleDiscriminatorChange">
     <template #title>Body</template>
   </RequestBody>
 </template>

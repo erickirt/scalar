@@ -1,31 +1,36 @@
 <script setup lang="ts">
 import { ScalarErrorBoundary } from '@scalar/components'
 import type { Collection, Server } from '@scalar/oas-utils/entities/spec'
-import type { OpenAPIV2, OpenAPIV3, OpenAPIV3_1 } from '@scalar/openapi-types'
+import type { OpenAPIV3_1 } from '@scalar/openapi-types'
 import type { Spec, Tag as TagType } from '@scalar/types/legacy'
 import { computed } from 'vue'
 
 import { Lazy } from '@/components/Content/Lazy'
 import { Operation } from '@/features/Operation'
-import { useNavState, useSidebar } from '@/hooks'
+import { useSidebar } from '@/features/sidebar'
+import { useNavState } from '@/hooks/useNavState'
 
 import TagAccordion from './TagAccordion.vue'
 import TagSection from './TagSection.vue'
 
 const { collection, tags, spec, layout, server } = defineProps<{
+  /** Just to set the id for webhooks, for now */
+  id?: string
+  document: OpenAPIV3_1.Document
+  /**
+   * @deprecated Use `document` instead
+   */
   collection: Collection
   tags: TagType[]
+  /**
+   * @deprecated Use `document` instead
+   */
   spec: Spec
   layout?: 'modern' | 'classic'
   server?: Server
-  schemas?:
-    | OpenAPIV2.DefinitionsObject
-    | Record<string, OpenAPIV3.SchemaObject>
-    | Record<string, OpenAPIV3_1.SchemaObject>
-    | unknown
 }>()
 
-const { getOperationId, getTagId, hash } = useNavState()
+const { getTagId, hash } = useNavState()
 const { collapsedSidebarItems } = useSidebar()
 
 const tagLayout = computed(() =>
@@ -49,31 +54,33 @@ const isLazy = (index: number) =>
 <template>
   <Lazy
     v-for="(tag, index) in tags"
-    :id="getTagId(tag)"
-    :key="getTagId(tag)"
+    :id="id || getTagId(tag)"
+    :key="id || getTagId(tag)"
     :isLazy="isLazy(index)">
     <Component
       :is="tagLayout"
-      :id="getTagId(tag)"
+      :id="id || getTagId(tag)"
       :collection="collection"
       :spec="spec"
       :tag="tag">
       <Lazy
-        v-for="(operation, operationIndex) in tag.operations"
-        :id="getOperationId(operation, tag)"
-        :key="`${operation.httpVerb}-${operation.operationId}`"
+        v-for="(transformedOperation, operationIndex) in tag.operations"
+        :id="transformedOperation.id"
+        :key="transformedOperation.id"
         :isLazy="
           isLazy(index) ||
           (collapsedSidebarItems[getTagId(tag)] && operationIndex > 0)
         ">
         <ScalarErrorBoundary>
           <Operation
-            :id="getOperationId(operation, tag)"
+            :path="transformedOperation.path"
+            :method="transformedOperation.httpVerb"
+            :isWebhook="transformedOperation.isWebhook"
+            :id="transformedOperation.id"
+            :document="document"
             :collection="collection"
             :layout="layout"
-            :schemas="schemas"
-            :server="server"
-            :transformedOperation="operation" />
+            :server="server" />
         </ScalarErrorBoundary>
       </Lazy>
     </Component>

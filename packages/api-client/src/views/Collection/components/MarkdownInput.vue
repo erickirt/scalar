@@ -27,6 +27,13 @@ watch(mode, (newMode) => {
     })
   }
 })
+
+const handleBlur = () => {
+  // Delay mode switch until after DOM updates to avoid input typing issue
+  requestAnimationFrame(() => {
+    mode.value = 'preview'
+  })
+}
 </script>
 
 <template>
@@ -48,19 +55,19 @@ watch(mode, (newMode) => {
       </ScalarButton>
     </div>
     <div
-      class="has-[:focus-visible]:bg-b-1 z-1 group relative flex flex-col rounded-lg">
+      class="has-[:focus-visible]:bg-b-1 group relative z-1 flex flex-col rounded-lg">
       <div class="flex h-full min-h-[calc(1rem*4)] flex-col">
         <!-- Preview -->
         <template v-if="mode === 'preview'">
           <template v-if="modelValue && modelValue.trim().length">
             <ScalarMarkdown
               v-if="modelValue"
-              class="hover:border-b-3 h-full flex-1 rounded border border-transparent p-1.5"
+              class="h-full flex-1 rounded border border-transparent p-1.5 hover:border-(--scalar-background-3)"
               :value="modelValue"
               withImages
               @dblclick="mode = 'edit'" />
             <div
-              class="brightness-lifted -z-1 bg-b-1 absolute inset-0 hidden rounded group-hover:block group-has-[:focus-visible]:hidden" />
+              class="brightness-lifted bg-b-1 absolute inset-0 -z-1 hidden rounded group-hover:block group-has-[:focus-visible]:hidden" />
           </template>
           <div
             v-else
@@ -88,7 +95,7 @@ watch(mode, (newMode) => {
             :environment="environment"
             :modelValue="modelValue"
             :workspace="workspace"
-            @blur="mode = 'preview'"
+            @blur="handleBlur"
             @update:modelValue="emit('update:modelValue', $event)" />
         </template>
       </div>

@@ -3,7 +3,7 @@ import { computed, ref, toRef } from 'vue'
 
 import ViewLayoutCollapse from '@/components/ViewLayout/ViewLayoutCollapse.vue'
 import { useResponseBody } from '@/hooks/useResponseBody'
-import { mediaTypes } from '@/views/Request/consts'
+import { getMediaTypeConfig } from '@/views/Request/consts'
 
 import ResponseBodyDownload from './ResponseBodyDownload.vue'
 import ResponseBodyInfo from './ResponseBodyInfo.vue'
@@ -33,7 +33,7 @@ const { mimeType, attachmentFilename, dataUrl } = useResponseBody({
   headers: toRef(props, 'headers'),
 })
 
-const mediaConfig = computed(() => mediaTypes[mimeType.value.essence])
+const mediaConfig = computed(() => getMediaTypeConfig(mimeType.value.essence))
 </script>
 <template>
   <ViewLayoutCollapse
@@ -80,6 +80,6 @@ const mediaConfig = computed(() => mediaTypes[mimeType.value.essence])
 </template>
 <style scoped>
 .scalar-code-block:deep(.hljs *) {
-  font-size: var(--scalar-mini);
+  font-size: var(--scalar-small);
 }
 </style>

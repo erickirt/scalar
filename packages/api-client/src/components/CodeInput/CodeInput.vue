@@ -231,11 +231,19 @@ const handleKeyDown = (key: string, event: KeyboardEvent) => {
 
 const defaultType = computed(() => {
   return Array.isArray(props.type)
-    ? // Find the first type, that’s not 'null'
+    ? // Find the first type, that's not 'null'
       (props.type.find((type) => type !== 'null') ?? 'string')
-    : // If it’s not an array, just return the type
+    : // If it's not an array, just return the type
       props.type
 })
+
+const displayVariablesDropdown = computed(
+  () =>
+    showDropdown.value &&
+    props.withVariables &&
+    layout !== 'modal' &&
+    props.environment,
+)
 
 defineExpose({
   /** Expose focus method */
@@ -261,7 +269,7 @@ export default {
   <template v-if="disabled">
     <div
       class="text-c-2 flex cursor-default items-center justify-center"
-      :class="layout === 'modal' ? 'font-code pl-1 pr-2 text-sm' : 'px-2'"
+      :class="layout === 'modal' ? 'font-code pr-2 pl-1 text-base' : 'px-2'"
       data-testid="code-input-disabled">
       <span class="whitespace-nowrap">{{ modelValue }}</span>
     </div>
@@ -293,9 +301,9 @@ export default {
       :id="uid"
       v-bind="$attrs"
       ref="codeMirrorRef"
-      class="group/input group-[.alert]:outline-orange group-[.error]:outline-red font-code peer relative w-full overflow-hidden whitespace-nowrap text-xs leading-[1.44] -outline-offset-1 has-[:focus-visible]:rounded-[4px] has-[:focus-visible]:outline"
+      class="group/input group-[.alert]:outline-orange group-[.error]:outline-red font-code peer relative w-full overflow-hidden text-xs leading-[1.44] whitespace-nowrap -outline-offset-1 has-[:focus-visible]:rounded-[4px] has-[:focus-visible]:outline"
       :class="{
-        'line-wrapping has-[:focus-visible]:bg-b-1 has-[:focus-visible]:z-1 has-[:focus-visible]:absolute':
+        'line-wrapping has-[:focus-visible]:bg-b-1 has-[:focus-visible]:absolute has-[:focus-visible]:z-1':
           lineWrapping,
         'flow-code-input--error': error,
       }"
@@ -319,7 +327,7 @@ export default {
       </div>
       <div
         v-if="!disableTabIndent"
-        class="z-context text-c-2 absolute bottom-1 right-1.5 hidden font-sans group-has-[:focus-visible]/input:block"
+        class="z-context text-c-2 absolute right-1.5 bottom-1 hidden font-sans group-has-[:focus-visible]/input:block"
         role="alert">
         Press
         <kbd class="-mx-0.25 rounded border px-0.5 font-mono">Esc</kbd> then
@@ -334,16 +342,16 @@ export default {
   </div>
   <div
     v-if="$slots.icon"
-    class="centered-y group-has-[.cm-focused]:z-1 absolute right-0 flex h-full items-center p-1.5">
+    class="centered-y absolute right-0 flex h-full items-center p-1.5 group-has-[.cm-focused]:z-1">
     <slot name="icon" />
   </div>
   <div
     v-if="required"
-    class="required centered-y text-xxs text-c-3 group-[.error]:text-red bg-b-1 pointer-events-none absolute right-0 mr-0.5 pr-2 pt-px opacity-100 shadow-[-8px_0_4px_var(--scalar-background-1)] transition-opacity duration-150 group-[.alert]:bg-transparent group-[.error]:bg-transparent group-[.alert]:shadow-none group-[.error]:shadow-none peer-has-[.cm-focused]:opacity-0">
+    class="required centered-y text-xxs text-c-3 group-[.error]:text-red bg-b-1 pointer-events-none absolute right-0 mr-0.5 pt-px pr-2 opacity-100 shadow-[-8px_0_4px_var(--scalar-background-1)] transition-opacity duration-150 group-[.alert]:bg-transparent group-[.alert]:shadow-none group-[.error]:bg-transparent group-[.error]:shadow-none peer-has-[.cm-focused]:opacity-0">
     Required
   </div>
   <EnvironmentVariableDropdown
-    v-if="showDropdown && withVariables && layout !== 'modal' && environment"
+    v-if="displayVariablesDropdown"
     ref="dropdownRef"
     :dropdownPosition="dropdownPosition"
     :envVariables="envVariables"
@@ -422,7 +430,7 @@ export default {
   background-color: transparent;
   border-right: none;
   color: var(--scalar-color-3);
-  font-size: var(--scalar-mini);
+  font-size: var(--scalar-small);
   line-height: 1.44;
   border-radius: 0 0 0 3px;
 }
@@ -506,7 +514,7 @@ export default {
   border-radius: 3px;
   display: inline-block;
   border-radius: 30px;
-  font-size: var(--scalar-mini);
+  font-size: var(--scalar-small);
   background: color-mix(in srgb, var(--tw-bg-base), transparent 94%) !important;
 }
 .cm-pill.bg-grey {

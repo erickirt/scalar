@@ -1,5 +1,93 @@
 # @scalar/hono-api-reference
 
+## 0.9.10
+
+### Patch Changes
+
+- @scalar/core@0.3.8
+
+## 0.9.9
+
+### Patch Changes
+
+- Updated dependencies [66347d4]
+  - @scalar/core@0.3.7
+
+## 0.9.8
+
+### Patch Changes
+
+- 2d7f995: refactor: use more common straight apostrophe ' instead of the real apostrophe ’
+- Updated dependencies [2d7f995]
+  - @scalar/core@0.3.6
+
+## 0.9.7
+
+### Patch Changes
+
+- @scalar/core@0.3.5
+
+## 0.9.6
+
+### Patch Changes
+
+- @scalar/core@0.3.4
+
+## 0.9.5
+
+### Patch Changes
+
+- 161733e: docs: new README
+
+## 0.9.4
+
+### Patch Changes
+
+- @scalar/core@0.3.3
+
+## 0.9.3
+
+### Patch Changes
+
+- @scalar/core@0.3.2
+
+## 0.9.2
+
+### Patch Changes
+
+- a90046a: chore: move to esbuild for integration packages
+
+## 0.9.1
+
+### Patch Changes
+
+- @scalar/core@0.3.1
+
+## 0.9.0
+
+### Minor Changes
+
+- 483ca93: chore: require Node 20 (or above)
+
+### Patch Changes
+
+- 5e451f7: feat: support for dynamic configuration in hono middleware
+- Updated dependencies [483ca93]
+  - @scalar/core@0.3.0
+
+## 0.8.10
+
+### Patch Changes
+
+- 382b510: docs: add an example for /llms.txt
+  - @scalar/core@0.2.16
+
+## 0.8.9
+
+### Patch Changes
+
+- @scalar/core@0.2.15
+
 ## 0.8.8
 
 ### Patch Changes

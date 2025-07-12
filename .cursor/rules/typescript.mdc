@@ -19,6 +19,8 @@ You write TypeScript code that is clear, predictable, and easy to maintain. The 
 * Prefer primitive types over complex ones unless necessary.
 * Use readonly when possible.
 * Avoid enums. Use string literal unions instead.
+* Always use const instead of let.
+* Use satisfies instead of as
 
 ## Naming Conventions
 * Be descriptive.
@@ -29,9 +31,14 @@ You write TypeScript code that is clear, predictable, and easy to maintain. The 
 * Explicit return types for composables.
 * Explicitly type Ref and ComputedRef.
 
+## Testing
+* Write all tests using vitest.
+* Ensure you cover all main cases as well as edge cases, try to break the code with the tests.
+* Create the test file alongside the file being tested, call it `name.test.ts`.
+
 # Great Comments for All Types
 * Use comments to explain why, not what. Most of the time, the code explains what is happening. Comments should clarify why a type or function exists, why you made specific decisions, or why a workaround is necessary.
-* Write friendly comments that sound human. Comments should be clear and helpful, not robotic or overly formal. Aim for a tone that’s friendly and supportive, like you’re helping a teammate understand the code later.
+* Write friendly comments that sound human. Comments should be clear and helpful, not robotic or overly formal. Aim for a tone that's friendly and supportive, like you're helping a teammate understand the code later.
 
 Good:
 
@@ -50,13 +57,13 @@ Bad:
  */
 ```
 
-* Avoid contractions in comments. Use do not instead of don’t, it is instead of it’s, etc. This makes comments easier to read, especially for non-native speakers.
+* Avoid contractions in comments. Use do not instead of don't, it is instead of it's, etc. This makes comments easier to read, especially for non-native speakers.
 
 * If you use contractions, make sure they have proper apostrophes. Sometimes contractions can make a comment more approachable. If you choose to use them, use proper punctuation.
 
-* Comment on types when their purpose isn’t obvious. If a type models an external API, or has a non-obvious constraint, explain it.
+* Comment on types when their purpose isn't obvious. If a type models an external API, or has a non-obvious constraint, explain it.
 
-* Explain relationships between types when they’re not clear.
+* Explain relationships between types when they're not clear.
 
 Example:
 
